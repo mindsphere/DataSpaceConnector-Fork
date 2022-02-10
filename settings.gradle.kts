@@ -116,6 +116,8 @@ include(":extensions:data-plane:data-plane-http-proxy:data-plane-http-proxy-prov
 include(":extensions:data-plane:data-plane-http-proxy:data-plane-http-proxy-consumer")
 include(":extensions:data-plane:data-plane-http-proxy:data-plane-http-proxy-core")
 
+include(":extensions:mindsphere:mindsphere-http")
+
 // modules for launchers, i.e. runnable compositions of the app
 include(":launchers:basic")
 include(":launchers:junit")
@@ -135,6 +137,9 @@ include(":samples:other:dataseed:dataseed-policy")
 include(":samples:other:run-from-junit")
 include(":samples:other:streaming")
 include(":samples:other:custom-runtime")
+
+include(":samples:other:file-transfer-http-to-http")
+include(":samples:other:file-transfer-http-to-http:api")
 
 
 // extension points for a connector
