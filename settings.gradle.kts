@@ -103,6 +103,8 @@ include(":extensions:transaction:transaction-datasource-spi")
 include(":extensions:transaction:transaction-atomikos")
 include(":extensions:transaction:transaction-local")
 
+include(":extensions:mindsphere:mindsphere-http")
+
 // modules for launchers, i.e. runnable compositions of the app
 include(":launchers:basic")
 include(":launchers:junit")
@@ -121,6 +123,9 @@ include(":samples:other:dataseed:dataseed-policy")
 include(":samples:other:run-from-junit")
 include(":samples:other:streaming")
 include(":samples:other:custom-runtime")
+
+include(":samples:other:file-transfer-http-to-http")
+include(":samples:other:file-transfer-http-to-http:api")
 
 
 // extension points for a connector
