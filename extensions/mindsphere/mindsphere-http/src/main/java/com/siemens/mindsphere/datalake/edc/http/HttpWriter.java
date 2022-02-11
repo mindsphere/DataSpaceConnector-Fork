@@ -39,11 +39,16 @@ public class HttpWriter implements DataWriter {
             urlConnection.setRequestMethod("PUT");
 
             try(OutputStream outputStream = urlConnection.getOutputStream()) {
-                outputStream.write(data.readAllBytes());
-                return  Result.success();
+                final byte[] bytes = data.readAllBytes();
+                outputStream.write(bytes);
             } catch (IOException e) {
-                return Result.failure("Unable to write to the source");
+                return Result.failure("Unable to write to the source: " + e.getMessage());
             }
+
+            // check the HTTP response code to complete the upload.
+            final int responseCode = urlConnection.getResponseCode();
+            monitor.info("Response code: " + responseCode);
+            return  Result.success();
         } catch (MalformedURLException e) {
             return Result.failure("Malformed URL provided");
         }catch (IOException e) {
