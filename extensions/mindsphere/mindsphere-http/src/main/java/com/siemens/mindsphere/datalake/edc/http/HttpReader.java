@@ -25,7 +25,7 @@ public class HttpReader implements DataReader {
 
     @Override
     public Result<ByteArrayInputStream> read(DataAddress source) {
-        monitor.info("Reading from HTTP asset: "  + source.getKeyName());
+        monitor.info("Reading from HTTP asset: " + source.getKeyName());
         final String urlString = source.getProperty("url");
         if (urlString == null) {
             return Result.failure("No source URL provided");
@@ -33,7 +33,7 @@ public class HttpReader implements DataReader {
 
         try {
             final URL url = new URL(urlString);
-            try(final InputStream inputStream = url.openStream()) {
+            try (final InputStream inputStream = url.openStream()) {
                 return Result.success(new ByteArrayInputStream(inputStream.readAllBytes()));
             }
         } catch (MalformedURLException e) {

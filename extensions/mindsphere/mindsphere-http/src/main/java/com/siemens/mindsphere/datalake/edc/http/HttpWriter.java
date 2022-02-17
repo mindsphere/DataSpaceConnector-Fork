@@ -26,7 +26,7 @@ public class HttpWriter implements DataWriter {
 
     @Override
     public Result<Void> write(DataAddress destination, String name, InputStream data, String secretToken) {
-        monitor.info("Writing to HTTP asset: "  +name);
+        monitor.info("Writing to HTTP asset: " + name);
         final String urlString = destination.getProperty(HttpSchema.URL);
         if (urlString == null) {
             return Result.failure("No destination URL provided");
@@ -38,7 +38,7 @@ public class HttpWriter implements DataWriter {
             urlConnection.setDoOutput(true);
             urlConnection.setRequestMethod("PUT");
 
-            try(OutputStream outputStream = urlConnection.getOutputStream()) {
+            try (OutputStream outputStream = urlConnection.getOutputStream()) {
                 final byte[] bytes = data.readAllBytes();
                 outputStream.write(bytes);
             } catch (IOException e) {
@@ -48,10 +48,10 @@ public class HttpWriter implements DataWriter {
             // check the HTTP response code to complete the upload.
             final int responseCode = urlConnection.getResponseCode();
             monitor.info("Response code: " + responseCode);
-            return  Result.success();
+            return Result.success();
         } catch (MalformedURLException e) {
             return Result.failure("Malformed URL provided");
-        }catch (IOException e) {
+        } catch (IOException e) {
             return Result.failure("Unable to open connection to the source");
         }
     }
