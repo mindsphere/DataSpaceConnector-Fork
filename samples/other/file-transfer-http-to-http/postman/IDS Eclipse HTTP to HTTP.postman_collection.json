@@ -1,0 +1,387 @@
+{
+	"info": {
+		"_postman_id": "daf79882-3352-4ced-bd7a-393050204924",
+		"name": "IDS Eclipse HTTP to HTTP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get offers",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseText = pm.response.text();\r",
+							"pm.test(\"Response is OK\", () => {\r",
+							"    pm.expect(responseText).to.be.not.empty\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.environment.set(\"contract-offer-body\", JSON.stringify(response.contractOffers[0]));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "secret",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8181/api/control/catalog?provider=http://localhost:8181/api/ids/multipart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"api",
+						"control",
+						"catalog"
+					],
+					"query": [
+						{
+							"key": "provider",
+							"value": "http://localhost:8181/api/ids/multipart"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Negotiate contract",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseText = pm.response.text();\r",
+							"pm.test(\"Response is OK\", () => {\r",
+							"    pm.expect(responseText).to.be.not.empty\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.text();\r",
+							"\r",
+							"pm.environment.set(\"negotiation-id\", response);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "secret",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"type\": \"INITIAL\",\r\n  \"protocol\": \"ids-multipart\",\r\n  \"connectorId\": \"1\",\r\n  \"connectorAddress\": \"http://localhost:8181/api/ids/multipart\",\r\n  \"correlationId\": null,\r\n  \"contractOffer\": {{contract-offer-body}},\r\n  \"asset\": \"1\",\r\n  \"provider\": \"https://provider.com\",\r\n  \"consumer\": \"https://consumer.com\",\r\n  \"offerStart\": null,\r\n  \"offerEnd\": null,\r\n  \"contractStart\": null,\r\n  \"contractEnd\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8181/api/control/negotiation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"api",
+						"control",
+						"negotiation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get negotiation state",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseText = pm.response.text();\r",
+							"pm.test(\"Response is OK\", () => {\r",
+							"    pm.expect(responseText).to.be.not.empty\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.environment.set(\"agreement-id\", response.contractAgreementId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "secret",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8181/api/control/negotiation/{{negotiation-id}}/state",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"api",
+						"control",
+						"negotiation",
+						"{{negotiation-id}}",
+						"state"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Artifact request",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseText = pm.response.text();\r",
+							"pm.test(\"Response is OK\", () => {\r",
+							"    pm.expect(responseText).to.be.not.empty\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.text();\r",
+							"\r",
+							"pm.environment.set(\"process-id\", response);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "secret",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"edctype\": \"dataspaceconnector:datarequest\",\r\n  \"connectorAddress\": \"http://localhost:8181/api/ids/multipart\",\r\n  \"protocol\": \"ids-multipart\",\r\n  \"connectorId\": \"provider\",\r\n  \"assetId\": \"1\",\r\n  \"contractId\": \"{{agreement-id}}\",\r\n  \"dataDestination\": {\r\n    \"keyName\" : \"new_image.jpg\",\r\n    \"type\": \"http\",\r\n    \"properties\" : {\r\n        \"url\" : \"{{destination-url}}\"\r\n    }\r\n  },\r\n  \"managedResources\": false,\r\n  \"transferType\": {\r\n    \"contentType\": \"application/octet-stream\",\r\n    \"isFinite\": true\r\n  },\r\n  \"destinationType\": \"http\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8181/api/control/transfer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"api",
+						"control",
+						"transfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get agreement",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "secret",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8181/api/control/agreement/{{negotiation-id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"api",
+						"control",
+						"agreement",
+						"{{negotiation-id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Request status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8181/api/consumer/transfer/data/request/{{process-id}}/state",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"api",
+						"consumer",
+						"transfer",
+						"data",
+						"request",
+						"{{process-id}}",
+						"state"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Health check",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "secret",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8181/api/consumer/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"api",
+						"consumer",
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload file (manual)",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/C:/Users/User/Desktop/data/demo_image.jpg"
+					}
+				},
+				"url": {
+					"raw": "https://041167962674-eu-central-1-gaia-x-data.s3.amazonaws.com/new_image.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQTFONIIZGED2Y45Y%2F20220211%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20220211T080153Z&X-Amz-Expires=7200&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPj%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCWV1LXdlc3QtMSJHMEUCIQDRhHaCit7Gi7NIlNvl2xjTA0DMj4LjHFDGn%2FZ4ht0kQQIgXz%2BhKzwd64%2BjQVnAoUGHVXktMmqcuv8cFf0rH%2B9L%2BR8qqAIIQRAEGgwwNDExNjc5NjI2NzQiDGtS3OUU9aOB6YyzeyqFAnQw7vhvmOtPyHhOEolFTr9SW4RuiYHXpQ0pCRfUmRwQfLR9%2B5muuoeutWpmn8pHPwkWikjGOta2ld3A8xCdXHr13TKARvwk5OkRTcYQKL1BcgIax%2FTNbsPrk5DPQ%2FN7PhQnuxkHW9lyaCr%2FNZBpKgYzJz4qf2tB6OMngpXbodJs7oNAcQSIoySPrvfMarvfffy1f0HqZXypgz0ENRr15cE37%2FEh5rLESXBW3K%2B9VlwhEovEGhbZ5gbzpuDdbhLPtU8Dd0hoZr8I55kBNrik4%2FbIx3HzX6%2BclAF%2BQ4FhFidZlVXEfGit2h6%2B0nKPiRQ%2B0a1X%2B7Ka3hv0no3BDpJzN36GPgaVpDD0rZiQBjqdAQbDy6GFGv7yQyCmrTVT%2BkYzzVNegrz3YGDumwtZwvIo4lIBGHuP3E%2BNDnHzsx06A3In1JaTATU%2FiBs%2FmBnWJrsjHShAwCKT%2FTsai0S2k1DVayeYfQL%2FNiqaX5hAorDdq0BB7EK5tT7NhRtqiUXyRfRjj%2Fx8lUevybM7jhAIz9ih3m%2F05QY1uD6ZYDYE8t4fW5tLzBNtPehDTI3p0Pk%3D&X-Amz-Signature=4b09ccabdc8363ae18cb8116854fd680529ddbca06231a84e5a4b6a5d816a583",
+					"protocol": "https",
+					"host": [
+						"041167962674-eu-central-1-gaia-x-data",
+						"s3",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"new_image.jpg"
+					],
+					"query": [
+						{
+							"key": "X-Amz-Algorithm",
+							"value": "AWS4-HMAC-SHA256"
+						},
+						{
+							"key": "X-Amz-Credential",
+							"value": "ASIAQTFONIIZGED2Y45Y%2F20220211%2Feu-central-1%2Fs3%2Faws4_request"
+						},
+						{
+							"key": "X-Amz-Date",
+							"value": "20220211T080153Z"
+						},
+						{
+							"key": "X-Amz-Expires",
+							"value": "7200"
+						},
+						{
+							"key": "X-Amz-SignedHeaders",
+							"value": "host"
+						},
+						{
+							"key": "X-Amz-Security-Token",
+							"value": "IQoJb3JpZ2luX2VjEPj%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCWV1LXdlc3QtMSJHMEUCIQDRhHaCit7Gi7NIlNvl2xjTA0DMj4LjHFDGn%2FZ4ht0kQQIgXz%2BhKzwd64%2BjQVnAoUGHVXktMmqcuv8cFf0rH%2B9L%2BR8qqAIIQRAEGgwwNDExNjc5NjI2NzQiDGtS3OUU9aOB6YyzeyqFAnQw7vhvmOtPyHhOEolFTr9SW4RuiYHXpQ0pCRfUmRwQfLR9%2B5muuoeutWpmn8pHPwkWikjGOta2ld3A8xCdXHr13TKARvwk5OkRTcYQKL1BcgIax%2FTNbsPrk5DPQ%2FN7PhQnuxkHW9lyaCr%2FNZBpKgYzJz4qf2tB6OMngpXbodJs7oNAcQSIoySPrvfMarvfffy1f0HqZXypgz0ENRr15cE37%2FEh5rLESXBW3K%2B9VlwhEovEGhbZ5gbzpuDdbhLPtU8Dd0hoZr8I55kBNrik4%2FbIx3HzX6%2BclAF%2BQ4FhFidZlVXEfGit2h6%2B0nKPiRQ%2B0a1X%2B7Ka3hv0no3BDpJzN36GPgaVpDD0rZiQBjqdAQbDy6GFGv7yQyCmrTVT%2BkYzzVNegrz3YGDumwtZwvIo4lIBGHuP3E%2BNDnHzsx06A3In1JaTATU%2FiBs%2FmBnWJrsjHShAwCKT%2FTsai0S2k1DVayeYfQL%2FNiqaX5hAorDdq0BB7EK5tT7NhRtqiUXyRfRjj%2Fx8lUevybM7jhAIz9ih3m%2F05QY1uD6ZYDYE8t4fW5tLzBNtPehDTI3p0Pk%3D"
+						},
+						{
+							"key": "X-Amz-Signature",
+							"value": "4b09ccabdc8363ae18cb8116854fd680529ddbca06231a84e5a4b6a5d816a583"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
