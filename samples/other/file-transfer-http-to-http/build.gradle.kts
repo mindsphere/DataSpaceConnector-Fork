@@ -18,8 +18,6 @@ dependencies {
     implementation(project(":extensions:in-memory:negotiation-store-memory"))
     implementation(project(":extensions:http"))
 
-    implementation(project(":extensions:inline-data-transfer:inline-data-transfer-core"))
-
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
     implementation(project(":extensions:api:control"))
     implementation(project(":data-protocols:ids"))

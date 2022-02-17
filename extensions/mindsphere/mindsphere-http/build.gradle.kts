@@ -4,7 +4,6 @@ plugins {
 
 dependencies {
     api(project(":spi"))
-    api(project(":extensions:inline-data-transfer:inline-data-transfer-spi"))
 
     testImplementation(testFixtures(project(":common:util")))
 }

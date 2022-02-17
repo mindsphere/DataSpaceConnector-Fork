@@ -118,8 +118,6 @@ include(":extensions:data-plane:data-plane-http-proxy:data-plane-http-proxy-core
 
 include(":extensions:mindsphere:mindsphere-http")
 
-include(":extensions:mindsphere:mindsphere-http")
-
 // modules for launchers, i.e. runnable compositions of the app
 include(":launchers:basic")
 include(":launchers:junit")

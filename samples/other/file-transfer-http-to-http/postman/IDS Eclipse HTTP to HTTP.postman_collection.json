@@ -19,7 +19,12 @@
 							"\r",
 							"const response = pm.response.json();\r",
 							"\r",
-							"pm.environment.set(\"contract-offer-body\", JSON.stringify(response.contractOffers[0]));"
+							"var offer = response.contractOffers[0];\r",
+							"\r",
+							"offer[\"provider\"] = \"https://provider.com\";\r",
+							"offer[\"consumer\"] = \"https://consumer.com\";\r",
+							"\r",
+							"pm.environment.set(\"contract-offer-body\", JSON.stringify(offer));"
 						],
 						"type": "text/javascript"
 					}

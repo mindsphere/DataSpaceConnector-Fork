@@ -2,8 +2,8 @@ package com.siemens.mindsphere.datalake.edc.http;
 
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.result.Result;
+import org.eclipse.dataspaceconnector.spi.transfer.inline.DataReader;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
-import org.eclipse.dataspaceconnector.transfer.inline.spi.DataReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
