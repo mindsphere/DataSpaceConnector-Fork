@@ -6,6 +6,7 @@ plugins {
 
 val jupiterVersion: String by project
 val rsApi: String by project
+val openTelemetryVersion: String by project
 
 dependencies {
     implementation(project(":core"))
@@ -22,13 +23,26 @@ dependencies {
 
     implementation(project(":data-protocols:ids"))
 
+    implementation(project(":extensions:data-plane-transfer:data-plane-transfer-client"))
+    implementation(project(":extensions:data-plane-selector:selector-client"))
+    implementation(project(":extensions:data-plane-selector:selector-core"))
+    implementation(project(":extensions:data-plane-selector:selector-store"))
+    implementation(project(":extensions:data-plane:data-plane-framework"))
+    implementation(project(":extensions:data-plane:data-plane-http"))
+
+    implementation("io.opentelemetry:opentelemetry-extension-annotations:${openTelemetryVersion}")
+
+    implementation(project(":extensions:data-plane:data-plane-spi"))
+
+    implementation(project(":extensions:mindsphere:mindsphere-http"))
+
     implementation(project(":samples:other:file-transfer-http-to-http:transfer-file"))
 
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
 }
 
 application {
-    mainClass.set("org.eclipse.dataspaceconnector.boot.system.runtime.BaseRuntime")
+    mainClass.set("com.siemens.mindsphere.datalake.edc.http.CatenaBaseRuntime")
 }
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
