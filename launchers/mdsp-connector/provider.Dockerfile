@@ -10,6 +10,10 @@ WORKDIR /app
 COPY --from=build /home/gradle/project/samples/other/file-transfer-http-to-http/provider/build/libs/provider.jar /app
 COPY --from=build /home/gradle/project/samples/other/file-transfer-http-to-http/provider/config.properties /app
 
+COPY --from=build /home/gradle/project/extensions/sql/asset-index-sql/docs/schema.sql /app/asset-index-sql/schema.sql
+COPY --from=build /home/gradle/project/extensions/sql/contract-definition-store-sql/docs/schema.sql /app/contract-definition-store-sql/schema.sql
+COPY --from=build /home/gradle/project/extensions/sql/policy-store-sql/docs/schema.sql /app/policy-store-sql/schema.sql
+
 EXPOSE 8181
 EXPOSE 8182
 EXPOSE 8282

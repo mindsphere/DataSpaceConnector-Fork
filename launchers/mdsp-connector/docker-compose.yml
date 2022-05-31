@@ -7,18 +7,27 @@ services:
       dockerfile: ./launchers/mdsp-connector/provider.Dockerfile
     #image: mdsp-connector_edc-provider:latest
     container_name: 'catena-x-edc-provider'
+    depends_on:
+      - postgres
     ports:
       - 8181:8181
       - 8182:8182
       - 8282:8282
     environment:
       - IDS_WEBHOOK_ADDRESS=http://catena-x-edc-provider:8282
+      - EDC_DATASOURCE_DB_USER=postgres
+      - EDC_DATASOURCE_DB_PASSWORD=password
+      - EDC_DATASOURCE_JDBC_PREFIX=jdbc:postgresql://catena-x-postgres:5432/
+      - EDC_DATASOURCE_CONTRACTDEFINITION_NAME=http
+      - EDC_DATASOURCE_CONTRACTDEFINITION_URL=jdbc:postgresql://catena-x-postgres:5432/provider
+      - EDC_DATASOURCE_CONTRACTDEFINITION_USER=user
+      - EDC_DATASOURCE_CONTRACTDEFINITION_PASSWORD=password
 
   edc-consumer:
-    build:
-      context: ../../
-      dockerfile: ./launchers/mdsp-connector/consumer.Dockerfile
-    #image: mdsp-connector_edc-consumer:latest
+    # build:
+    #   context: ../../
+    #   dockerfile: ./launchers/mdsp-connector/consumer.Dockerfile
+    image: mdsp-connector_edc-consumer:latest
     container_name: 'catena-x-edc-consumer'
     ports:
       - 9191:9191
@@ -26,4 +35,17 @@ services:
       - 9292:9292
     environment:
       - IDS_WEBHOOK_ADDRESS=http://catena-x-edc-consumer:9292
-    
+
+  postgres:
+    image: bitnami/postgresql:12.10.0-debian-10-r63
+    container_name: 'catena-x-postgres'
+    ports:
+      - 5432:5432
+    volumes:
+      - edc-data:/bitnami/postgresql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+
+volumes:
+  edc-data: {}

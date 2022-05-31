@@ -16,25 +16,29 @@ package com.siemens.mindsphere.datalake.edc.http;
 
 import org.eclipse.dataspaceconnector.dataloading.AssetLoader;
 import org.eclipse.dataspaceconnector.dataloading.ContractDefinitionLoader;
-import org.eclipse.dataspaceconnector.policy.model.Action;
-import org.eclipse.dataspaceconnector.policy.model.Permission;
-import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
-import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
 import org.eclipse.dataspaceconnector.spi.asset.DataAddressResolver;
+import org.eclipse.dataspaceconnector.spi.persistence.EdcPersistenceException;
 import org.eclipse.dataspaceconnector.spi.policy.store.PolicyStore;
 import org.eclipse.dataspaceconnector.spi.security.Vault;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
+import org.eclipse.dataspaceconnector.spi.transaction.TransactionContext;
 import org.eclipse.dataspaceconnector.spi.transfer.flow.DataFlowManager;
 import org.eclipse.dataspaceconnector.spi.transfer.inline.DataOperatorRegistry;
-import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
-import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
-import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractDefinition;
 import org.eclipse.dataspaceconnector.transfer.core.inline.InlineDataFlowController;
 
-import java.util.UUID;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.lang.String.format;
 
 public class TransferExtension implements ServiceExtension {
     @EdcSetting
@@ -52,6 +56,19 @@ public class TransferExtension implements ServiceExtension {
     private PolicyStore policyStore;
     @Inject
     private AssetLoader assetLoader;
+    @Inject
+    private TransactionContext transactionContext;
+
+    @EdcSetting
+    private static final String DB_USER = "edc.datasource.db.user.";
+    @EdcSetting
+    private static final String DB_PASSWORD = "edc.datasource.db.password";
+    @EdcSetting
+    private static final String JDBC_URL_PREFIX = "edc.datasource.jdbc.prefix";
+
+    private static final String DEFAULT_DB_USER = "postgres";
+    private static final String DEFAULT_DB_PASSWORD = "password";
+    private static final String DEFAULT_JDBC_URL_PREFIX = "jdbc:postgresql://localhost:5432/";
 
     @Override
     public void initialize(ServiceExtensionContext context) {
@@ -63,54 +80,59 @@ public class TransferExtension implements ServiceExtension {
 
         dataFlowMgr.register(new InlineDataFlowController(vault, context.getMonitor(), dataOperatorRegistry));
 
-        String assetId = registerDataEntries(context);
-        monitor.info("Register http sample Asset: " + assetId);
+        try {
+            monitor.info("Initialize postgresql databases");
+            prepareDatabase("provider", context);
+        } catch (ClassNotFoundException e) {
+            monitor.severe("Error initializing postgresql driver", e);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-        var policy = createPolicy(assetId);
-        policyStore.save(policy);
-
-        registerContractDefinition(policy.getUid(), assetId);
-        context.getMonitor().info("HTTP Transfer Extension initialized!");
+        monitor.info("HTTP Transfer Extension initialized!");
     }
 
-    private Policy createPolicy(String assetId) {
-        return Policy.Builder.newInstance()
-                .target(assetId)
-                .permission(Permission.Builder.newInstance()
-                        .target(assetId)
-                        .action(Action.Builder.newInstance()
-                                .type("USE")
-                                .build())
-                        .build())
-                .build();
+    static void createDatabase(String name, String jdbcUrlPrefix, String dbUser, String dbPassword) {
+        try (var connection = DriverManager.getConnection(jdbcUrlPrefix + dbUser, dbUser, dbPassword)) {
+            connection.createStatement().execute(format("create database %s;", name));
+        } catch (SQLException e) {
+            // database could already exist
+        }
     }
 
-    private String registerDataEntries(ServiceExtensionContext context) {
-        final String assetUrl = context.getSetting(STUB_URL, "missing");
+    private static void prepareDatabase(String provider, ServiceExtensionContext context)
+            throws ClassNotFoundException, SQLException, IOException {
+        Class.forName("org.postgresql.Driver");
 
-        DataAddress dataAddress = DataAddress.Builder.newInstance()
-                .type(HttpSchema.TYPE)
-                .property(HttpSchema.URL, assetUrl)
-                .keyName("demo.jpg")
-                .build();
+        String jdbcUrlPrefix = context.getSetting(JDBC_URL_PREFIX, DEFAULT_JDBC_URL_PREFIX);
+        String dbUser = context.getSetting(DB_USER, DEFAULT_DB_USER);
+        String dbPassword = context.getSetting(DB_PASSWORD, DEFAULT_DB_PASSWORD);
 
-        var assetId = UUID.randomUUID().toString();
-        Asset asset = Asset.Builder.newInstance().id(assetId).build();
-        assetLoader.accept(asset, dataAddress);
+        createDatabase(provider, jdbcUrlPrefix, dbUser, dbPassword);
 
-        return assetId;
-    }
+        var scripts = Stream.of(
+                "asset-index-sql",
+                "contract-definition-store-sql",
+                "policy-store-sql")
+                .map(module -> "./" + module + "/schema.sql")
+                .map(Paths::get)
+                .collect(Collectors.toList());
 
-    private void registerContractDefinition(String policyId, String assetId) {
-        ContractDefinition contractDefinition1 = ContractDefinition.Builder.newInstance()
-                .id("1")
-                .accessPolicyId(policyId)
-                .contractPolicyId(policyId)
-                .selectorExpression(AssetSelectorExpression.Builder.newInstance()
-                        .whenEquals(Asset.PROPERTY_ID, assetId).build())
-                .build();
+        try (Connection connection = DriverManager.getConnection(jdbcUrlPrefix + dbUser, dbUser, dbPassword)) {
+            for (var script : scripts) {
+                var sql = Files.readString(script);
 
-        contractDefinitionLoader.accept(contractDefinition1);
+                try (var statement = connection.createStatement()) {
+                    statement.execute(sql);
+                } catch (Exception exception) {
+                    throw new EdcPersistenceException(exception.getMessage(), exception);
+                }
+            }
+        }
     }
 
 }

@@ -17,6 +17,12 @@ spec:
       protocol: TCP
       name: http-mgmt
     {{ end }}
+    {{ if .Values.edc.debug.enabled }}
+    - port: {{ .Values.service.debug.port }}
+      targetPort: {{ .Values.edc.debug.port }}
+      protocol: TCP
+      name: http-debug
+    {{ end }}
     - port: {{ .Values.service.idsApi.port }}
       targetPort: {{ .Values.edc.idsApi.port }}
       protocol: TCP
