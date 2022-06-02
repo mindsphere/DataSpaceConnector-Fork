@@ -7,25 +7,11 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.edc.port }}
-      protocol: TCP
-      name: http
-    {{ if .Values.edc.managementApi.enabled }}
-    - port: {{ .Values.service.managementApi.port }}
-      targetPort: {{ .Values.edc.managementApi.port }}
-      protocol: TCP
-      name: http-mgmt
-    {{ end }}
-    {{ if .Values.edc.debug.enabled }}
-    - port: {{ .Values.service.debug.port }}
-      targetPort: {{ .Values.edc.debug.port }}
-      protocol: TCP
-      name: http-debug
-    {{ end }}
-    - port: {{ .Values.service.idsApi.port }}
-      targetPort: {{ .Values.edc.idsApi.port }}
-      protocol: TCP
-      name: http-ids
+  {{- range $k, $v := .Values.ports }}
+  - port: {{ default $v.containerPort $v.servicePort }}
+    targetPort: {{ $v.containerPort }}
+    name: {{ $k }}
+    protocol: TCP
+  {{- end }}
   selector:
     {{- include "dataspace-connector.selectorLabels" . | nindent 4 }}
