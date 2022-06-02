@@ -20,14 +20,12 @@ import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.asset.DataAddressResolver;
 import org.eclipse.dataspaceconnector.spi.persistence.EdcPersistenceException;
 import org.eclipse.dataspaceconnector.spi.policy.store.PolicyStore;
-import org.eclipse.dataspaceconnector.spi.security.Vault;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.transaction.TransactionContext;
 import org.eclipse.dataspaceconnector.spi.transfer.flow.DataFlowManager;
 import org.eclipse.dataspaceconnector.spi.transfer.inline.DataOperatorRegistry;
-import org.eclipse.dataspaceconnector.transfer.core.inline.InlineDataFlowController;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -72,14 +70,14 @@ public class TransferExtension implements ServiceExtension {
 
     @Override
     public void initialize(ServiceExtensionContext context) {
-        var vault = context.getService(Vault.class);
+        // var vault = context.getService(Vault.class);
         var monitor = context.getMonitor();
 
-        //Comment the below 3 lines out to remove the old way of copying files
-        dataOperatorRegistry.registerWriter(new HttpWriter(monitor));
-        dataOperatorRegistry.registerReader(new HttpReader(monitor));
+        // //Comment the below 3 lines out to remove the old way of copying files
+        // dataOperatorRegistry.registerWriter(new HttpWriter(monitor));
+        // dataOperatorRegistry.registerReader(new HttpReader(monitor));
 
-        dataFlowMgr.register(new InlineDataFlowController(vault, context.getMonitor(), dataOperatorRegistry));
+        // dataFlowMgr.register(new InlineDataFlowController(vault, context.getMonitor(), dataOperatorRegistry));
 
         try {
             monitor.info("Initialize postgresql databases");

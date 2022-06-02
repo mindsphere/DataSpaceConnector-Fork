@@ -18,8 +18,8 @@ import com.siemens.mindsphere.datalake.edc.http.dataplane.DatalakeHttpDataSinkFa
 import com.siemens.mindsphere.datalake.edc.http.provision.DestinationUrlProvisionedResource;
 import com.siemens.mindsphere.datalake.edc.http.provision.DestinationUrlProvisioner;
 import com.siemens.mindsphere.datalake.edc.http.provision.DestinationUrlResourceDefinition;
-import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlProvisioner;
 import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlProvisionedResource;
+import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlProvisioner;
 import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlResourceDefinition;
 import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlResourceDefinitionGenerator;
 import net.jodah.failsafe.RetryPolicy;
@@ -101,8 +101,10 @@ public class DataLakeExtension implements ServiceExtension {
 
             final URL url = new URL(dataLakeAddress);
 
-            final OauthClientDetails oauthClientDetails = new OauthClientDetails(tokenmanagementClientId, tokenmanagementClientSecret,
-                    tokenmanagementClientAppName, tokenmanagementClientAppVersion, applicationTenant, new URL(tokenmanagementAddress));
+            final OauthClientDetails oauthClientDetails = new OauthClientDetails(tokenmanagementClientId,
+                    tokenmanagementClientSecret,
+                    tokenmanagementClientAppName, tokenmanagementClientAppVersion, applicationTenant,
+                    new URL(tokenmanagementAddress));
             final DataLakeClientImpl clientImpl = new DataLakeClientImpl(oauthClientDetails, url);
 
             // create Data Lake Reader
@@ -110,9 +112,9 @@ public class DataLakeExtension implements ServiceExtension {
             // register Data Lake Reader
             dataOperatorRegistry.registerReader(dataLakeReader);
 
-
-            //MUST BE 1 partition - we can handle only one part at a time
-            var sinkFactoryHttp = new DatalakeHttpDataSinkFactory(httpClient, executorContainer.getExecutorService(), 1, monitor);
+            // MUST BE 1 partition - we can handle only one part at a time
+            var sinkFactoryHttp = new DatalakeHttpDataSinkFactory(httpClient, executorContainer.getExecutorService(), 1,
+                    monitor);
             pipelineService.registerFactory(sinkFactoryHttp);
 
             registerProvisioners(context, monitor, clientImpl);
@@ -121,7 +123,8 @@ public class DataLakeExtension implements ServiceExtension {
 
             // register status checker
             var statusCheckerReg = context.getService(StatusCheckerRegistry.class);
-            //statusCheckerReg.register(HttpSchema.TYPE, new DataLakeStatusChecker(dataLakeClient, retryPolicy, monitor));
+            // statusCheckerReg.register(HttpSchema.TYPE, new
+            // DataLakeStatusChecker(dataLakeClient, retryPolicy, monitor));
         } catch (MalformedURLException e) {
             monitor.severe("Failed to register datalake source url provisioning due to exception ", e);
         }
@@ -136,10 +139,12 @@ public class DataLakeExtension implements ServiceExtension {
     }
 
     private void registerProvisioners(ServiceExtensionContext context, Monitor monitor, DataLakeClientImpl clientImpl) {
-        @SuppressWarnings("unchecked") var retryPolicy = context.getService(RetryPolicy.class);
+        @SuppressWarnings("unchecked")
+        var retryPolicy = context.getService(RetryPolicy.class);
         var provisionManager = context.getService(ProvisionManager.class);
 
-        final DestinationUrlProvisioner destinationUrlProvisioner = new DestinationUrlProvisioner(clientImpl, monitor, retryPolicy);
+        final DestinationUrlProvisioner destinationUrlProvisioner = new DestinationUrlProvisioner(clientImpl, monitor,
+                retryPolicy);
         provisionManager.register(destinationUrlProvisioner);
 
         final SourceUrlProvisioner sourceUrlProvisioner = new SourceUrlProvisioner(clientImpl, context, retryPolicy);
