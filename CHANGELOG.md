@@ -59,6 +59,7 @@ in the detailed section referring to by linking pull requests or issues.
 * Update `slf4j-api` to `2.0.0-alpha7` (#1328)
 * Added timestamps to TransferProcess DTO (#1350)
 * Make Helm charts more generic (#1363)
+* Make `ParticipantAgent` claims more generic (#1405)
 
 #### Removed
 
@@ -84,6 +85,7 @@ in the detailed section referring to by linking pull requests or issues.
 * Fix misleading warning message on initialization (#1336)
 * Auto-upload of Cosmos stored procedures (#1338)
 * Resiliency against exceptions in the `PartitionManagerImpl` (#1366)
+* QuerySpec when right-op contains "=" or " " (#1380)
 
 ## [milestone-3] - 2022-04-08
 
