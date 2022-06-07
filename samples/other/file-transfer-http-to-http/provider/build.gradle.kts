@@ -44,7 +44,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.siemens.mindsphere.datalake.edc.http.CatenaBaseRuntime")
+    mainClass.set("org.eclipse.dataspaceconnector.boot.system.runtime.BaseRuntime")
 }
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {

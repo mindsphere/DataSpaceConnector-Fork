@@ -18,6 +18,9 @@ services:
       - EDC_DATASOURCE_DB_USER=postgres
       - EDC_DATASOURCE_DB_PASSWORD=password
       - EDC_DATASOURCE_JDBC_PREFIX=jdbc:postgresql://catena-x-postgres:5432/
+      - EDC_DATASOURCE_ASSET_NAME=postgres
+      - EDC_DATASOURCE_CONTRACTDEFINITION_NAME=postgres
+      - EDC_DATASOURCE_POLICY_NAME=postgres
 
   edc-consumer:
     build:

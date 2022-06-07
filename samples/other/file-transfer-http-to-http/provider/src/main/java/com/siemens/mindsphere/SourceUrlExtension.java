@@ -18,10 +18,11 @@ import org.eclipse.dataspaceconnector.dataloading.AssetLoader;
 import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
+import org.eclipse.dataspaceconnector.policy.model.PolicyDefinition;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
-import org.eclipse.dataspaceconnector.spi.policy.store.PolicyStore;
+import org.eclipse.dataspaceconnector.spi.policy.store.PolicyDefinitionStore;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
@@ -36,7 +37,7 @@ import org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchem
 public class SourceUrlExtension implements ServiceExtension {
 
     @Inject
-    private PolicyStore policyStore;
+    private PolicyDefinitionStore policyStore;
 
     @Inject
     private ContractDefinitionStore contractStore;
@@ -84,16 +85,21 @@ public class SourceUrlExtension implements ServiceExtension {
         return "Datalake Transfer With Provisioning";
     }
 
-    private Policy createPolicy() {
+    private PolicyDefinition createPolicy() {
 
         var usePermission = Permission.Builder.newInstance()
                 .action(Action.Builder.newInstance().type("USE").build())
                 .build();
 
-        return Policy.Builder.newInstance()
-                .id(USE_POLICY)
+        var policy = Policy.Builder.newInstance()
                 .permission(usePermission)
                 .build();
+
+        return PolicyDefinition.Builder.newInstance()
+                .uid(USE_POLICY)
+                .policy(policy)
+                .build();
+
     }
 
     private void registerDataEntries(ServiceExtensionContext context) {

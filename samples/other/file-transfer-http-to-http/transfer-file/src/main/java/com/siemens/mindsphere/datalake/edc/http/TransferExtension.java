@@ -19,13 +19,15 @@ import org.eclipse.dataspaceconnector.dataloading.ContractDefinitionLoader;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.asset.DataAddressResolver;
 import org.eclipse.dataspaceconnector.spi.persistence.EdcPersistenceException;
-import org.eclipse.dataspaceconnector.spi.policy.store.PolicyStore;
+import org.eclipse.dataspaceconnector.spi.policy.store.PolicyDefinitionStore;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.transaction.TransactionContext;
+import org.eclipse.dataspaceconnector.spi.transaction.datasource.DataSourceRegistry;
 import org.eclipse.dataspaceconnector.spi.transfer.flow.DataFlowManager;
 import org.eclipse.dataspaceconnector.spi.transfer.inline.DataOperatorRegistry;
+import org.postgresql.ds.PGSimpleDataSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -49,9 +51,11 @@ public class TransferExtension implements ServiceExtension {
     @Inject
     private DataOperatorRegistry dataOperatorRegistry;
     @Inject
+    private static DataSourceRegistry dataSourceRegistry;
+    @Inject
     private ContractDefinitionLoader contractDefinitionLoader;
     @Inject
-    private PolicyStore policyStore;
+    private PolicyDefinitionStore policyStore;
     @Inject
     private AssetLoader assetLoader;
     @Inject
@@ -77,7 +81,8 @@ public class TransferExtension implements ServiceExtension {
         // dataOperatorRegistry.registerWriter(new HttpWriter(monitor));
         // dataOperatorRegistry.registerReader(new HttpReader(monitor));
 
-        // dataFlowMgr.register(new InlineDataFlowController(vault, context.getMonitor(), dataOperatorRegistry));
+        // dataFlowMgr.register(new InlineDataFlowController(vault,
+        // context.getMonitor(), dataOperatorRegistry));
 
         try {
             monitor.info("Initialize postgresql databases");
@@ -110,6 +115,11 @@ public class TransferExtension implements ServiceExtension {
         String jdbcUrlPrefix = context.getSetting(JDBC_URL_PREFIX, DEFAULT_JDBC_URL_PREFIX);
         String dbUser = context.getSetting(DB_USER, DEFAULT_DB_USER);
         String dbPassword = context.getSetting(DB_PASSWORD, DEFAULT_DB_PASSWORD);
+
+        var pgSimpleDataSource = new PGSimpleDataSource();
+        pgSimpleDataSource.setURL(jdbcUrlPrefix + dbUser);
+
+        dataSourceRegistry.register("postgres", pgSimpleDataSource);
 
         createDatabase(provider, jdbcUrlPrefix, dbUser, dbPassword);
 
