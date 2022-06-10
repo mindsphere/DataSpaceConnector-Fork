@@ -11,6 +11,30 @@ in the detailed section referring to by linking pull requests or issues.
 
 ### Overview
 
+*
+
+### Detailed Changes
+
+#### Added
+
+*
+
+#### Changed
+
+*
+
+#### Removed
+
+* Old RegistrationService (was used for a PoC) (#164)
+
+#### Fixed
+
+*
+
+## [milestone-4] - 2022-06-07
+
+### Overview
+
 * Bugfixing DataManagementApi
 * Build improvements
 * Improvements to Dependency Resolution
@@ -38,6 +62,8 @@ in the detailed section referring to by linking pull requests or issues.
 * Add signing/publishing config (#1147)
 * Verify OpenAPI definitions (#1312)
 * Documentation for CosmosDB (#1334)
+* Add validation to contract definition id (#1347)
+* Shared clock service (#1416)
 
 #### Changed
 
@@ -88,6 +114,7 @@ in the detailed section referring to by linking pull requests or issues.
 * Auto-upload of Cosmos stored procedures (#1338)
 * Resiliency against exceptions in the `PartitionManagerImpl` (#1366)
 * QuerySpec when right-op contains "=" or " " (#1380)
+* Fix check whether policy can be deleted (#1410)
 
 ## [milestone-3] - 2022-04-08
 
