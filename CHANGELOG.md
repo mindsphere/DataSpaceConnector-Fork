@@ -361,6 +361,7 @@ in the detailed section referring to by linking pull requests or issues.
 * Support IDS logical constraint transformations (#342)
 * Add SQL persistence for contract definitions (#460) (#461)
 * Add cloud http data extension (#50002)
+* Lazily generate presign url (#5001)
 
 #### Changed
 
