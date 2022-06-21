@@ -14,12 +14,12 @@
 package com.siemens.mindsphere.datalake.edc.http.provision;
 
 import io.opentelemetry.api.internal.StringUtils;
-import org.eclipse.dataspaceconnector.dataplane.cloud.http.pipeline.PresignedHttpDataAddressSchema;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.transfer.provision.ProviderResourceDefinitionGenerator;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
+import org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.DataRequest;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.ResourceDefinition;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +43,7 @@ public class SourceUrlResourceDefinitionGenerator implements ProviderResourceDef
         }
 
         final String dataDestinationType = dataRequest.getDataDestination().getType();
-        if (!PresignedHttpDataAddressSchema.TYPE.equalsIgnoreCase(dataDestinationType)) {
+        if (!HttpDataAddressSchema.TYPE.equalsIgnoreCase(dataDestinationType)) {
             monitor.debug("The destination is " + dataDestinationType);
             return null;
         }
