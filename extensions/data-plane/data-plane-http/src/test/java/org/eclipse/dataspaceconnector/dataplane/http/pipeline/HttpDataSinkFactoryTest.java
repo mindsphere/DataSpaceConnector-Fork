@@ -9,11 +9,13 @@
  *
  *  Contributors:
  *       Microsoft Corporation - initial API and implementation
+ *       Siemens AG - changes to make it compatible with AWS S3, Azure blob and AWS China S3 presigned URL for upload
  *
  */
 
 package org.eclipse.dataspaceconnector.dataplane.http.pipeline;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -32,9 +34,11 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.dataplane.http.HttpTestFixtures.createHttpResponse;
 import static org.eclipse.dataspaceconnector.dataplane.http.HttpTestFixtures.createRequest;
+import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.ADDITIONAL_HEADERS;
 import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.AUTHENTICATION_CODE;
 import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.AUTHENTICATION_KEY;
 import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.ENDPOINT;
+import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.HTTP_VERB;
 import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.TYPE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.isA;
@@ -103,10 +107,65 @@ class HttpDataSinkFactoryTest {
         verify(call).execute();
     }
 
+    @Test
+    void verifyCreatePutVerb() throws InterruptedException, ExecutionException, IOException {
+        var dataAddress = DataAddress.Builder.newInstance()
+                .type(TYPE)
+                .property(ENDPOINT, "http://example.com")
+                .property(HTTP_VERB, "PUT")
+                .build();
+
+        var validRequest = createRequest(TYPE).destinationDataAddress(dataAddress).build();
+
+        var call = mock(Call.class);
+        when(call.execute()).thenReturn(createHttpResponse().build());
+
+        when(httpClient.newCall(isA(Request.class))).thenAnswer(r -> {
+            assertThat(((Request) r.getArgument(0)).method()).isEqualTo("PUT");  // verify verb PUT
+            return call;
+        });
+
+        var sink = factory.createSink(validRequest);
+
+        var result = sink.transfer(new InputStreamDataSource("test", new ByteArrayInputStream("test".getBytes()))).get();
+
+        assertThat(result.failed()).isFalse();
+
+        verify(call).execute();
+    }
+
+    @Test
+    void verifyCreateAdditionalHeaders() throws InterruptedException, ExecutionException, IOException {
+        var dataAddress = DataAddress.Builder.newInstance()
+                .type(TYPE)
+                .property(ENDPOINT, "http://example.com")
+                .property(ADDITIONAL_HEADERS, "{\"Content-Type\" : \"application/test-octet-stream\",\"x-ms-blob-type\": \"BlockBlob\"}")
+                .build();
+
+        var validRequest = createRequest(TYPE).destinationDataAddress(dataAddress).build();
+
+        var call = mock(Call.class);
+        when(call.execute()).thenReturn(createHttpResponse().build());
+
+        when(httpClient.newCall(isA(Request.class))).thenAnswer(r -> {
+            assertThat(((Request) r.getArgument(0)).headers("Content-Type").get(0)).isEqualTo("application/test-octet-stream");  // verify Content-Type
+            assertThat(((Request) r.getArgument(0)).headers("x-ms-blob-type").get(0)).isEqualTo("BlockBlob");  // verify x-ms-blob-type
+            return call;
+        });
+
+        var sink = factory.createSink(validRequest);
+
+        var result = sink.transfer(new InputStreamDataSource("test", new ByteArrayInputStream("test".getBytes()))).get();
+
+        assertThat(result.failed()).isFalse();
+
+        verify(call).execute();
+    }
+
     @BeforeEach
     void setUp() {
         httpClient = mock(OkHttpClient.class);
-        factory = new HttpDataSinkFactory(httpClient, Executors.newFixedThreadPool(1), 5, mock(Monitor.class));
+        factory = new HttpDataSinkFactory(httpClient, new ObjectMapper(), Executors.newFixedThreadPool(1), 5, mock(Monitor.class));
     }
 
 

@@ -363,6 +363,7 @@ in the detailed section referring to by linking pull requests or issues.
 * Add cloud http data extension (#50002)
 * Lazily generate presign url (#5001)
 * Support for additional headers (#50003)
+* Extra configuration for HttpDataSink (#1480)
 
 #### Changed
 

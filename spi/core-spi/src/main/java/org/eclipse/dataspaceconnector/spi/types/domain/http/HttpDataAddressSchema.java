@@ -68,4 +68,20 @@ public interface HttpDataAddressSchema {
      * If set to true the http method of the actual request will be used to retrieve data from this address
      */
     String PROXY_METHOD = "proxyMethod";
+
+    /**
+     * The http verb to use for sink endpoint - possible values POST/PUT - default set to POST
+     */
+    String HTTP_VERB = "httpVerb";
+
+    /**
+     * Use partition name when sending to endpoint
+     * When set to true (default) - it appends the name of the part to the sink endpoint
+     */
+    String USE_PART_NAME = "usePartName";
+
+    /**
+     * The additional headers to use as json string e.g. "additionalHeaders" : "{\"Content-Type\" : \"application/octet-stream\",\"x-ms-blob-type\": \"BlockBlob\"}"
+     */
+    String ADDITIONAL_HEADERS = "additionalHeaders";
 }
