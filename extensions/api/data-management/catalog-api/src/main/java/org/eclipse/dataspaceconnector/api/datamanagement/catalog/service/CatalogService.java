@@ -25,5 +25,5 @@ public interface CatalogService {
      * @param providerUrl the url of the provider
      * @return the provider's catalog
      */
-    CompletableFuture<Catalog> getByProviderUrl(String providerUrl);
+    CompletableFuture<Catalog> getByProviderUrl(String providerUrl, String tenant);
 }

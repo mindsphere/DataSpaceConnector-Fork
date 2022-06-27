@@ -151,7 +151,7 @@ public class IdsResponseMessageFactory {
         }
         builder._recipientConnector_(new ArrayList<>(Collections.singletonList(recipientConnector)));
 
-        Result<TokenRepresentation> tokenResult = identityService.obtainClientCredentials(IdsClientCredentialsScope.ALL);
+        Result<TokenRepresentation> tokenResult = identityService.obtainClientCredentials(IdsClientCredentialsScope.ALL, "IdsResponseMessageFactory");
         if (tokenResult.failed()) {
             tokenResult = Result.success(TokenRepresentation.Builder.newInstance().token(NULL_TOKEN).build());
         }
@@ -212,7 +212,7 @@ public class IdsResponseMessageFactory {
         }
         builder._recipientConnector_(new ArrayList<>(Collections.singletonList(recipientConnector)));
 
-        Result<TokenRepresentation> tokenResult = identityService.obtainClientCredentials(IdsClientCredentialsScope.ALL);
+        Result<TokenRepresentation> tokenResult = identityService.obtainClientCredentials(IdsClientCredentialsScope.ALL, "IdsResponseMessageFactory");
         if (tokenResult.failed()) {
             throw new MissingClientCredentialsException(tokenResult.getFailureMessages());
         }

@@ -55,7 +55,7 @@ public class DecentralizedIdentityService implements IdentityService {
     }
 
     @Override
-    public Result<TokenRepresentation> obtainClientCredentials(String scope) {
+    public Result<TokenRepresentation> obtainClientCredentials(String scope, String tenant) {
 
         var jwt = verifiableCredentialProvider.get();
         var token = jwt.serialize();

@@ -28,11 +28,12 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public CompletableFuture<Catalog> getByProviderUrl(String providerUrl) {
+    public CompletableFuture<Catalog> getByProviderUrl(String providerUrl, String tenant) {
         var request = CatalogRequest.Builder.newInstance()
                 .protocol("ids-multipart")
                 .connectorId(providerUrl)
                 .connectorAddress(providerUrl)
+                .tenant(tenant)
                 .build();
 
         return dispatcher.send(Catalog.class, request, () -> null);

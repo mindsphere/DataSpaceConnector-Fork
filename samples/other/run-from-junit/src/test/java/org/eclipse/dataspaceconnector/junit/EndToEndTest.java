@@ -171,7 +171,7 @@ public class EndToEndTest {
         public void initialize(ServiceExtensionContext context) {
             context.registerService(IdentityService.class, new IdentityService() {
                 @Override
-                public Result<TokenRepresentation> obtainClientCredentials(String scope) {
+                public Result<TokenRepresentation> obtainClientCredentials(String scope, String tenant) {
                     return Result.success(TokenRepresentation.Builder.newInstance().token("test").build());
                 }
 

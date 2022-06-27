@@ -20,12 +20,15 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.dataspaceconnector.api.datamanagement.catalog.service.CatalogService;
 
 @Path("/catalog")
 @Produces({ MediaType.APPLICATION_JSON })
 public class CatalogApiController implements CatalogApi {
+    private static final String EMPTY_HEADER = "";
 
     private final CatalogService service;
 
@@ -35,8 +38,8 @@ public class CatalogApiController implements CatalogApi {
 
     @Override
     @GET
-    public void getCatalog(@QueryParam("providerUrl") String providerUrl, @Suspended AsyncResponse response) {
-        service.getByProviderUrl(providerUrl)
+    public void getCatalog(@QueryParam("providerUrl") String providerUrl, @Context HttpHeaders headers, @Suspended AsyncResponse response) {
+        service.getByProviderUrl(providerUrl, headers.getRequestHeader("ten") == null ? EMPTY_HEADER : headers.getRequestHeader("ten").get(0))
                 .whenComplete((content, throwable) -> {
                     if (throwable == null) {
                         response.resume(content);

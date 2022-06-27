@@ -51,7 +51,7 @@ class CatalogServiceImplTest {
         var catalog = Catalog.Builder.newInstance().id("id").contractOffers(List.of(contractOffer)).build();
         when(dispatcher.send(any(), any(), any())).thenReturn(completedFuture(catalog));
 
-        var future = service.getByProviderUrl(FAKER.internet().url());
+        var future = service.getByProviderUrl(FAKER.internet().url(), "test");
 
         assertThat(future).succeedsWithin(1, SECONDS).extracting(Catalog::getContractOffers, InstanceOfAssertFactories.list(ContractOffer.class)).hasSize(1);
         verify(dispatcher).send(eq(Catalog.class), isA(CatalogRequest.class), any());

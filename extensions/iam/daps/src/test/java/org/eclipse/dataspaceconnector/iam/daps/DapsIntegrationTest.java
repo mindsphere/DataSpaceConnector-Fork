@@ -54,7 +54,7 @@ class DapsIntegrationTest {
 
     @Test
     void retrieveTokenAndValidate(IdentityService identityService) {
-        var tokenResult = identityService.obtainClientCredentials("idsc:IDS_CONNECTOR_ATTRIBUTES_ALL");
+        var tokenResult = identityService.obtainClientCredentials("idsc:IDS_CONNECTOR_ATTRIBUTES_ALL", "retrieveTokenAndValidate");
 
         assertThat(tokenResult.succeeded()).isTrue();
 

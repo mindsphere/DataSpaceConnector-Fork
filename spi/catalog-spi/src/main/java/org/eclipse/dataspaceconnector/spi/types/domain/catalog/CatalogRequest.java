@@ -30,11 +30,13 @@ public class CatalogRequest implements RemoteMessage {
     private final String protocol;
     private final String connectorId;
     private final String connectorAddress;
+    private final String tenant;
 
-    private CatalogRequest(@NotNull String protocol, @NotNull String connectorId, @NotNull String connectorAddress) {
+    private CatalogRequest(@NotNull String protocol, @NotNull String connectorId, @NotNull String connectorAddress, String tenant) {
         this.protocol = protocol;
         this.connectorId = connectorId;
         this.connectorAddress = connectorAddress;
+        this.tenant = tenant;
     }
 
     @NotNull
@@ -52,10 +54,15 @@ public class CatalogRequest implements RemoteMessage {
         return connectorAddress;
     }
 
+    public String getTenant() {
+        return tenant;
+    }
+
     public static class Builder {
         private String protocol;
         private String connectorId;
         private String connectorAddress;
+        private String tenant;
 
         private Builder() {
         }
@@ -80,12 +87,17 @@ public class CatalogRequest implements RemoteMessage {
             return this;
         }
 
+        public CatalogRequest.Builder tenant(String tenant) {
+            this.tenant = tenant;
+            return this;
+        }
+
         public CatalogRequest build() {
             Objects.requireNonNull(protocol, "protocol");
             Objects.requireNonNull(connectorId, "connectorId");
             Objects.requireNonNull(connectorAddress, "connectorAddress");
 
-            return new CatalogRequest(protocol, connectorId, connectorAddress);
+            return new CatalogRequest(protocol, connectorId, connectorAddress, tenant);
         }
     }
 }

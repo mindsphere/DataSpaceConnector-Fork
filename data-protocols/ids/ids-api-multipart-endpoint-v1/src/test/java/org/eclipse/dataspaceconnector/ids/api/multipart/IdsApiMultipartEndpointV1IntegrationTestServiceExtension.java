@@ -136,7 +136,7 @@ class IdsApiMultipartEndpointV1IntegrationTestServiceExtension implements Servic
 
     private static class FakeIdentityService implements IdentityService {
         @Override
-        public Result<TokenRepresentation> obtainClientCredentials(String scope) {
+        public Result<TokenRepresentation> obtainClientCredentials(String scope, String tenant) {
             return Result.success(TokenRepresentation.Builder.newInstance().build());
         }
 

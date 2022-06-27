@@ -26,7 +26,7 @@ public interface IdentityService {
     /**
      * Obtains a client token encoded as a JWT.
      */
-    Result<TokenRepresentation> obtainClientCredentials(String scope);
+    Result<TokenRepresentation> obtainClientCredentials(String scope, String tenant);
 
     /**
      * Verifies a JWT bearer token.

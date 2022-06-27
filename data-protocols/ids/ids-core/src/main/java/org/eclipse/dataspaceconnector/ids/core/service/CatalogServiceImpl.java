@@ -24,6 +24,7 @@ import org.eclipse.dataspaceconnector.spi.types.domain.catalog.Catalog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -53,6 +54,10 @@ public class CatalogServiceImpl implements CatalogService {
 
         var offers = contractOfferService.queryContractOffers(query).collect(toList());
 
-        return Catalog.Builder.newInstance().id(dataCatalogId).contractOffers(offers).build();
+        var ten = claimToken.getClaims().get("ten");
+
+        return Catalog.Builder.newInstance().id(dataCatalogId)
+                .contractOffers(offers.stream().filter(offer -> Objects.equals(offer.getAsset().getProperty("ten"),ten)).collect(Collectors.toUnmodifiableList()))
+                .build();
     }
 }

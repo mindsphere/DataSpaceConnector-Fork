@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.common.types.Cast.cast;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -226,7 +227,7 @@ public class ConsumerRunner {
     @BeforeEach
     void before(EdcExtension extension) {
         IdentityService identityService = mock(IdentityService.class);
-        when(identityService.obtainClientCredentials(isA(String.class))).thenReturn(Result.success(US_TOKEN));
+        when(identityService.obtainClientCredentials(isA(String.class), any())).thenReturn(Result.success(US_TOKEN));
 
         latch = new CountDownLatch(1);
 

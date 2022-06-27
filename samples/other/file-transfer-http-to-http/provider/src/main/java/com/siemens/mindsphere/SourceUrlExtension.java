@@ -121,7 +121,7 @@ public class SourceUrlExtension implements ServiceExtension {
                 .build();
 
         var assetId1 = "styleguide.md";
-        var asset1 = Asset.Builder.newInstance().id(assetId1).build();
+        var asset1 = Asset.Builder.newInstance().id(assetId1).property("ten", "castidev").build();
 
         var dataAddress2 = DataAddress.Builder.newInstance()
                 .property("type", HttpDataAddressSchema.TYPE)
@@ -129,7 +129,7 @@ public class SourceUrlExtension implements ServiceExtension {
                 .build();
 
         var assetId2 = "1";
-        var asset2 = Asset.Builder.newInstance().id(assetId2).build();
+        var asset2 = Asset.Builder.newInstance().id(assetId2).property("ten", "castiop").build();
 
         loader.accept(asset, dataAddress);
         loader.accept(asset1, dataAddress1);
