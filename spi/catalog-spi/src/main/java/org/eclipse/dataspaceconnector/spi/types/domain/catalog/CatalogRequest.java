@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.eclipse.dataspaceconnector.spi.types.domain.message.RemoteMessage;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -30,13 +31,13 @@ public class CatalogRequest implements RemoteMessage {
     private final String protocol;
     private final String connectorId;
     private final String connectorAddress;
-    private final String tenant;
+    private final Map<String, Object> additionalProperties;
 
-    private CatalogRequest(@NotNull String protocol, @NotNull String connectorId, @NotNull String connectorAddress, String tenant) {
+    private CatalogRequest(@NotNull String protocol, @NotNull String connectorId, @NotNull String connectorAddress, Map<String, Object> additionalProperties) {
         this.protocol = protocol;
         this.connectorId = connectorId;
         this.connectorAddress = connectorAddress;
-        this.tenant = tenant;
+        this.additionalProperties = additionalProperties;
     }
 
     @NotNull
@@ -54,15 +55,15 @@ public class CatalogRequest implements RemoteMessage {
         return connectorAddress;
     }
 
-    public String getTenant() {
-        return tenant;
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
     }
 
     public static class Builder {
         private String protocol;
         private String connectorId;
         private String connectorAddress;
-        private String tenant;
+        private Map<String, Object> additionalProperties;
 
         private Builder() {
         }
@@ -87,8 +88,8 @@ public class CatalogRequest implements RemoteMessage {
             return this;
         }
 
-        public CatalogRequest.Builder tenant(String tenant) {
-            this.tenant = tenant;
+        public CatalogRequest.Builder additionalProperties(Map<String, Object> additionalProperties) {
+            this.additionalProperties = additionalProperties;
             return this;
         }
 
@@ -97,7 +98,7 @@ public class CatalogRequest implements RemoteMessage {
             Objects.requireNonNull(connectorId, "connectorId");
             Objects.requireNonNull(connectorAddress, "connectorAddress");
 
-            return new CatalogRequest(protocol, connectorId, connectorAddress, tenant);
+            return new CatalogRequest(protocol, connectorId, connectorAddress, additionalProperties);
         }
     }
 }

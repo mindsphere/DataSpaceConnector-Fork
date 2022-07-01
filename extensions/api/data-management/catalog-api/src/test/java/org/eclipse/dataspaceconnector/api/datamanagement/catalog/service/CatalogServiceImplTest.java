@@ -23,6 +23,7 @@ import org.eclipse.dataspaceconnector.spi.types.domain.catalog.CatalogRequest;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractOffer;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -51,7 +52,7 @@ class CatalogServiceImplTest {
         var catalog = Catalog.Builder.newInstance().id("id").contractOffers(List.of(contractOffer)).build();
         when(dispatcher.send(any(), any(), any())).thenReturn(completedFuture(catalog));
 
-        var future = service.getByProviderUrl(FAKER.internet().url(), "test");
+        var future = service.getByProviderUrl(FAKER.internet().url(), new HashMap<>());
 
         assertThat(future).succeedsWithin(1, SECONDS).extracting(Catalog::getContractOffers, InstanceOfAssertFactories.list(ContractOffer.class)).hasSize(1);
         verify(dispatcher).send(eq(Catalog.class), isA(CatalogRequest.class), any());

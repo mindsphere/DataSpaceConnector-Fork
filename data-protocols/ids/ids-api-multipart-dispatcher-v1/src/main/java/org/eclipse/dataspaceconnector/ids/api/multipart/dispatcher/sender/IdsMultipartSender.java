@@ -37,7 +37,6 @@ import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
 import org.eclipse.dataspaceconnector.spi.message.MessageContext;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.types.domain.catalog.CatalogRequest;
 import org.eclipse.dataspaceconnector.spi.types.domain.message.RemoteMessage;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.jetbrains.annotations.NotNull;
@@ -101,7 +100,7 @@ abstract class IdsMultipartSender<M extends RemoteMessage, R> implements IdsMess
     @Override
     public CompletableFuture<R> send(M request, MessageContext context) {
         // Get Dynamic Attribute Token
-        var tokenResult = identityService.obtainClientCredentials(TOKEN_SCOPE, request instanceof CatalogRequest ? ((CatalogRequest)request).getTenant() : "IdsMultipartSender");
+        var tokenResult = identityService.obtainClientCredentials(TOKEN_SCOPE, request.getAdditionalProperties());
         if (tokenResult.failed()) {
             String message = "Failed to obtain token: " + String.join(",", tokenResult.getFailureMessages());
             monitor.severe(message);

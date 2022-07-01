@@ -57,7 +57,7 @@ public class CatalogServiceImpl implements CatalogService {
         var ten = claimToken.getClaims().get("ten");
 
         return Catalog.Builder.newInstance().id(dataCatalogId)
-                .contractOffers(offers.stream().filter(offer -> Objects.equals(offer.getAsset().getProperty("ten"),ten)).collect(Collectors.toUnmodifiableList()))
+                .contractOffers(offers.stream().filter(offer -> Objects.equals(offer.getAsset().getProperty("ten"), ten)).collect(Collectors.toUnmodifiableList()))
                 .build();
     }
 }

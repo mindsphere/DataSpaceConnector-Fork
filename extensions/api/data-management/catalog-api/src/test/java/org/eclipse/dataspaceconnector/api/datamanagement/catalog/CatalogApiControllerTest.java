@@ -22,11 +22,10 @@ import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.types.domain.catalog.Catalog;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractOffer;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +36,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@Disabled
 class CatalogApiControllerTest {
 
     private static final Faker FAKER = Faker.instance();
@@ -55,8 +53,8 @@ class CatalogApiControllerTest {
                 .build();
         var catalog = Catalog.Builder.newInstance().id("any").contractOffers(List.of(offer)).build();
         var url = FAKER.internet().url();
-        when(headers.getRequestHeader("ten")).thenReturn(Arrays.asList("tenant"));
-        when(service.getByProviderUrl(url, "tenant")).thenReturn(completedFuture(catalog));
+
+        when(service.getByProviderUrl(url, new HashMap<>())).thenReturn(completedFuture(catalog));
 
         controller.getCatalog(url, mock(HttpHeaders.class), response);
 
@@ -70,8 +68,7 @@ class CatalogApiControllerTest {
         var response = mock(AsyncResponse.class);
         var url = FAKER.internet().url();
 
-        when(headers.getRequestHeader("ten")).thenReturn(Arrays.asList("tenant"));
-        when(service.getByProviderUrl(url, "tenant")).thenReturn(failedFuture(new EdcException("error")));
+        when(service.getByProviderUrl(url, new HashMap<>())).thenReturn(failedFuture(new EdcException("error")));
 
         controller.getCatalog(url, mock(HttpHeaders.class), response);
 

@@ -76,7 +76,7 @@ abstract class DecentralizedIdentityServiceTest {
 
     @Test
     void verifyObtainClientCredentials() throws Exception {
-        var result = identityService.obtainClientCredentials("Foo", "tenant");
+        var result = identityService.obtainClientCredentials("Foo");
 
         assertTrue(result.succeeded());
 
