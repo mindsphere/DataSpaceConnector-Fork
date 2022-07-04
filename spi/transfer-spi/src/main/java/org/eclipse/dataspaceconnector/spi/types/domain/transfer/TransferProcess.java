@@ -21,19 +21,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import org.eclipse.dataspaceconnector.spi.telemetry.TraceCarrier;
+import org.eclipse.dataspaceconnector.spi.entity.StatefulEntity;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -59,9 +55,10 @@ import static org.eclipse.dataspaceconnector.spi.types.domain.transfer.TransferP
 /**
  * Represents a data transfer process.
  * <p>
- * A data transfer process exists on both the consumer and provider connector; it is a representation of the data sharing transaction from the perspective of each endpoint. The data
- * transfer process is modeled as a "loosely" coordinated state machine on each connector. The state transitions are symmetric on the consumer and provider with the exception that
- * the consumer process has two additional states for request/request ack.
+ * A data transfer process exists on both the consumer and provider connector; it is a representation of the data
+ * sharing transaction from the perspective of each endpoint. The data transfer process is modeled as a "loosely"
+ * coordinated state machine on each connector. The state transitions are symmetric on the consumer and provider with
+ * the exception that the consumer process has two additional states for request/request ack.
  * <p>
  * The consumer transitions are:
  *
@@ -97,53 +94,24 @@ import static org.eclipse.dataspaceconnector.spi.types.domain.transfer.TransferP
  */
 @JsonTypeName("dataspaceconnector:transferprocess")
 @JsonDeserialize(builder = TransferProcess.Builder.class)
-public class TransferProcess implements TraceCarrier {
+public class TransferProcess extends StatefulEntity<TransferProcess> {
 
-    private String id;
     private Type type = Type.CONSUMER;
-    private long createdTimestamp;
-    private int state;
-    private int stateCount = UNSAVED.code();
-    private long stateTimestamp;
-    private Map<String, String> traceContext = new HashMap<>();
-    private String errorDetail;
     private DataRequest dataRequest;
     private DataAddress contentDataAddress;
     private ResourceManifest resourceManifest;
     private ProvisionedResourceSet provisionedResourceSet;
     private List<DeprovisionedResource> deprovisionedResources = new ArrayList<>();
-    private Clock clock = Clock.systemUTC();
 
     private TransferProcess() {
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public long getCreatedTimestamp() {
-        return createdTimestamp;
+    public List<DeprovisionedResource> getDeprovisionedResources() {
+        return deprovisionedResources;
     }
 
     public Type getType() {
         return type;
-    }
-
-    public int getState() {
-        return state;
-    }
-
-    public int getStateCount() {
-        return stateCount;
-    }
-
-    public long getStateTimestamp() {
-        return stateTimestamp;
-    }
-
-    @Override
-    public Map<String, String> getTraceContext() {
-        return Collections.unmodifiableMap(traceContext);
     }
 
     public DataRequest getDataRequest() {
@@ -160,10 +128,6 @@ public class TransferProcess implements TraceCarrier {
 
     public DataAddress getContentDataAddress() {
         return contentDataAddress;
-    }
-
-    public String getErrorDetail() {
-        return errorDetail;
     }
 
     public void transitionInitial() {
@@ -328,26 +292,25 @@ public class TransferProcess implements TraceCarrier {
         updateStateTimestamp();
     }
 
+    @Override
     public TransferProcess copy() {
-        return Builder.newInstance()
-                .id(id)
-                .state(state)
-                .stateTimestamp(stateTimestamp)
-                .stateCount(stateCount)
+        var builder = Builder.newInstance()
                 .resourceManifest(resourceManifest)
                 .dataRequest(dataRequest)
                 .provisionedResourceSet(provisionedResourceSet)
                 .contentDataAddress(contentDataAddress)
-                .traceContext(traceContext)
-                .type(type)
-                .createdTimestamp(createdTimestamp)
-                .errorDetail(errorDetail)
-                .clock(clock)
-                .build();
+                .deprovisionedResources(deprovisionedResources)
+                .type(type);
+        return copy(builder);
     }
 
     public Builder toBuilder() {
         return new Builder(copy());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Override
@@ -363,26 +326,12 @@ public class TransferProcess implements TraceCarrier {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
     public String toString() {
         return "TransferProcess{" +
                 "id='" + id + '\'' +
                 ", state=" + TransferProcessStates.from(state) +
                 ", stateTimestamp=" + Instant.ofEpochMilli(stateTimestamp) +
                 '}';
-    }
-
-    /**
-     * Sets the state timestamp to the clock time.
-     *
-     * @see Builder#clock(Clock)
-     */
-    public void updateStateTimestamp() {
-        stateTimestamp = clock.millis();
     }
 
     private void transition(TransferProcessStates end, TransferProcessStates... starts) {
@@ -393,9 +342,7 @@ public class TransferProcess implements TraceCarrier {
         if (Arrays.stream(starts).noneMatch(s -> s.code() == state)) {
             throw new IllegalStateException(format("Cannot transition from state %s to %s", TransferProcessStates.from(state), TransferProcessStates.from(end.code())));
         }
-        stateCount = state == end.code() ? stateCount + 1 : 1;
-        state = end.code();
-        updateStateTimestamp();
+        transitionTo(end.code());
     }
 
     public enum Type {
@@ -403,12 +350,10 @@ public class TransferProcess implements TraceCarrier {
     }
 
     @JsonPOJOBuilder(withPrefix = "")
-    public static class Builder {
-
-        private final TransferProcess process;
+    public static class Builder extends StatefulEntity.Builder<TransferProcess, Builder> {
 
         private Builder(TransferProcess process) {
-            this.process = process;
+            super(process);
         }
 
         @JsonCreator
@@ -416,94 +361,55 @@ public class TransferProcess implements TraceCarrier {
             return new Builder(new TransferProcess());
         }
 
-        public Builder id(String id) {
-            process.id = id;
-            return this;
-        }
-
         public Builder type(Type type) {
-            process.type = type;
-            return this;
-        }
-
-        public Builder clock(Clock clock) {
-            process.clock = clock;
-            return this;
-        }
-
-        public Builder createdTimestamp(long value) {
-            process.createdTimestamp = value;
-            return this;
-        }
-
-        public Builder state(int value) {
-            process.state = value;
-            return this;
-        }
-
-        public Builder stateCount(int value) {
-            process.stateCount = value;
-            return this;
-        }
-
-        public Builder stateTimestamp(long value) {
-            process.stateTimestamp = value;
+            entity.type = type;
             return this;
         }
 
         public Builder dataRequest(DataRequest request) {
-            process.dataRequest = request;
+            entity.dataRequest = request;
             return this;
         }
 
         public Builder resourceManifest(ResourceManifest manifest) {
-            process.resourceManifest = manifest;
+            entity.resourceManifest = manifest;
             return this;
         }
 
         public Builder contentDataAddress(DataAddress dataAddress) {
-            process.contentDataAddress = dataAddress;
+            entity.contentDataAddress = dataAddress;
             return this;
         }
 
         public Builder provisionedResourceSet(ProvisionedResourceSet set) {
-            process.provisionedResourceSet = set;
+            entity.provisionedResourceSet = set;
             return this;
         }
 
         public Builder deprovisionedResources(List<DeprovisionedResource> resources) {
-            process.deprovisionedResources = resources;
+            entity.deprovisionedResources = resources;
             return this;
         }
 
-        public Builder errorDetail(String errorDetail) {
-            process.errorDetail = errorDetail;
+        @Override
+        public Builder self() {
             return this;
         }
 
-        public Builder traceContext(Map<String, String> traceContext) {
-            process.traceContext = traceContext;
-            return this;
-        }
-
+        @Override
         public TransferProcess build() {
-            Objects.requireNonNull(process.id, "id");
-            Objects.requireNonNull(process.clock, "clock");
-            if (process.state == UNSAVED.code() && process.stateTimestamp == 0) {
-                process.stateTimestamp = process.clock.millis();
-            }
-            if (process.resourceManifest != null) {
-                process.resourceManifest.setTransferProcessId(process.id);
+            if (entity.resourceManifest != null) {
+                entity.resourceManifest.setTransferProcessId(entity.id);
             }
 
-            if (process.provisionedResourceSet != null) {
-                process.provisionedResourceSet.setTransferProcessId(process.id);
+            if (entity.provisionedResourceSet != null) {
+                entity.provisionedResourceSet.setTransferProcessId(entity.id);
             }
 
-            if (process.dataRequest != null) {
-                process.dataRequest.associateWithProcessId(process.id);
+            if (entity.dataRequest != null) {
+                entity.dataRequest.associateWithProcessId(entity.id);
             }
-            return process;
+            return super.build();
         }
 
     }

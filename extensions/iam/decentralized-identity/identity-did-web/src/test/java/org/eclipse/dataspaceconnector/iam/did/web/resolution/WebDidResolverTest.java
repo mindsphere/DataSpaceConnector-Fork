@@ -28,7 +28,7 @@ import java.nio.charset.StandardCharsets;
 
 import static okhttp3.Protocol.HTTP_1_1;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.common.testfixtures.TestUtils.testOkHttpClient;
+import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.testOkHttpClient;
 import static org.mockito.Mockito.mock;
 
 class WebDidResolverTest {
@@ -77,7 +77,7 @@ class WebDidResolverTest {
         }
         var mapper = new ObjectMapper();
         Monitor monitor = mock(Monitor.class);
-        return new WebDidResolver(builder.build(), mapper, monitor);
+        return new WebDidResolver(builder.build(), true, mapper, monitor);
     }
 
 }

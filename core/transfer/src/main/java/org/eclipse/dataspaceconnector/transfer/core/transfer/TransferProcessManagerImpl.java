@@ -16,12 +16,14 @@
 package org.eclipse.dataspaceconnector.transfer.core.transfer;
 
 import io.opentelemetry.extension.annotations.WithSpan;
-import org.eclipse.dataspaceconnector.common.statemachine.StateMachine;
+import org.eclipse.dataspaceconnector.common.statemachine.StateMachineManager;
 import org.eclipse.dataspaceconnector.common.statemachine.StateProcessorImpl;
+import org.eclipse.dataspaceconnector.common.statemachine.retry.SendRetryManager;
 import org.eclipse.dataspaceconnector.spi.asset.DataAddressResolver;
 import org.eclipse.dataspaceconnector.spi.command.CommandProcessor;
 import org.eclipse.dataspaceconnector.spi.command.CommandQueue;
 import org.eclipse.dataspaceconnector.spi.command.CommandRunner;
+import org.eclipse.dataspaceconnector.spi.entity.StatefulEntity;
 import org.eclipse.dataspaceconnector.spi.message.RemoteMessageDispatcherRegistry;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.policy.store.PolicyArchive;
@@ -77,21 +79,25 @@ import static org.eclipse.dataspaceconnector.spi.types.domain.transfer.TransferP
 import static org.eclipse.dataspaceconnector.spi.types.domain.transfer.TransferProcessStates.REQUESTING;
 
 /**
- * This transfer process manager receives a {@link TransferProcess} and transitions it through its internal state machine (cf {@link TransferProcessStates}.
- * When submitting a new {@link TransferProcess} it gets created and inserted into the {@link TransferProcessStore}, then returns to the caller.
+ * This transfer process manager receives a {@link TransferProcess} and transitions it through its internal state
+ * machine (cf {@link TransferProcessStates}. When submitting a new {@link TransferProcess} it gets created and inserted
+ * into the {@link TransferProcessStore}, then returns to the caller.
  * <p>
- * All subsequent state transitions happen asynchronously, the {@code AsyncTransferProcessManager#initiate*Request()} will return immediately.
+ * All subsequent state transitions happen asynchronously, the {@code AsyncTransferProcessManager#initiate*Request()}
+ * will return immediately.
  * <p>
- * A data transfer processes transitions through a series of states, which allows the system to model both terminating and non-terminating (e.g. streaming) transfers. Transitions
- * occur asynchronously, since long-running processes such as resource provisioning may need to be completed before transitioning to a subsequent state. The permissible state
+ * A data transfer processes transitions through a series of states, which allows the system to model both terminating
+ * and non-terminating (e.g. streaming) transfers. Transitions occur asynchronously, since long-running processes such
+ * as resource provisioning may need to be completed before transitioning to a subsequent state. The permissible state
  * transitions are defined by {@link org.eclipse.dataspaceconnector.spi.types.domain.transfer.TransferProcessStates}.
  * <p>
- * The transfer manager performs continual iterations, which seek to advance the state of transfer processes, including recovery, in a FIFO state-based ordering.
- * Each iteration will seek to transition a set number of processes for each state to avoid situations where an excessive number of processes in one state block progress of
- * processes in other states.
+ * The transfer manager performs continual iterations, which seek to advance the state of transfer processes, including
+ * recovery, in a FIFO state-based ordering. Each iteration will seek to transition a set number of processes for each
+ * state to avoid situations where an excessive number of processes in one state block progress of processes in other
+ * states.
  * <p>
- * If no processes need to be transitioned, the transfer manager will wait according to the defined {@link WaitStrategy} before conducting the next iteration.
- * A wait strategy may implement a backoff scheme.
+ * If no processes need to be transitioned, the transfer manager will wait according to the defined {@link WaitStrategy}
+ * before conducting the next iteration. A wait strategy may implement a backoff scheme.
  */
 public class TransferProcessManagerImpl implements TransferProcessManager, ProvisionCallbackDelegate {
     private int batchSize = 5;
@@ -111,17 +117,17 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
     private Monitor monitor;
     private Telemetry telemetry;
     private ExecutorInstrumentation executorInstrumentation;
-    private StateMachine stateMachine;
+    private StateMachineManager stateMachineManager;
     private DataAddressResolver addressResolver;
     private PolicyArchive policyArchive;
-    private SendRetryManager<TransferProcess> sendRetryManager;
+    private SendRetryManager<StatefulEntity> sendRetryManager;
     private Clock clock;
 
     private TransferProcessManagerImpl() {
     }
 
     public void start() {
-        stateMachine = StateMachine.Builder.newInstance("transfer-process", monitor, executorInstrumentation, waitStrategy)
+        stateMachineManager = StateMachineManager.Builder.newInstance("transfer-process", monitor, executorInstrumentation, waitStrategy)
                 .processor(processTransfersInState(INITIAL, this::processInitial))
                 .processor(processTransfersInState(PROVISIONING, this::processProvisioning))
                 .processor(processTransfersInState(PROVISIONED, this::processProvisioned))
@@ -132,12 +138,12 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
                 .processor(processTransfersInState(DEPROVISIONED, this::processDeprovisioned))
                 .processor(onCommands(this::processCommand))
                 .build();
-        stateMachine.start();
+        stateMachineManager.start();
     }
 
     public void stop() {
-        if (stateMachine != null) {
-            stateMachine.stop();
+        if (stateMachineManager != null) {
+            stateMachineManager.stop();
         }
     }
 
@@ -172,6 +178,12 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
             monitor.severe("TransferProcessManager: no TransferProcess found for provisioned resources");
             return;
         }
+
+        if (transferProcess.getState() == ERROR.code()) {
+            monitor.severe(format("TransferProcessManager: transfer process %s is in ERROR state, so provisioning could not be completed", transferProcess.getId()));
+            return;
+        }
+
         handleProvisionResult(transferProcess, responses);
     }
 
@@ -182,6 +194,12 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
             monitor.severe("TransferProcessManager: no TransferProcess found for deprovisioned resources");
             return;
         }
+
+        if (transferProcess.getState() == ERROR.code()) {
+            monitor.severe(format("TransferProcessManager: transfer process %s is in ERROR state, so deprovisioning could not be processed", transferProcess.getId()));
+            return;
+        }
+
         handleDeprovisionResult(transferProcess, responses);
     }
 
@@ -208,8 +226,7 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
     }
 
     /**
-     * Process INITIAL transfer<p>
-     * set it to PROVISIONING
+     * Process INITIAL transfer<p> set it to PROVISIONING
      *
      * @param process the INITIAL transfer fetched
      * @return if the transfer has been processed or not
@@ -241,11 +258,12 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
     }
 
     /**
-     * Process PROVISIONING transfer<p>
-     * Launch provision process. On completion, set to PROVISIONED if succeeded, ERROR otherwise
+     * Process PROVISIONING transfer<p> Launch provision process. On completion, set to PROVISIONED if succeeded, ERROR
+     * otherwise
      * <p>
-     * On a consumer, provisioning may entail setting up a data destination and supporting infrastructure. On a provider, provisioning is initiated when a request is received and
-     * map involve preprocessing data or other operations.
+     * On a consumer, provisioning may entail setting up a data destination and supporting infrastructure. On a
+     * provider, provisioning is initiated when a request is received and map involve preprocessing data or other
+     * operations.
      *
      * @param process the PROVISIONING transfer fetched
      * @return if the transfer has been processed or not
@@ -260,7 +278,7 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
         provisionManager.provision(resources, policy)
                 .whenComplete((responses, throwable) -> {
                     if (throwable == null) {
-                        handleProvisionResult(process, responses);
+                        handleProvisionResult(process.getId(), responses);
                     } else {
                         transitionToError(process.getId(), throwable, "Error during provisioning");
                     }
@@ -270,8 +288,7 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
     }
 
     /**
-     * Process PROVISIONED transfer<p>
-     * If CONSUMER, set it to REQUESTING, if PROVIDER initiate data transfer
+     * Process PROVISIONED transfer<p> If CONSUMER, set it to REQUESTING, if PROVIDER initiate data transfer
      *
      * @param process the PROVISIONED transfer fetched
      * @return if the transfer has been processed or not
@@ -289,8 +306,7 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
     }
 
     /**
-     * Process REQUESTING transfer<p>
-     * If CONSUMER, send request to the provider, should never be PROVIDER
+     * Process REQUESTING transfer<p> If CONSUMER, send request to the provider, should never be PROVIDER
      *
      * @param process the REQUESTING transfer fetched
      * @return if the transfer has been processed or not
@@ -307,8 +323,8 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
     }
 
     /**
-     * Process REQUESTED transfer<p>
-     * If is managed or there are provisioned resources set IN_PROGRESS or STREAMING, do nothing otherwise
+     * Process REQUESTED transfer<p> If is managed or there are provisioned resources set IN_PROGRESS or STREAMING, do
+     * nothing otherwise
      *
      * @param process the REQUESTED transfer fetched
      * @return if the transfer has been processed or not
@@ -327,8 +343,8 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
     }
 
     /**
-     * Process IN PROGRESS transfer<p>
-     * if is completed or there's no checker and it's not managed, set to COMPLETE, nothing otherwise.
+     * Process IN PROGRESS transfer<p> if is completed or there's no checker and it's not managed, set to COMPLETE,
+     * nothing otherwise.
      *
      * @param process the IN PROGRESS transfer fetched
      * @return if the transfer has been processed or not
@@ -364,8 +380,8 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
     }
 
     /**
-     * Process DEPROVISIONING transfer<p>
-     * Launch deprovision process. On completion, set to DEPROVISIONED if succeeded, ERROR otherwise
+     * Process DEPROVISIONING transfer<p> Launch deprovision process. On completion, set to DEPROVISIONED if succeeded,
+     * ERROR otherwise
      *
      * @param process the DEPROVISIONING transfer fetched
      * @return if the transfer has been processed or not
@@ -383,7 +399,7 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
         provisionManager.deprovision(resourcesToDeprovision, policy)
                 .whenComplete((responses, throwable) -> {
                     if (throwable == null) {
-                        handleDeprovisionResult(process, responses);
+                        handleDeprovisionResult(process.getId(), responses);
                     } else {
                         transitionToError(process.getId(), throwable, "Error during deprovisioning");
                     }
@@ -393,8 +409,7 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
     }
 
     /**
-     * Process DEPROVISIONED transfer<p>
-     * Set it to ENDED.
+     * Process DEPROVISIONED transfer<p> Set it to ENDED.
      *
      * @param process the DEPROVISIONED transfer fetched
      * @return if the transfer has been processed or not
@@ -409,11 +424,6 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
     }
 
     private void handleProvisionResult(TransferProcess transferProcess, List<StatusResult<ProvisionResponse>> responses) {
-        if (transferProcess.getState() == ERROR.code()) {
-            monitor.severe(format("TransferProcessManager: transfer process %s is in ERROR state, so provisioning could not be completed", transferProcess.getId()));
-            return;
-        }
-
         var fatalErrors = new ArrayList<String>();
         responses.forEach(result -> {
             if (result.failed()) {
@@ -448,6 +458,7 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
             // update the transfer process with the provisioned resource
             transferProcess.addProvisionedResource(provisionedResource);
         });
+
         if (!fatalErrors.isEmpty()) {
             var errors = join("\n", fatalErrors);
             monitor.severe(format("Transitioning transfer process %s to ERROR state due to fatal provisioning errors: \n%s", transferProcess.getId(), errors));
@@ -473,13 +484,7 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
         }
     }
 
-
     private void handleDeprovisionResult(TransferProcess transferProcess, List<StatusResult<DeprovisionedResource>> results) {
-        if (transferProcess.getState() == ERROR.code()) {
-            monitor.severe(format("TransferProcessManager: transfer process %s is in ERROR state, so deprovisioning could not be processed", transferProcess.getId()));
-            return;
-        }
-
         var fatalErrors = new ArrayList<String>();
         results.forEach(result -> {
             if (result.failed()) {
@@ -662,7 +667,7 @@ public class TransferProcessManagerImpl implements TransferProcessManager, Provi
             return this;
         }
 
-        public Builder sendRetryManager(SendRetryManager<TransferProcess> sendRetryManager) {
+        public Builder sendRetryManager(SendRetryManager sendRetryManager) {
             manager.sendRetryManager = sendRetryManager;
             return this;
         }

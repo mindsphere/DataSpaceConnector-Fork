@@ -16,7 +16,7 @@ transfers as support more scalable parallelization.
 
 ## Data properties
 
-see [HttpDataAddressSchema.java](../../../spi/core-spi/src/main/java/org/eclipse/dataspaceconnector/spi/types/domain/http/HttpDataAddressSchema.java)
+see [HttpDataAddress.java](../../../spi/core-spi/src/main/java/org/eclipse/dataspaceconnector/spi/types/domain/HttpDataAddress.java)
 
 * type - The HTTP transfer type is "HttpData".
 * endpoint - The http endpoint.
@@ -28,6 +28,5 @@ see [HttpDataAddressSchema.java](../../../spi/core-spi/src/main/java/org/eclipse
 * proxyPath - If set to true the path of the actual request will be used to retrieve data from this address.
 * proxyQueryParams - If set to true the query params of the actual request will be used to retrieve data from this address.
 * proxyMethod - If set to true the http method of the actual request will be used to retrieve data from this address.
-* httpVerb - The http verb to use for sink endpoint - possible values POST/PUT - default set to POST.
-* usePartName - Use partition name when sending to endpoint. When set to true (default) - it appends the name of the part to the sink endpoint.
-* additionalHeaders - The additional headers to use as json string e.g. ```"additionalHeaders" : "{\"Content-Type\" : \"application/octet-stream\",\"x-ms-blob-type\": \"BlockBlob\"}"```.
+* header:* - The additional headers to use as json string e.g. ```"header:x-ms-blob-type": "BlockBlob"```. Note that Content-Type is handled separately - it will not be taken into consideration if specified here.
+* contentType - The HTTP Content-Type header is handled separate and has a default value of application/octet-stream.

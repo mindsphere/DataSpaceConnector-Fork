@@ -20,7 +20,7 @@ import com.azure.cosmos.implementation.NotFoundException;
 import com.azure.cosmos.models.CosmosContainerResponse;
 import com.azure.cosmos.models.CosmosDatabaseResponse;
 import com.azure.cosmos.models.PartitionKey;
-import net.jodah.failsafe.RetryPolicy;
+import dev.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosDbApiImpl;
 import org.eclipse.dataspaceconnector.azure.testfixtures.CosmosTestClient;
 import org.eclipse.dataspaceconnector.azure.testfixtures.annotations.AzureCosmosDbIntegrationTest;
@@ -86,7 +86,8 @@ public class CosmosPolicyDefinitionStoreIntegrationTest {
         assertThat(database).describedAs("CosmosDB database is null - did something go wrong during initialization?").isNotNull();
 
         var cosmosDbApi = new CosmosDbApiImpl(container, true);
-        store = new CosmosPolicyDefinitionStore(cosmosDbApi, typeManager, new RetryPolicy<>().withMaxRetries(3).withBackoff(1, 5, ChronoUnit.SECONDS), TEST_PARTITION_KEY);
+        var retryPolicy = RetryPolicy.builder().withMaxRetries(3).withBackoff(1, 5, ChronoUnit.SECONDS).build();
+        store = new CosmosPolicyDefinitionStore(cosmosDbApi, typeManager, retryPolicy, TEST_PARTITION_KEY);
     }
 
     @AfterEach
@@ -293,7 +294,7 @@ public class CosmosPolicyDefinitionStoreIntegrationTest {
         store.save(modifiedPolicy);
 
         // re-read
-        var all = store.findAll(QuerySpec.Builder.newInstance().filter("permissions[0].target=test-asset-id").build()).collect(Collectors.toList());
+        var all = store.findAll(QuerySpec.Builder.newInstance().filter("policy.permissions[0].target=test-asset-id").build()).collect(Collectors.toList());
         assertThat(all).hasSize(1).containsExactly(modifiedPolicy);
 
     }

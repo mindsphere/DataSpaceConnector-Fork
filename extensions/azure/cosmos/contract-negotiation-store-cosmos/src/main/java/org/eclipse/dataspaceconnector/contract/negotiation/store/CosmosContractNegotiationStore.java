@@ -19,7 +19,7 @@ import com.azure.cosmos.implementation.BadRequestException;
 import com.azure.cosmos.models.SqlParameter;
 import com.azure.cosmos.models.SqlQuerySpec;
 import com.fasterxml.jackson.core.type.TypeReference;
-import net.jodah.failsafe.RetryPolicy;
+import dev.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosDbApi;
 import org.eclipse.dataspaceconnector.azure.cosmos.dialect.SqlStatement;
 import org.eclipse.dataspaceconnector.azure.cosmos.util.CosmosLeaseContext;
@@ -42,9 +42,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
+import static dev.failsafe.Failsafe.with;
 import static java.util.Optional.ofNullable;
-import static net.jodah.failsafe.Failsafe.with;
 
 /**
  * Implementation of the {@link ContractDefinitionStore} based on CosmosDB. This store implements simple write-through
@@ -161,14 +160,6 @@ public class CosmosContractNegotiationStore implements ContractNegotiationStore 
                 .map(this::toNegotiation)
                 .map(ContractNegotiation::getContractAgreement)
                 .filter(Objects::nonNull);
-    }
-
-    @Override
-    public Stream<ContractNegotiation> getNegotiationsWithAgreementOnAsset(String assetId) {
-        var filter = format("contractAgreement.assetId = %s", assetId);
-        var query = QuerySpec.Builder.newInstance().filter(filter).build();
-
-        return queryNegotiations(query);
     }
 
     @Override

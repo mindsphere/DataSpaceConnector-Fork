@@ -9,14 +9,16 @@
  *
  *  Contributors:
  *       Amadeus - initial API and implementation
+ *       Microsoft Corporation - Use IDS Webhook address for JWT audience claim
  *
  */
 
 package org.eclipse.dataspaceconnector.iam.daps;
 
 import org.eclipse.dataspaceconnector.iam.daps.annotations.DapsTest;
-import org.eclipse.dataspaceconnector.junit.launcher.EdcExtension;
+import org.eclipse.dataspaceconnector.junit.extensions.EdcExtension;
 import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
+import org.eclipse.dataspaceconnector.spi.iam.TokenParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,23 +46,27 @@ class DapsIntegrationTest {
             "edc.oauth.private.key.alias", CLIENT_KEYSTORE_KEY_ALIAS
     );
 
+    @Test
+    void retrieveTokenAndValidate(IdentityService identityService) {
+        var tokenParameters = TokenParameters.Builder.newInstance()
+                .scope("idsc:IDS_CONNECTOR_ATTRIBUTES_ALL")
+                .audience("audience")
+                .build();
+        var tokenResult = identityService.obtainClientCredentials(tokenParameters);
+
+        assertThat(tokenResult.succeeded()).isTrue();
+
+        var verificationResult = identityService.verifyJwtToken(tokenResult.getContent(), "audience");
+
+        assertThat(verificationResult.succeeded()).isTrue();
+    }
+
     @BeforeEach
     protected void before(EdcExtension extension) {
         System.setProperty("edc.vault", "src/test/resources/empty-vault.properties");
         System.setProperty("edc.keystore", "src/test/resources/keystore.p12");
         System.setProperty("edc.keystore.password", CLIENT_KEYSTORE_PASSWORD);
         extension.setConfiguration(configuration);
-    }
-
-    @Test
-    void retrieveTokenAndValidate(IdentityService identityService) {
-        var tokenResult = identityService.obtainClientCredentials("idsc:IDS_CONNECTOR_ATTRIBUTES_ALL");
-
-        assertThat(tokenResult.succeeded()).isTrue();
-
-        var verificationResult = identityService.verifyJwtToken(tokenResult.getContent().getToken());
-
-        assertThat(verificationResult.succeeded()).isTrue();
     }
 
 }

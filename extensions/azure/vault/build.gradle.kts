@@ -30,10 +30,10 @@ dependencies {
     implementation("com.azure:azure-identity:${azureIdentityVersion}")
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
 
-    testImplementation("com.microsoft.azure:azure-mgmt-resources:1.3.0")
+    testImplementation("com.microsoft.azure:azure-mgmt-resources:1.41.3")
     testImplementation("com.azure.resourcemanager:azure-resourcemanager:${azureResourceManagerVersion}")
     testImplementation("com.azure.resourcemanager:azure-resourcemanager-keyvault:${azureResourceManagerVersion}")
-    testImplementation(testFixtures(project(":common:util")))
+
     testImplementation("org.mockito:mockito-inline:${mockitoVersion}")
 }
 

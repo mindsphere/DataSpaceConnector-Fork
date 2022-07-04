@@ -18,7 +18,7 @@ plugins {
 }
 
 val rsApi: String by project
-val jodahFailsafeVersion: String by project
+val failsafeVersion: String by project
 val okHttpVersion: String by project
 
 dependencies {
@@ -31,11 +31,11 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
 
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
-    implementation("net.jodah:failsafe:${jodahFailsafeVersion}")
+    implementation("dev.failsafe:failsafe:${failsafeVersion}")
 
     // required for integration test
-    testImplementation(testFixtures(project(":launchers:junit")))
-    testImplementation(testFixtures(project(":common:util")))
+    testImplementation(project(":extensions:junit"))
+
     testImplementation(project(":extensions:http"))
     testImplementation(project(":data-protocols:ids:ids-spi"))
 }

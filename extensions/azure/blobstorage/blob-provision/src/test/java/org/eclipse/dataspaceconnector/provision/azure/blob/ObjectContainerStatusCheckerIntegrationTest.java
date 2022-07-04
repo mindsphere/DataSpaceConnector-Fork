@@ -14,13 +14,13 @@
 
 package org.eclipse.dataspaceconnector.provision.azure.blob;
 
-import net.jodah.failsafe.RetryPolicy;
+import dev.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.azure.blob.core.AzureBlobStoreSchema;
 import org.eclipse.dataspaceconnector.azure.blob.core.api.BlobStoreApiImpl;
 import org.eclipse.dataspaceconnector.azure.testfixtures.AbstractAzureBlobTest;
 import org.eclipse.dataspaceconnector.azure.testfixtures.TestFunctions;
 import org.eclipse.dataspaceconnector.azure.testfixtures.annotations.AzureStorageIntegrationTest;
-import org.eclipse.dataspaceconnector.common.testfixtures.TestUtils;
+import org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils;
 import org.eclipse.dataspaceconnector.spi.security.Vault;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.DataRequest;
@@ -45,7 +45,7 @@ class ObjectContainerStatusCheckerIntegrationTest extends AbstractAzureBlobTest 
 
     @BeforeEach
     void setUp() {
-        var policy = new RetryPolicy<>().withMaxRetries(1);
+        var policy = RetryPolicy.builder().withMaxRetries(1).build();
         helloTxt = TestUtils.getFileFromResourceName("hello.txt");
         Vault vault = mock(Vault.class);
 

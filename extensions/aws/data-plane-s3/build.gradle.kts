@@ -14,7 +14,7 @@
 
 val okHttpVersion: String by project
 val storageBlobVersion: String by project;
-val jodahFailsafeVersion: String by project
+val failsafeVersion: String by project
 
 plugins {
     `java-library`
@@ -25,12 +25,13 @@ dependencies {
     implementation(project(":common:util"))
     implementation(project(":extensions:aws:s3:s3-core"))
 
-    implementation("net.jodah:failsafe:${jodahFailsafeVersion}")
+    implementation("dev.failsafe:failsafe:${failsafeVersion}")
 
     testImplementation(project(":extensions:data-plane:data-plane-framework"))
     testImplementation(testFixtures(project(":extensions:aws:aws-test")))
-    testImplementation(testFixtures(project(":common:util")))
-    testImplementation(testFixtures(project(":launchers:junit")))
+
+    testImplementation(project(":extensions:junit"))
+
 }
 
 publishing {

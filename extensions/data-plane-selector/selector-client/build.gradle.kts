@@ -13,7 +13,7 @@
  */
 
 val mockitoVersion: String by project
-val jodahFailsafeVersion: String by project
+val failsafeVersion: String by project
 val okHttpVersion: String by project
 
 plugins {
@@ -23,14 +23,14 @@ plugins {
 dependencies {
     api(project(":extensions:data-plane-selector:selector-spi"))
     implementation(project(":common:util"))
-    implementation("net.jodah:failsafe:${jodahFailsafeVersion}")
+    implementation("dev.failsafe:failsafe:${failsafeVersion}")
     implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
 
     testImplementation(project(":extensions:http"))
     testImplementation(project(":extensions:data-plane-selector:selector-api"))
     testImplementation(project(":extensions:api:api-core"))
-    testImplementation(testFixtures(project(":common:util")))
-    testImplementation(testFixtures(project(":launchers:junit")))
+
+    testImplementation(project(":extensions:junit"))
 }
 
 publishing {

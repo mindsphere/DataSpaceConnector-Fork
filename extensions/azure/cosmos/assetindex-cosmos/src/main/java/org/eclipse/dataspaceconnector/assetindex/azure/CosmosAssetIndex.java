@@ -16,7 +16,7 @@ package org.eclipse.dataspaceconnector.assetindex.azure;
 
 import com.azure.cosmos.implementation.NotFoundException;
 import com.azure.cosmos.models.SqlQuerySpec;
-import net.jodah.failsafe.RetryPolicy;
+import dev.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.assetindex.azure.model.AssetDocument;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosDbApi;
 import org.eclipse.dataspaceconnector.dataloading.AssetEntry;
@@ -35,7 +35,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static net.jodah.failsafe.Failsafe.with;
+import static dev.failsafe.Failsafe.with;
 
 public class CosmosAssetIndex implements AssetIndex, DataAddressResolver, AssetLoader {
 
@@ -104,12 +104,6 @@ public class CosmosAssetIndex implements AssetIndex, DataAddressResolver, AssetL
     }
 
     @Override
-    public void accept(Asset asset, DataAddress dataAddress) {
-        var assetDocument = new AssetDocument(asset, partitionKey, dataAddress);
-        assetDb.saveItem(assetDocument);
-    }
-
-    @Override
     public Asset deleteById(String assetId) {
         try {
             var deletedItem = assetDb.deleteItem(assetId);
@@ -122,7 +116,8 @@ public class CosmosAssetIndex implements AssetIndex, DataAddressResolver, AssetL
 
     @Override
     public void accept(AssetEntry item) {
-        accept(item.getAsset(), item.getDataAddress());
+        var assetDocument = new AssetDocument(item.getAsset(), partitionKey, item.getDataAddress());
+        assetDb.saveItem(assetDocument);
     }
 
     // we need to read the AssetDocument as Object, because no custom JSON deserialization can be registered

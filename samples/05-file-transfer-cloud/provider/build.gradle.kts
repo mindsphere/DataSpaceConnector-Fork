@@ -17,17 +17,13 @@
 plugins {
     `java-library`
     id("application")
-    id("com.github.johnrengelman.shadow") version "7.0.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
-
-val jupiterVersion: String by project
-val rsApi: String by project
 
 dependencies {
     implementation(project(":core"))
 
-
-
+    implementation(project(":extensions:api:observability"))
 
     implementation(project(":extensions:filesystem:configuration-fs"))
     implementation(project(":extensions:iam:iam-mock"))
@@ -37,14 +33,9 @@ dependencies {
     implementation(project(":extensions:api:auth-tokenbased"))
     implementation(project(":extensions:api:data-management"))
 
-    implementation(project(":data-protocols:ids")) {
-        exclude("org.eclipse.dataspaceconnector","ids-token-validation")
-    }
+    implementation(project(":data-protocols:ids"))
 
     implementation(project(":samples:05-file-transfer-cloud:transfer-file"))
-    implementation(project(":samples:05-file-transfer-cloud:data-seeder"))
-
-    implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
 }
 
 application {

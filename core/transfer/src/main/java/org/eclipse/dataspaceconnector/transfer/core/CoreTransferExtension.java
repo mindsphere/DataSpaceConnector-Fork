@@ -15,6 +15,7 @@
 
 package org.eclipse.dataspaceconnector.transfer.core;
 
+import org.eclipse.dataspaceconnector.common.statemachine.retry.EntitySendRetryManager;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.asset.DataAddressResolver;
 import org.eclipse.dataspaceconnector.spi.command.BoundedCommandQueue;
@@ -34,7 +35,6 @@ import org.eclipse.dataspaceconnector.spi.transfer.TransferProcessManager;
 import org.eclipse.dataspaceconnector.spi.transfer.edr.EndpointDataReferenceReceiverRegistry;
 import org.eclipse.dataspaceconnector.spi.transfer.edr.EndpointDataReferenceTransformerRegistry;
 import org.eclipse.dataspaceconnector.spi.transfer.flow.DataFlowManager;
-import org.eclipse.dataspaceconnector.spi.transfer.inline.DataOperatorRegistry;
 import org.eclipse.dataspaceconnector.spi.transfer.observe.TransferProcessObservable;
 import org.eclipse.dataspaceconnector.spi.transfer.provision.ProvisionManager;
 import org.eclipse.dataspaceconnector.spi.transfer.provision.ResourceManifestGenerator;
@@ -51,13 +51,11 @@ import org.eclipse.dataspaceconnector.transfer.core.command.handlers.Deprovision
 import org.eclipse.dataspaceconnector.transfer.core.edr.EndpointDataReferenceReceiverRegistryImpl;
 import org.eclipse.dataspaceconnector.transfer.core.edr.EndpointDataReferenceTransformerRegistryImpl;
 import org.eclipse.dataspaceconnector.transfer.core.flow.DataFlowManagerImpl;
-import org.eclipse.dataspaceconnector.transfer.core.inline.DataOperatorRegistryImpl;
 import org.eclipse.dataspaceconnector.transfer.core.observe.TransferProcessObservableImpl;
 import org.eclipse.dataspaceconnector.transfer.core.provision.ProvisionManagerImpl;
 import org.eclipse.dataspaceconnector.transfer.core.provision.ResourceManifestGeneratorImpl;
 import org.eclipse.dataspaceconnector.transfer.core.transfer.StatusCheckerRegistryImpl;
 import org.eclipse.dataspaceconnector.transfer.core.transfer.TransferProcessManagerImpl;
-import org.eclipse.dataspaceconnector.transfer.core.transfer.TransferProcessSendRetryManager;
 
 import java.time.Clock;
 
@@ -65,9 +63,9 @@ import java.time.Clock;
  * Provides core data transfer services to the system.
  */
 @CoreExtension
-@Provides({StatusCheckerRegistry.class, ResourceManifestGenerator.class, TransferProcessManager.class,
-        TransferProcessObservable.class, DataOperatorRegistry.class, DataFlowManager.class, ProvisionManager.class,
-        EndpointDataReferenceReceiverRegistry.class, EndpointDataReferenceTransformerRegistry.class})
+@Provides({ StatusCheckerRegistry.class, ResourceManifestGenerator.class, TransferProcessManager.class,
+        TransferProcessObservable.class, DataFlowManager.class, ProvisionManager.class,
+        EndpointDataReferenceReceiverRegistry.class, EndpointDataReferenceTransformerRegistry.class })
 public class CoreTransferExtension implements ServiceExtension {
     private static final long DEFAULT_ITERATION_WAIT = 5000; // millis
 
@@ -122,9 +120,6 @@ public class CoreTransferExtension implements ServiceExtension {
         var statusCheckerRegistry = new StatusCheckerRegistryImpl();
         context.registerService(StatusCheckerRegistry.class, statusCheckerRegistry);
 
-        var dataOperatorRegistry = new DataOperatorRegistryImpl();
-        context.registerService(DataOperatorRegistry.class, dataOperatorRegistry);
-
         var provisionManager = new ProvisionManagerImpl(monitor);
         context.registerService(ProvisionManager.class, provisionManager);
 
@@ -144,7 +139,7 @@ public class CoreTransferExtension implements ServiceExtension {
         var retryLimit = context.getSetting(TRANSFER_SEND_RETRY_LIMIT, 7);
         var retryBaseDelay = context.getSetting(TRANSFER_SEND_RETRY_BASE_DELAY_MS, 100L);
         Clock clock = context.getClock();
-        var sendRetryManager = new TransferProcessSendRetryManager(monitor, () -> new ExponentialWaitStrategy(retryBaseDelay), clock, retryLimit);
+        var sendRetryManager = new EntitySendRetryManager(monitor, () -> new ExponentialWaitStrategy(retryBaseDelay), clock, retryLimit);
 
         processManager = TransferProcessManagerImpl.Builder.newInstance()
                 .waitStrategy(waitStrategy)

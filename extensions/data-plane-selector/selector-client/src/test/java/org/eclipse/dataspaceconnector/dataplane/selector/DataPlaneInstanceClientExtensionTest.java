@@ -14,12 +14,12 @@
 
 package org.eclipse.dataspaceconnector.dataplane.selector;
 
-import net.jodah.failsafe.RetryPolicy;
+import dev.failsafe.RetryPolicy;
 import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.dataplane.selector.client.DataPlaneSelectorClient;
 import org.eclipse.dataspaceconnector.dataplane.selector.client.EmbeddedDataPlaneSelectorClient;
 import org.eclipse.dataspaceconnector.dataplane.selector.client.RemoteDataPlaneSelectorClient;
-import org.eclipse.dataspaceconnector.junit.launcher.DependencyInjectionExtension;
+import org.eclipse.dataspaceconnector.junit.extensions.DependencyInjectionExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.system.configuration.ConfigFactory;
 import org.eclipse.dataspaceconnector.spi.system.injection.ObjectFactory;

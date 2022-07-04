@@ -16,6 +16,7 @@ package org.eclipse.dataspaceconnector.transfer.dataplane.sync.proxy;
 
 import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.spi.result.Result;
+import org.eclipse.dataspaceconnector.spi.types.domain.HttpDataAddress;
 import org.eclipse.dataspaceconnector.spi.types.domain.edr.EndpointDataReference;
 import org.eclipse.dataspaceconnector.transfer.dataplane.spi.proxy.DataPlaneTransferProxyCreationRequest;
 import org.eclipse.dataspaceconnector.transfer.dataplane.spi.proxy.DataPlaneTransferProxyReferenceService;
@@ -26,34 +27,24 @@ import org.mockito.ArgumentCaptor;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.dataplane.spi.DataPlaneConstants.CONTRACT_ID;
-import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.AUTHENTICATION_CODE;
-import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.AUTHENTICATION_KEY;
-import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.ENDPOINT;
-import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.PROXY_BODY;
-import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.PROXY_METHOD;
-import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.PROXY_PATH;
-import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.PROXY_QUERY_PARAMS;
-import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.TYPE;
+import static org.eclipse.dataspaceconnector.transfer.dataplane.spi.DataPlaneTransferConstants.CONTRACT_ID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class DataPlaneTransferConsumerProxyTransformerTest {
-
     private static final Faker FAKER = new Faker();
 
-    private String proxyEndpoint;
-    private DataPlaneTransferProxyReferenceService proxyCreatorMock;
+    private DataPlaneTransferProxyResolver proxyResolverMock;
+    private DataPlaneTransferProxyReferenceService proxyReferenceServiceMock;
     private DataPlaneTransferConsumerProxyTransformer transformer;
 
     @BeforeEach
     public void setUp() {
-        proxyEndpoint = FAKER.internet().url();
-        proxyCreatorMock = mock(DataPlaneTransferProxyReferenceService.class);
-        transformer = new DataPlaneTransferConsumerProxyTransformer(proxyEndpoint, proxyCreatorMock);
+        proxyResolverMock = mock(DataPlaneTransferProxyResolver.class);
+        proxyReferenceServiceMock = mock(DataPlaneTransferProxyReferenceService.class);
+        transformer = new DataPlaneTransferConsumerProxyTransformer(proxyResolverMock, proxyReferenceServiceMock);
     }
 
     /**
@@ -64,12 +55,14 @@ class DataPlaneTransferConsumerProxyTransformerTest {
         var inputEdr = createEndpointDataReference();
         var outputEdr = createEndpointDataReference();
         var proxyCreationRequestCapture = ArgumentCaptor.forClass(DataPlaneTransferProxyCreationRequest.class);
+        var proxyUrl = FAKER.internet().url();
 
-        when(proxyCreatorMock.createProxyReference(any())).thenReturn(Result.success(outputEdr));
+        when(proxyResolverMock.resolveProxyUrl(any())).thenReturn(Result.success(proxyUrl));
+        when(proxyReferenceServiceMock.createProxyReference(any())).thenReturn(Result.success(outputEdr));
 
         var result = transformer.transform(inputEdr);
 
-        verify(proxyCreatorMock, times(1)).createProxyReference(proxyCreationRequestCapture.capture());
+        verify(proxyReferenceServiceMock).createProxyReference(proxyCreationRequestCapture.capture());
 
         assertThat(result.succeeded()).isTrue();
         assertThat(result.getContent()).isEqualTo(outputEdr);
@@ -77,17 +70,18 @@ class DataPlaneTransferConsumerProxyTransformerTest {
         var proxyCreationRequest = proxyCreationRequestCapture.getValue();
         assertThat(proxyCreationRequest.getId()).isEqualTo(inputEdr.getId());
         assertThat(proxyCreationRequest.getContractId()).isEqualTo(inputEdr.getProperties().get(CONTRACT_ID));
-        assertThat(proxyCreationRequest.getProxyEndpoint()).isEqualTo(proxyEndpoint);
+        assertThat(proxyCreationRequest.getProxyEndpoint()).isEqualTo(proxyUrl);
         assertThat(proxyCreationRequest.getProperties()).containsExactlyInAnyOrderEntriesOf(inputEdr.getProperties());
         assertThat(proxyCreationRequest.getContentAddress()).satisfies(address -> {
-            assertThat(address.getType()).isEqualTo(TYPE);
-            assertThat(address.getProperty(ENDPOINT)).isEqualTo(inputEdr.getEndpoint());
-            assertThat(address.getProperty(AUTHENTICATION_KEY)).isEqualTo(inputEdr.getAuthKey());
-            assertThat(address.getProperty(AUTHENTICATION_CODE)).isEqualTo(inputEdr.getAuthCode());
-            assertThat(address.getProperty(PROXY_QUERY_PARAMS)).isEqualTo(Boolean.TRUE.toString());
-            assertThat(address.getProperty(PROXY_PATH)).isEqualTo(Boolean.TRUE.toString());
-            assertThat(address.getProperty(PROXY_METHOD)).isEqualTo(Boolean.TRUE.toString());
-            assertThat(address.getProperty(PROXY_BODY)).isEqualTo(Boolean.TRUE.toString());
+            assertThat(address.getType()).isEqualTo(HttpDataAddress.DATA_TYPE);
+            var httpAddress = (HttpDataAddress) address;
+            assertThat(httpAddress.getBaseUrl()).isEqualTo(inputEdr.getEndpoint());
+            assertThat(httpAddress.getAuthKey()).isEqualTo(inputEdr.getAuthKey());
+            assertThat(httpAddress.getAuthCode()).isEqualTo(inputEdr.getAuthCode());
+            assertThat(httpAddress.getProxyQueryParams()).isEqualTo(Boolean.TRUE.toString());
+            assertThat(httpAddress.getProxyPath()).isEqualTo(Boolean.TRUE.toString());
+            assertThat(httpAddress.getProxyMethod()).isEqualTo(Boolean.TRUE.toString());
+            assertThat(httpAddress.getProxyBody()).isEqualTo(Boolean.TRUE.toString());
         });
     }
 
