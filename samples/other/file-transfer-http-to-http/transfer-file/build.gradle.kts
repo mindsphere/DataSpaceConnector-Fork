@@ -10,7 +10,7 @@ dependencies {
 
     implementation(project(":common:util"))
 
+    implementation(project(":extensions:dataloading"))
     implementation(project(":extensions:mindsphere:mindsphere-http"))
-
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
 }

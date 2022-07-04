@@ -14,11 +14,11 @@
 
 package com.siemens.mindsphere.datalake.edc.http;
 
-import dev.failsafe.RetryPolicy;
 import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlProvisionedResource;
 import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlProvisioner;
 import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlResourceDefinition;
 import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlResourceDefinitionGenerator;
+import dev.failsafe.RetryPolicy;
 import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;

@@ -37,6 +37,8 @@ dependencies {
     implementation(project(":extensions:data-plane:data-plane-framework"))
     implementation(project(":extensions:data-plane:data-plane-http"))
 
+    implementation(project(":extensions:dataloading"))
+
     implementation("io.opentelemetry:opentelemetry-extension-annotations:${openTelemetryVersion}")
 
     implementation(project(":extensions:data-plane:data-plane-spi"))
