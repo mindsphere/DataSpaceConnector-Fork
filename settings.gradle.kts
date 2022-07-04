@@ -128,8 +128,6 @@ include(":extensions:data-plane:integration-tests")
 include(":extensions:http-receiver")
 include(":extensions:http-provisioner")
 
-include(":extensions:mindsphere:mindsphere-http")
-
 include(":extensions:sql:asset-index-sql")
 include(":extensions:sql:common-sql")
 include(":extensions:sql:contract-definition-store-sql")
@@ -154,14 +152,14 @@ include(":samples:other:dataseed:dataseed-policy")
 include(":samples:other:run-from-junit")
 include(":samples:other:custom-runtime")
 
+//siemens
+include(":extensions:mindsphere:mindsphere-http")
+
 include(":samples:other:file-transfer-http-to-http:api")
 include(":samples:other:file-transfer-http-to-http:consumer")
 include(":samples:other:file-transfer-http-to-http:provider")
 include(":samples:other:file-transfer-http-to-http:transfer-file")
-
-// provisioning sample
-include(":samples:other:file-transfer-provisioning:consumer")
-include(":samples:other:file-transfer-provisioning:provider")
+//end siemens
 
 // extension points for a connector
 include(":spi")
