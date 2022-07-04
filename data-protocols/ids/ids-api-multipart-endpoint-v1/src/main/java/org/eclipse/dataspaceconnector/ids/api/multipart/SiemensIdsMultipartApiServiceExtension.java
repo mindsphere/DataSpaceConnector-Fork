@@ -18,6 +18,7 @@ package org.eclipse.dataspaceconnector.ids.api.multipart;
 
 import de.fraunhofer.iais.eis.ParticipantUpdateMessage;
 import org.eclipse.dataspaceconnector.ids.api.configuration.IdsApiConfiguration;
+import org.eclipse.dataspaceconnector.ids.api.multipart.controller.MultipartController;
 import org.eclipse.dataspaceconnector.ids.api.multipart.handler.ArtifactRequestHandler;
 import org.eclipse.dataspaceconnector.ids.api.multipart.handler.ContractAgreementHandler;
 import org.eclipse.dataspaceconnector.ids.api.multipart.handler.ContractOfferHandler;
@@ -35,9 +36,9 @@ import org.eclipse.dataspaceconnector.ids.api.multipart.handler.description.Repr
 import org.eclipse.dataspaceconnector.ids.api.multipart.handler.description.ResourceDescriptionRequestHandler;
 import org.eclipse.dataspaceconnector.ids.api.multipart.message.ids.IdsResponseMessageFactory;
 import org.eclipse.dataspaceconnector.ids.api.multipart.siemens.SiemensCatalogServiceImpl;
-import org.eclipse.dataspaceconnector.ids.api.multipart.siemens.SiemensConnectorServiceImpl;
 import org.eclipse.dataspaceconnector.ids.api.multipart.siemens.SiemensMultipartController;
 import org.eclipse.dataspaceconnector.ids.core.serialization.ObjectMapperFactory;
+import org.eclipse.dataspaceconnector.ids.core.service.ConnectorServiceImpl;
 import org.eclipse.dataspaceconnector.ids.core.service.ConnectorServiceSettings;
 import org.eclipse.dataspaceconnector.ids.core.version.ConnectorVersionProviderImpl;
 import org.eclipse.dataspaceconnector.ids.spi.IdsId;
@@ -147,11 +148,11 @@ public final class SiemensIdsMultipartApiServiceExtension implements ServiceExte
         serviceExtensionContext.registerService(ConnectorVersionProvider.class, connectorVersionProvider);
 
         dataCatalogId = resolveCatalogId(serviceExtensionContext);
-        CatalogService dataCatalogService = createDataCatalogService(dataCatalogId, contractOfferService);
+        SiemensCatalogServiceImpl dataCatalogService = createDataCatalogService(dataCatalogId, contractOfferService);
 
-        ConnectorService connectorService = new SiemensConnectorServiceImpl(monitor, connectorServiceSettings, connectorVersionProvider, dataCatalogService);
+        ConnectorService connectorService = new ConnectorServiceImpl(monitor, connectorServiceSettings, connectorVersionProvider, dataCatalogService);
 
-        //serviceExtensionContext.registerService(CatalogService.class, dataCatalogService);
+        serviceExtensionContext.registerService(CatalogService.class, dataCatalogService);
 
         // create description request handlers
         var artifactDescriptionRequestHandler = new ArtifactDescriptionRequestHandler(monitor, connectorId, assetIndex, transformerRegistry);
@@ -197,10 +198,12 @@ public final class SiemensIdsMultipartApiServiceExtension implements ServiceExte
 
         // create & register controller  - siemens code
         var multipartController = new SiemensMultipartController(monitor, connectorId, objectMapper, identityService, handlers);
+        //var multipartController1 = new MultipartController(monitor, connectorId, objectMapper, identityService, handlers);
+       // webService.registerResource(idsApiConfiguration.getContextAlias(), multipartController1);
         webService.registerResource(idsApiConfiguration.getContextAlias(), multipartController);
     }
 
-    private CatalogService createDataCatalogService(
+    private SiemensCatalogServiceImpl createDataCatalogService(
             String dataCatalogId,
             ContractOfferService contractOfferService) {
         return new SiemensCatalogServiceImpl(
