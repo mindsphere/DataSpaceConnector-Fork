@@ -10,7 +10,7 @@ val openTelemetryVersion: String by project
 
 dependencies {
     api(project(":spi"))
-    api("dev.failsafe:failsafe:${failsafeVersion}")
+    implementation("dev.failsafe:failsafe:${failsafeVersion}")
 
     implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
     implementation("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")

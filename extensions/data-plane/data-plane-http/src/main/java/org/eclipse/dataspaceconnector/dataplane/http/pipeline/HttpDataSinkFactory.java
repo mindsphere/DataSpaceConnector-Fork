@@ -38,7 +38,7 @@ public class HttpDataSinkFactory implements DataSinkFactory {
     private final int partitionSize;
     private final Monitor monitor;
 
-    public HttpDataSinkFactory(OkHttpClient httpClient, ObjectMapper mapper, ExecutorService executorService, int partitionSize, Monitor monitor) {
+    public HttpDataSinkFactory(OkHttpClient httpClient, ExecutorService executorService, int partitionSize, Monitor monitor) {
         this.httpClient = httpClient;
         this.executorService = executorService;
         this.partitionSize = partitionSize;

@@ -141,7 +141,7 @@ class HttpDataSinkFactoryTest {
     @BeforeEach
     void setUp() {
         httpClient = mock(OkHttpClient.class);
-        factory = new HttpDataSinkFactory(httpClient, new ObjectMapper(), Executors.newFixedThreadPool(1), 5, mock(Monitor.class));
+        factory = new HttpDataSinkFactory(httpClient, Executors.newFixedThreadPool(1), 5, mock(Monitor.class));
     }
 
 

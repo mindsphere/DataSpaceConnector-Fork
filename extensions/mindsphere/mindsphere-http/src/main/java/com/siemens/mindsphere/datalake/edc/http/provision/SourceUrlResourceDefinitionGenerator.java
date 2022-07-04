@@ -19,7 +19,7 @@ import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.transfer.provision.ProviderResourceDefinitionGenerator;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
-import org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema;
+import org.eclipse.dataspaceconnector.spi.types.domain.HttpDataAddress;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.DataRequest;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.ResourceDefinition;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +43,7 @@ public class SourceUrlResourceDefinitionGenerator implements ProviderResourceDef
         }
 
         final String dataDestinationType = dataRequest.getDataDestination().getType();
-        if (!HttpDataAddressSchema.TYPE.equalsIgnoreCase(dataDestinationType)) {
+        if (!HttpDataAddress.DATA_TYPE.equalsIgnoreCase(dataDestinationType)) {
             monitor.debug("The destination is " + dataDestinationType);
             return null;
         }
