@@ -16,8 +16,8 @@ package org.eclipse.dataspaceconnector.transfer.dataplane.sync.proxy;
 
 import com.github.javafaker.Faker;
 import com.nimbusds.jwt.JWTClaimsSet;
+import jakarta.ws.rs.core.HttpHeaders;
 import org.eclipse.dataspaceconnector.common.token.TokenGenerationService;
-import org.eclipse.dataspaceconnector.dataplane.spi.DataPlaneConstants;
 import org.eclipse.dataspaceconnector.spi.iam.TokenRepresentation;
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.eclipse.dataspaceconnector.spi.types.TypeManager;
@@ -38,8 +38,8 @@ import java.util.HashMap;
 
 import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.dataplane.spi.DataPlaneConstants.CONTRACT_ID;
-import static org.eclipse.dataspaceconnector.dataplane.spi.DataPlaneConstants.DATA_ADDRESS;
+import static org.eclipse.dataspaceconnector.transfer.dataplane.spi.DataPlaneTransferConstants.CONTRACT_ID;
+import static org.eclipse.dataspaceconnector.transfer.dataplane.spi.DataPlaneTransferConstants.DATA_ADDRESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -111,7 +111,7 @@ class DataPlaneTransferProxyReferenceServiceImplTest {
         var edr = result.getContent();
         assertThat(edr.getId()).isEqualTo(id);
         assertThat(edr.getEndpoint()).isEqualTo(proxyEndpoint);
-        assertThat(edr.getAuthKey()).isEqualTo(DataPlaneConstants.PUBLIC_API_AUTH_HEADER);
+        assertThat(edr.getAuthKey()).isEqualTo(HttpHeaders.AUTHORIZATION);
         assertThat(edr.getAuthCode()).isEqualTo(generatedToken.getToken());
         var expectedProperties = new HashMap<>(proxyCreationRequest.getProperties());
         expectedProperties.put(CONTRACT_ID, contractId);

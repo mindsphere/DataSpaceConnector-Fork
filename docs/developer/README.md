@@ -1,6 +1,7 @@
 # Developer Documentation
 
 As a developer, I want to ...
+
 - ... extend the existing codebase.
 - ... write new extensions.
 - ... work on the service provider interface (SPI).
@@ -12,6 +13,7 @@ As a developer, I want to ...
 - ... improve software tests.
 
 As a developer, I do not want to ...
+
 - ... bring in new requirements.
 - ... deep-dive into use cases.
 
@@ -24,12 +26,15 @@ As a developer, I do not want to ...
 - [Customize policy engine](policy-engine.md)
 - [Dependency resolution](dependency_resolution.md)
 - [Data plane framework](data-plane-framework/README.md)
+- [Events](events.md)
 - [Logging](logging.md)
 - [Metrics](metrics.md)
+- [State machine](state-machine.md)
 - [Releases](releases.md)
 - [Style guide](_helper/styleguide.md)
 - [Testing](testing.md)
+- [Dynamic SQL Queries](sql_queries.md)
 
-> All implementations have to follow existing design principles and architectural patterns that are provided as 
-> [Decision Records](decision-records/README.md). Please make sure to continuously check and extend the 
+> All implementations have to follow existing design principles and architectural patterns that are provided as
+> [Decision Records](decision-records/README.md). Please make sure to continuously check and extend the
 > list. The same applies to the [Contributing.md]({{main}}CONTRIBUTING.md).

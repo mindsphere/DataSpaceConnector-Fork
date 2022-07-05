@@ -33,16 +33,16 @@ dependencies {
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
     implementation("org.glassfish.jersey.media:jersey-media-multipart:${jerseyVersion}")
 
-    testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.28.0")
-    testImplementation("net.javacrumbs.json-unit:json-unit-json-path:2.28.0")
-    testImplementation("net.javacrumbs.json-unit:json-unit:2.28.0")
+    testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.35.0")
+    testImplementation("net.javacrumbs.json-unit:json-unit-json-path:2.35.0")
+    testImplementation("net.javacrumbs.json-unit:json-unit:2.35.0")
 
     testImplementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
-    testImplementation(testFixtures(project(":launchers:junit")))
-    testImplementation(testFixtures(project(":common:util")))
-    testImplementation(project(":core:transfer"))
+    testImplementation(project(":extensions:junit"))
 
+    testImplementation(project(":core:transfer"))
     testImplementation(testFixtures(project(":common:util")))
+
 }
 
 publishing {

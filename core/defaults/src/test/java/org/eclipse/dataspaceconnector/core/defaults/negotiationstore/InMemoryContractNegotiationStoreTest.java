@@ -16,6 +16,7 @@ package org.eclipse.dataspaceconnector.core.defaults.negotiationstore;
 
 
 import org.eclipse.dataspaceconnector.contract.common.ContractId;
+import org.eclipse.dataspaceconnector.spi.query.Criterion;
 import org.eclipse.dataspaceconnector.spi.query.QuerySpec;
 import org.eclipse.dataspaceconnector.spi.query.SortOrder;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.agreement.ContractAgreement;
@@ -167,7 +168,7 @@ class InMemoryContractNegotiationStoreTest {
     }
 
     @Test
-    void verifyNextForState_avoidsStarvation() throws InterruptedException {
+    void verifyNextForState_avoidsStarvation() {
         for (int i = 0; i < 10; i++) {
             ContractNegotiation negotiation = createNegotiation("test-negotiation-" + i);
             negotiation.transitionInitial();
@@ -175,8 +176,6 @@ class InMemoryContractNegotiationStoreTest {
         }
 
         var list1 = store.nextForState(INITIAL.code(), 5);
-        Thread.sleep(50); //simulate a short delay to generate different timestamps
-        list1.forEach(tp -> store.save(tp));
         var list2 = store.nextForState(INITIAL.code(), 5);
         assertThat(list1).isNotEqualTo(list2).doesNotContainAnyElementsOf(list2);
     }
@@ -330,7 +329,11 @@ class InMemoryContractNegotiationStoreTest {
 
         store.save(negotiation);
 
-        var result = store.getNegotiationsWithAgreementOnAsset(assetId).collect(Collectors.toList());
+        var query = QuerySpec.Builder.newInstance()
+                .filter(List.of(new Criterion("contractAgreement.assetId", "=", assetId)))
+                .build();
+        var result = store.queryNegotiations(query).collect(Collectors.toList());
+
 
         assertThat(result).hasSize(1).usingRecursiveFieldByFieldElementComparator().containsOnly(negotiation);
     }
@@ -351,7 +354,10 @@ class InMemoryContractNegotiationStoreTest {
 
         store.save(negotiation);
 
-        var result = store.getNegotiationsWithAgreementOnAsset(assetId).collect(Collectors.toList());
+        var query = QuerySpec.Builder.newInstance()
+                .filter(List.of(new Criterion("contractAgreement.assetId", "=", assetId)))
+                .build();
+        var result = store.queryNegotiations(query).collect(Collectors.toList());
 
         assertThat(result).isEmpty();
         assertThat(store.queryAgreements(QuerySpec.none())).isEmpty();
@@ -366,7 +372,10 @@ class InMemoryContractNegotiationStoreTest {
         store.save(negotiation1);
         store.save(negotiation2);
 
-        var result = store.getNegotiationsWithAgreementOnAsset(assetId).collect(Collectors.toList());
+        var query = QuerySpec.Builder.newInstance()
+                .filter(List.of(new Criterion("contractAgreement.assetId", "=", assetId)))
+                .build();
+        var result = store.queryNegotiations(query).collect(Collectors.toList());
 
         assertThat(result).hasSize(2)
                 .extracting(ContractNegotiation::getId).containsExactlyInAnyOrder("negotiation1", "negotiation2");

@@ -15,7 +15,7 @@ package com.siemens.mindsphere.datalake.edc.http.provision;
 
 import com.siemens.mindsphere.datalake.edc.http.DataLakeClientImpl;
 import com.siemens.mindsphere.datalake.edc.http.DataLakeException;
-import net.jodah.failsafe.RetryPolicy;
+import dev.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.response.ResponseStatus;
@@ -23,7 +23,7 @@ import org.eclipse.dataspaceconnector.spi.response.StatusResult;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.transfer.provision.Provisioner;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
-import org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema;
+import org.eclipse.dataspaceconnector.spi.types.domain.HttpDataAddress;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.DeprovisionedResource;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.ProvisionResponse;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.ProvisionedResource;
@@ -34,8 +34,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.UUID.randomUUID;
-import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.ENDPOINT;
-import static org.eclipse.dataspaceconnector.spi.types.domain.http.HttpDataAddressSchema.NAME;
+
 
 /**
  * Generates HttpData schema with the download presign URL created
@@ -81,10 +80,10 @@ public class SourceUrlProvisioner
                                 .dataAddress(DataAddress.Builder.newInstance()
                                         .properties(
                                                 Map.of(
-                                                        ENDPOINT, createPresignedUrl(resourceDefinition.getDatalakePath()),
-                                                        NAME, "",
+                                                        "baseUrl", createPresignedUrl(resourceDefinition.getDatalakePath()),
+                                                        "name", "",
                                                         MindsphereDatalakeSchema.DOWNLOAD_DATALAKE_PATH, resourceDefinition.getDatalakePath()))
-                                        .type(HttpDataAddressSchema.TYPE).build())
+                                        .type(HttpDataAddress.DATA_TYPE).build())
                                 .path(resourceDefinition.getDatalakePath())
                                 .build())
                         .build();

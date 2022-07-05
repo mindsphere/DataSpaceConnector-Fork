@@ -18,9 +18,10 @@ package org.eclipse.dataspaceconnector.api.datamanagement.contractdefinition;
 import io.restassured.specification.RequestSpecification;
 import org.eclipse.dataspaceconnector.api.datamanagement.contractdefinition.model.ContractDefinitionDto;
 import org.eclipse.dataspaceconnector.dataloading.ContractDefinitionLoader;
-import org.eclipse.dataspaceconnector.junit.launcher.EdcExtension;
+import org.eclipse.dataspaceconnector.junit.extensions.EdcExtension;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
+import org.eclipse.dataspaceconnector.spi.query.QuerySpec;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.common.testfixtures.TestUtils.getFreePort;
+import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
 import static org.hamcrest.Matchers.is;
 
 @ExtendWith(EdcExtension.class)
@@ -112,7 +113,7 @@ public class ContractDefinitionApiControllerIntegrationTest {
                 .post("/contractdefinitions")
                 .then()
                 .statusCode(204);
-        assertThat(store.findAll()).isNotEmpty();
+        assertThat(store.findAll(QuerySpec.max())).isNotEmpty();
     }
 
     @Test
@@ -129,7 +130,7 @@ public class ContractDefinitionApiControllerIntegrationTest {
                 .post("/contractdefinitions")
                 .then()
                 .statusCode(400);
-        assertThat(store.findAll()).isEmpty();
+        assertThat(store.findAll(QuerySpec.max())).isEmpty();
     }
 
     @Test
@@ -143,7 +144,7 @@ public class ContractDefinitionApiControllerIntegrationTest {
                 .post("/contractdefinitions")
                 .then()
                 .statusCode(409);
-        assertThat(store.findAll()).hasSize(1);
+        assertThat(store.findAll(QuerySpec.max())).hasSize(1);
     }
 
     @Test
@@ -155,7 +156,7 @@ public class ContractDefinitionApiControllerIntegrationTest {
                 .delete("/contractdefinitions/definitionId")
                 .then()
                 .statusCode(204);
-        assertThat(store.findAll()).isEmpty();
+        assertThat(store.findAll(QuerySpec.max())).isEmpty();
     }
 
     @Test

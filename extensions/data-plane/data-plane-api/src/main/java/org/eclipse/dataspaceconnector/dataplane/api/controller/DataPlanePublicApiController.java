@@ -26,22 +26,15 @@ import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-import org.eclipse.dataspaceconnector.common.token.TokenValidationService;
-import org.eclipse.dataspaceconnector.dataplane.spi.DataPlaneConstants;
+import org.eclipse.dataspaceconnector.dataplane.api.validation.TokenValidationClient;
 import org.eclipse.dataspaceconnector.dataplane.spi.manager.DataPlaneManager;
 import org.eclipse.dataspaceconnector.dataplane.spi.pipeline.OutputStreamDataSink;
-import org.eclipse.dataspaceconnector.dataplane.spi.pipeline.OutputStreamDataSinkFactory;
-import org.eclipse.dataspaceconnector.spi.iam.ClaimToken;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.types.TypeManager;
-import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
-import org.eclipse.dataspaceconnector.spi.types.domain.transfer.DataFlowRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import static org.eclipse.dataspaceconnector.dataplane.api.response.ResponseFunctions.internalErrors;
@@ -57,30 +50,26 @@ import static org.eclipse.dataspaceconnector.dataplane.api.response.ResponseFunc
 @Produces(MediaType.APPLICATION_JSON)
 public class DataPlanePublicApiController {
 
-
     private final DataPlaneManager dataPlaneManager;
-    private final TokenValidationService tokenValidationService;
+    private final TokenValidationClient tokenValidationClient;
     private final Monitor monitor;
-    private final ContainerRequestContextApi requestContextApi;
-    private final TypeManager typeManager;
     private final ExecutorService executorService;
 
     public DataPlanePublicApiController(DataPlaneManager dataPlaneManager,
-                                        TokenValidationService tokenValidationService,
+                                        TokenValidationClient tokenValidationClient,
                                         Monitor monitor,
-                                        ContainerRequestContextApi wrapper,
-                                        TypeManager typeManager,
                                         ExecutorService executorService) {
         this.dataPlaneManager = dataPlaneManager;
-        this.tokenValidationService = tokenValidationService;
+        this.tokenValidationClient = tokenValidationClient;
         this.monitor = monitor;
-        this.requestContextApi = wrapper;
-        this.typeManager = typeManager;
         this.executorService = executorService;
     }
 
     /**
      * Sends a {@link GET} request to the data source and returns data.
+     *
+     * @param requestContext Request context.
+     * @param response       Data fetched from the data source.
      */
     @GET
     public void get(@Context ContainerRequestContext requestContext, @Suspended AsyncResponse response) {
@@ -88,7 +77,10 @@ public class DataPlanePublicApiController {
     }
 
     /**
-     * Sends a {@link DELETE} request to the data source.
+     * Sends a {@link DELETE} request to the data source and returns data.
+     *
+     * @param requestContext Request context.
+     * @param response       Data fetched from the data source.
      */
     @DELETE
     public void delete(@Context ContainerRequestContext requestContext, @Suspended AsyncResponse response) {
@@ -96,7 +88,10 @@ public class DataPlanePublicApiController {
     }
 
     /**
-     * Sends a {@link PATCH} request to the data source.
+     * Sends a {@link PATCH} request to the data source and returns data.
+     *
+     * @param requestContext Request context.
+     * @param response       Data fetched from the data source.
      */
     @PATCH
     public void patch(@Context ContainerRequestContext requestContext, @Suspended AsyncResponse response) {
@@ -104,7 +99,10 @@ public class DataPlanePublicApiController {
     }
 
     /**
-     * Sends a {@link PUT} request to the data source.
+     * Sends a {@link PUT} request to the data source and returns data.
+     *
+     * @param requestContext Request context.
+     * @param response       Data fetched from the data source.
      */
     @PUT
     public void put(@Context ContainerRequestContext requestContext, @Suspended AsyncResponse response) {
@@ -112,29 +110,31 @@ public class DataPlanePublicApiController {
     }
 
     /**
-     * Sends a {@link POST} request to the data source.
+     * Sends a {@link POST} request to the data source and returns data.
+     *
+     * @param requestContext Request context.
+     * @param response       Data fetched from the data source.
      */
     @POST
     public void post(@Context ContainerRequestContext requestContext, @Suspended AsyncResponse response) {
         handle(requestContext, response);
     }
 
-    private void handle(ContainerRequestContext requestContext, AsyncResponse response) {
-        var bearerToken = requestContextApi.authHeader(requestContext);
+    private void handle(ContainerRequestContext context, AsyncResponse response) {
+        var contextApi = new ContainerRequestContextApiImpl(context);
+        var bearerToken = contextApi.headers().get(HttpHeaders.AUTHORIZATION);
         if (bearerToken == null) {
             response.resume(notAuthorizedErrors(List.of("Missing bearer token")));
             return;
         }
 
-        var tokenValidationResult = tokenValidationService.validate(bearerToken);
+        var tokenValidationResult = tokenValidationClient.callTokenValidationServer(bearerToken);
         if (tokenValidationResult.failed()) {
             response.resume(notAuthorizedErrors(tokenValidationResult.getFailureMessages()));
             return;
         }
 
-        var properties = requestContextApi.properties(requestContext);
-        var dataFlowRequest = createDataFlowRequest(tokenValidationResult.getContent(), properties);
-
+        var dataFlowRequest = DataFlowRequestFactory.from(contextApi, tokenValidationResult.getContent());
         var validationResult = dataPlaneManager.validate(dataFlowRequest);
         if (validationResult.failed()) {
             var res = validationResult.getFailureMessages().isEmpty()
@@ -159,22 +159,5 @@ public class DataPlanePublicApiController {
                         response.resume(internalErrors(List.of("Unhandled exception: " + throwable.getLocalizedMessage())));
                     }
                 });
-    }
-
-    /**
-     * Create a {@link DataFlowRequest} based on the decoded claim token and the request content.
-     */
-    private DataFlowRequest createDataFlowRequest(ClaimToken claims, Map<String, String> properties) {
-        var dataAddress = typeManager.readValue((String) claims.getClaims().get(DataPlaneConstants.DATA_ADDRESS), DataAddress.class);
-        return DataFlowRequest.Builder.newInstance()
-                .processId(UUID.randomUUID().toString())
-                .sourceDataAddress(dataAddress)
-                .destinationDataAddress(DataAddress.Builder.newInstance()
-                        .type(OutputStreamDataSinkFactory.TYPE)
-                        .build())
-                .trackable(false)
-                .id(UUID.randomUUID().toString())
-                .properties(properties)
-                .build();
     }
 }

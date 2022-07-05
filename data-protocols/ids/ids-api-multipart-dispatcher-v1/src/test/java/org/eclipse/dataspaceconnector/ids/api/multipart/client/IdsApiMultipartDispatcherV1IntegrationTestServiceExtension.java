@@ -16,7 +16,7 @@
 package org.eclipse.dataspaceconnector.ids.api.multipart.client;
 
 import kotlin.NotImplementedError;
-import org.eclipse.dataspaceconnector.common.annotations.ComponentTest;
+import org.eclipse.dataspaceconnector.common.util.junit.annotations.ComponentTest;
 import org.eclipse.dataspaceconnector.ids.core.serialization.ObjectMapperFactory;
 import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
@@ -253,11 +253,6 @@ class IdsApiMultipartDispatcherV1IntegrationTestServiceExtension implements Serv
         }
 
         @Override
-        public @NotNull Collection<ContractDefinition> findAll() {
-            return contractDefinitions;
-        }
-
-        @Override
         public @NotNull Stream<ContractDefinition> findAll(QuerySpec spec) {
             throw new UnsupportedOperationException();
         }
@@ -290,11 +285,6 @@ class IdsApiMultipartDispatcherV1IntegrationTestServiceExtension implements Serv
         @Override
         public void reload() {
             throw new NotImplementedError();
-        }
-
-        @Override
-        public Stream<ContractDefinition> isReferenced(String policyId) {
-            throw new UnsupportedOperationException();
         }
     }
 

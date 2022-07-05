@@ -18,16 +18,16 @@ plugins {
 }
 
 val cosmosSdkVersion: String by project
-val jodahFailsafeVersion: String by project
+val failsafeVersion: String by project
 
 dependencies {
     api(project(":spi"))
     api(project(":common:util"))
 
     implementation("com.azure:azure-cosmos:${cosmosSdkVersion}")
-    implementation("net.jodah:failsafe:${jodahFailsafeVersion}")
+    implementation("dev.failsafe:failsafe:${failsafeVersion}")
 
-    testImplementation(testFixtures(project(":common:util")))
+
     testImplementation(testFixtures(project(":extensions:azure:azure-test")))
 
     testFixturesImplementation("com.azure:azure-cosmos:${cosmosSdkVersion}")

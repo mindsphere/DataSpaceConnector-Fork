@@ -13,9 +13,10 @@
  *
  */
 
-val rsApi: String by project
-val restAssured: String by project
+val awaitility: String by project
 val jerseyVersion: String by project
+val restAssured: String by project
+val rsApi: String by project
 
 plugins {
     `java-library`
@@ -23,18 +24,19 @@ plugins {
 }
 
 dependencies {
+    api(project(":spi:transaction-spi"))
     implementation(project(":extensions:api:api-core"))
     implementation(project(":extensions:api:auth-spi"))
     implementation(project(":extensions:api:data-management:api-configuration"))
     implementation(project(":extensions:dataloading"))
-    implementation(project(":extensions:transaction:transaction-spi"))
 
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
 
     testImplementation(project(":extensions:http"))
-    testImplementation(testFixtures(project(":common:util")))
-    testImplementation(testFixtures(project(":launchers:junit")))
+
+    testImplementation(project(":extensions:junit"))
     testImplementation("io.rest-assured:rest-assured:${restAssured}")
+    testImplementation("org.awaitility:awaitility:${awaitility}")
 }
 
 publishing {

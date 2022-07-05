@@ -18,16 +18,13 @@ import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlProvisionedRe
 import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlProvisioner;
 import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlResourceDefinition;
 import com.siemens.mindsphere.datalake.edc.http.provision.SourceUrlResourceDefinitionGenerator;
-import net.jodah.failsafe.RetryPolicy;
+import dev.failsafe.RetryPolicy;
 import okhttp3.OkHttpClient;
-import org.eclipse.dataspaceconnector.dataplane.spi.pipeline.DataTransferExecutorServiceContainer;
-import org.eclipse.dataspaceconnector.dataplane.spi.pipeline.PipelineService;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
-import org.eclipse.dataspaceconnector.spi.transfer.inline.DataOperatorRegistry;
 import org.eclipse.dataspaceconnector.spi.transfer.provision.ProvisionManager;
 import org.eclipse.dataspaceconnector.spi.transfer.provision.ResourceManifestGenerator;
 import org.eclipse.dataspaceconnector.spi.types.TypeManager;
@@ -40,16 +37,7 @@ public class DataLakeExtension implements ServiceExtension {
     private static final String STUB_URL = "edc.demo.http.destination.url";
 
     @Inject
-    private DataOperatorRegistry dataOperatorRegistry;
-
-    @Inject
     private ResourceManifestGenerator manifestGenerator;
-
-    @Inject
-    private PipelineService pipelineService;
-
-    @Inject
-    private DataTransferExecutorServiceContainer executorContainer;
 
     @Inject
     private OkHttpClient httpClient;
@@ -99,11 +87,6 @@ public class DataLakeExtension implements ServiceExtension {
             final OauthClientDetails oauthClientDetails = new OauthClientDetails(tokenmanagementClientId, tokenmanagementClientSecret,
                     tokenmanagementClientAppName, tokenmanagementClientAppVersion, applicationTenant, new URL(tokenmanagementAddress));
             final DataLakeClientImpl clientImpl = new DataLakeClientImpl(oauthClientDetails, url);
-
-            // create Data Lake Reader
-            final DataLakeReader dataLakeReader = new DataLakeReader(clientImpl, monitor);
-            // register Data Lake Reader
-            dataOperatorRegistry.registerReader(dataLakeReader);
 
 
             registerProvisioners(context, monitor, clientImpl);

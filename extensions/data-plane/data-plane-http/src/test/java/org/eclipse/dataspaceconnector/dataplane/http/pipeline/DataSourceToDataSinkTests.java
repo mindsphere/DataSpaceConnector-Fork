@@ -14,7 +14,8 @@
 
 package org.eclipse.dataspaceconnector.dataplane.http.pipeline;
 
-import net.jodah.failsafe.RetryPolicy;
+import dev.failsafe.RetryPolicy;
+import io.netty.handler.codec.http.HttpMethod;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -36,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.common.testfixtures.TestUtils.testOkHttpClient;
+import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.testOkHttpClient;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -45,9 +46,27 @@ import static org.mockito.Mockito.when;
 
 class DataSourceToDataSinkTests {
     private static final String NULL_ENDPOINT = "https://example.com/sink";
+    private static final String CONTENT_TYPE = "application/json";
 
     private ExecutorService executor;
     private Monitor monitor;
+
+    /**
+     * Provides most common http error status codes.
+     *
+     * @return Http Error codes as {@link Stream} of {@link Arguments}.
+     */
+    private static Stream<Arguments> provideCommonErrorCodes() {
+        return Stream.of(
+                Arguments.of("MOVED_PERMANENTLY_301", 301),
+                Arguments.of("FOUND_302", 302),
+                Arguments.of("BAD_REQUEST_400", 400),
+                Arguments.of("UNAUTHORIZED_401", 401),
+                Arguments.of("NOT_FOUND_404", 404),
+                Arguments.of("INTERNAL_SERVER_ERROR_500", 500),
+                Arguments.of("BAD_GATEWAY_502", 502)
+        );
+    }
 
     /**
      * Verifies a sink is able to pull data from the source without exceptions if both endpoints are functioning.
@@ -63,13 +82,14 @@ class DataSourceToDataSinkTests {
                 .build();
 
         var dataSource = HttpDataSource.Builder.newInstance()
-                .sourceUrl(NULL_ENDPOINT)
+                .params(HttpRequestParams.Builder.newInstance()
+                        .baseUrl(NULL_ENDPOINT)
+                        .method(HttpMethod.GET.name())
+                        .build())
                 .name("test.json")
                 .requestId("1")
-                .retryPolicy(new RetryPolicy<>())
+                .retryPolicy(RetryPolicy.ofDefaults())
                 .httpClient(sourceClient)
-                .monitor(monitor)
-                .method("GET")
                 .build();
 
         var sinkClient = testOkHttpClient().newBuilder()
@@ -77,7 +97,11 @@ class DataSourceToDataSinkTests {
                 .build();
 
         var dataSink = HttpDataSink.Builder.newInstance()
-                .endpoint("https://example.com/sink")
+                .params(HttpRequestParams.Builder.newInstance()
+                        .baseUrl("https://example.com/sink")
+                        .method(HttpMethod.POST.name())
+                        .contentType(CONTENT_TYPE)
+                        .build())
                 .requestId("1")
                 .httpClient(sinkClient)
                 .executorService(executor)
@@ -107,19 +131,24 @@ class DataSourceToDataSinkTests {
                 .build();
 
         var dataSource = HttpDataSource.Builder.newInstance()
-                .sourceUrl(NULL_ENDPOINT)
+                .params(HttpRequestParams.Builder.newInstance()
+                        .baseUrl(NULL_ENDPOINT)
+                        .method(HttpMethod.GET.name())
+                        .build())
                 .name("test.json")
                 .requestId("1")
-                .retryPolicy(new RetryPolicy<>())
+                .retryPolicy(RetryPolicy.ofDefaults())
                 .httpClient(sourceClient)
-                .monitor(monitor)
-                .method("GET")
                 .build();
 
         var sinkClient = mock(OkHttpClient.class);
 
         var dataSink = HttpDataSink.Builder.newInstance()
-                .endpoint("https://example.com/sink")
+                .params(HttpRequestParams.Builder.newInstance()
+                        .baseUrl("https://example.com/sink")
+                        .method(HttpMethod.POST.name())
+                        .contentType(CONTENT_TYPE)
+                        .build())
                 .requestId("1")
                 .httpClient(sinkClient)
                 .executorService(executor)
@@ -130,7 +159,6 @@ class DataSourceToDataSinkTests {
 
         verify(sourceInterceptor).intercept(isA(Interceptor.Chain.class));
     }
-
 
     /**
      * Verifies an exception thrown by the sink endpoint is handled correctly.
@@ -149,13 +177,14 @@ class DataSourceToDataSinkTests {
                 .build();
 
         var dataSource = HttpDataSource.Builder.newInstance()
-                .sourceUrl(NULL_ENDPOINT)
+                .params(HttpRequestParams.Builder.newInstance()
+                        .baseUrl(NULL_ENDPOINT)
+                        .method(HttpMethod.GET.name())
+                        .build())
                 .name("test.json")
                 .requestId("1")
-                .retryPolicy(new RetryPolicy<>())
+                .retryPolicy(RetryPolicy.ofDefaults())
                 .httpClient(sourceClient)
-                .monitor(monitor)
-                .method("GET")
                 .build();
 
         // sink endpoint raises an exception
@@ -169,7 +198,11 @@ class DataSourceToDataSinkTests {
                 .build();
 
         var dataSink = HttpDataSink.Builder.newInstance()
-                .endpoint(NULL_ENDPOINT)
+                .params(HttpRequestParams.Builder.newInstance()
+                        .baseUrl(NULL_ENDPOINT)
+                        .method(HttpMethod.POST.name())
+                        .contentType(CONTENT_TYPE)
+                        .build())
                 .requestId("1")
                 .httpClient(sinkClient)
                 .executorService(executor)
@@ -200,22 +233,5 @@ class DataSourceToDataSinkTests {
 
     private Request getRequest(InvocationOnMock invocation) {
         return invocation.getArgument(0, Interceptor.Chain.class).request();
-    }
-
-    /**
-     * Provides most common http error status codes.
-     *
-     * @return Http Error codes as {@link Stream} of {@link Arguments}.
-     */
-    private static Stream<Arguments> provideCommonErrorCodes() {
-        return Stream.of(
-                Arguments.of("MOVED_PERMANENTLY_301", 301),
-                Arguments.of("FOUND_302", 302),
-                Arguments.of("BAD_REQUEST_400", 400),
-                Arguments.of("UNAUTHORIZED_401", 401),
-                Arguments.of("NOT_FOUND_404", 404),
-                Arguments.of("INTERNAL_SERVER_ERROR_500", 500),
-                Arguments.of("BAD_GATEWAY_502", 502)
-        );
     }
 }

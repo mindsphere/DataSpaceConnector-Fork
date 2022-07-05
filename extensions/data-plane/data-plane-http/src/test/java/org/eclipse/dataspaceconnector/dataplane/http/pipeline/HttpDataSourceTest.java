@@ -14,145 +14,120 @@
 
 package org.eclipse.dataspaceconnector.dataplane.http.pipeline;
 
-import net.jodah.failsafe.RetryPolicy;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.javafaker.Faker;
+import dev.failsafe.RetryPolicy;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import okio.Okio;
-import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static okhttp3.Protocol.HTTP_1_1;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.common.testfixtures.TestUtils.testOkHttpClient;
-import static org.eclipse.dataspaceconnector.dataplane.http.pipeline.HttpDataSourceTest.CustomInterceptor.JSON_RESPONSE;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.testOkHttpClient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class HttpDataSourceTest {
+    private static final Faker FAKER = new Faker();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static final String TEST_ENDPOINT = "http://example.com";
-    private static final String GET = "GET";
-    private static final String POST = "POST";
-    private static final String FILE_NAME = "testfile.txt";
-    private static final String TEST_QUERY_PARAMS = "foo=bar&hello=world";
-
-    private CustomInterceptor interceptor;
+    private String requestId;
+    private String url;
 
     @BeforeEach
     public void setUp() {
-        interceptor = new CustomInterceptor();
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    void sourceWithNameBlankOrNull_shouldIgnore(String name) {
-        var source = defaultBuilder().method(GET).name(name).build();
-
-        source.openPartStream();
-
-        var request = interceptor.getInterceptedRequest();
-        assertThat(request.url()).hasToString(TEST_ENDPOINT + "/");
-        assertThat(request.method()).isEqualTo(GET);
-    }
-
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    void sourceWithQueryParamsBlankOrNull_shouldIgnore(String queryParams) {
-        var source = defaultBuilder().method(GET).name(FILE_NAME).queryParams(queryParams).build();
-
-        source.openPartStream();
-
-        var request = interceptor.getInterceptedRequest();
-        assertThat(request.url()).hasToString(TEST_ENDPOINT + "/" + FILE_NAME);
-        assertThat(request.method()).isEqualTo(GET);
+        requestId = FAKER.internet().uuid();
+        url = "http://" + FAKER.internet().domainName() + "/";
     }
 
     @Test
-    void sourceWithNameAndQueryParams() {
-        var source = defaultBuilder().method(GET).name(FILE_NAME).queryParams(TEST_QUERY_PARAMS).build();
+    void verifyCallSuccess() throws IOException {
+        var json = MAPPER.writeValueAsString(Map.of(FAKER.lorem().word(), FAKER.lorem().word()));
+        var responseBody = ResponseBody.create(json, MediaType.parse("application/json"));
 
-        source.openPartStream();
+        var interceptor = new CustomInterceptor(200, responseBody, FAKER.lorem().word());
+        var params = mock(HttpRequestParams.class);
+        var request = new Request.Builder().url(url).get().build();
+        var source = defaultBuilder(interceptor).params(params).build();
 
-        var request = interceptor.getInterceptedRequest();
-        assertThat(request.url()).hasToString(String.format("%s/%s?%s", TEST_ENDPOINT, FILE_NAME, TEST_QUERY_PARAMS));
-        assertThat(request.method()).isEqualTo(GET);
-    }
-
-    @Test
-    void sourceWithBody() {
-        var json = "{ \"foo\" : \"bar\" }";
-        var source = defaultBuilder().method(POST).requestBody(MediaType.get("application/json"), json).build();
-
-        source.openPartStream();
-
-        var request = interceptor.getInterceptedRequest();
-        assertThat(request.url()).hasToString(TEST_ENDPOINT + "/");
-        assertThat(request.method()).isEqualTo(POST);
-        assertThat(extractRequestBody(request)).isEqualTo(json);
-    }
-
-    @Test
-    void verifyOpenPartStream() {
-        var source = defaultBuilder().method(GET).build();
+        when(params.toRequest()).thenReturn(request);
 
         var parts = source.openPartStream().collect(Collectors.toList());
 
+        var interceptedRequest = interceptor.getInterceptedRequest();
+        assertThat(interceptedRequest).isEqualTo(request);
         assertThat(parts).hasSize(1);
-        assertThat(parts.get(0).openStream()).hasContent(JSON_RESPONSE);
-    }
-
-    private static String extractRequestBody(Request request) {
-        try {
-            var sink = Okio.sink(new ByteArrayOutputStream());
-            var bufferedSink = Okio.buffer(sink);
-            Objects.requireNonNull(request.body()).writeTo(bufferedSink);
-            return bufferedSink.getBuffer().readUtf8();
-        } catch (IOException e) {
-            throw new AssertionError(e);
+        var part = parts.get(0);
+        try (var is = part.openStream()) {
+            assertThat(new String(is.readAllBytes())).isEqualTo(json);
         }
+
+        verify(params).toRequest();
     }
 
-    private HttpDataSource.Builder defaultBuilder() {
-        var monitor = mock(Monitor.class);
-        var retryPolicy = new RetryPolicy<>().withMaxAttempts(1);
+    @Test
+    void verifyExceptionIsThrownIfCallFailed() {
+        var message = FAKER.lorem().word();
+        var interceptor = new CustomInterceptor(400, ResponseBody.create(FAKER.lorem().word(), MediaType.parse("text/plain")), message);
+        var params = mock(HttpRequestParams.class);
+        var request = new Request.Builder().url(url).get().build();
+        var source = defaultBuilder(interceptor).params(params).build();
+
+        when(params.toRequest()).thenReturn(request);
+
+        assertThatExceptionOfType(EdcException.class)
+                .isThrownBy(source::openPartStream)
+                .withMessageContaining("Received code transferring HTTP data for request %s: %d - %s", requestId, 400, message);
+
+        verify(params).toRequest();
+    }
+
+    private HttpDataSource.Builder defaultBuilder(Interceptor interceptor) {
+        var retryPolicy = RetryPolicy.builder().withMaxAttempts(1).build();
         var httpClient = testOkHttpClient().newBuilder().addInterceptor(interceptor).build();
         return HttpDataSource.Builder.newInstance()
                 .httpClient(httpClient)
-                .monitor(monitor)
-                .sourceUrl(TEST_ENDPOINT)
-                .requestId(UUID.randomUUID().toString())
+                .name(FAKER.lorem().word())
+                .requestId(requestId)
                 .retryPolicy(retryPolicy);
     }
 
     static final class CustomInterceptor implements Interceptor {
-
-        public static final String JSON_RESPONSE = "{\"hello\" : \"world\"}";
-
         private final List<Request> requests = new ArrayList<>();
+        private final int statusCode;
+        private final ResponseBody responseBody;
+        private final String message;
+
+        CustomInterceptor(int statusCode, ResponseBody responseBody, String message) {
+            this.statusCode = statusCode;
+            this.responseBody = responseBody;
+            this.message = message;
+        }
 
         @NotNull
         @Override
-        public Response intercept(@NotNull Interceptor.Chain chain) throws IOException {
+        public Response intercept(@NotNull Interceptor.Chain chain) {
             requests.add(chain.request());
             return new Response.Builder()
                     .request(chain.request())
-                    .protocol(HTTP_1_1).code(200)
-                    .body(ResponseBody.create(JSON_RESPONSE, MediaType.get("application/json"))).message("ok")
+                    .protocol(HTTP_1_1)
+                    .code(statusCode)
+                    .body(responseBody)
+                    .message(message)
                     .build();
         }
 

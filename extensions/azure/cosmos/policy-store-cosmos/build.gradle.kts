@@ -17,7 +17,7 @@ plugins {
 }
 
 val cosmosSdkVersion: String by project
-val jodahFailsafeVersion: String by project
+val failsafeVersion: String by project
 
 dependencies {
     api(project(":spi:policy-spi"))
@@ -25,10 +25,10 @@ dependencies {
     implementation(project(":extensions:azure:cosmos:cosmos-common"))
 
     implementation("com.azure:azure-cosmos:${cosmosSdkVersion}")
-    implementation("net.jodah:failsafe:${jodahFailsafeVersion}")
+    implementation("dev.failsafe:failsafe:${failsafeVersion}")
 
-    testImplementation(testFixtures(project(":common:util")))
-    testImplementation(testFixtures(project(":launchers:junit")))
+
+    testImplementation(project(":extensions:junit"))
     testImplementation(testFixtures(project(":extensions:azure:azure-test")))
 }
 

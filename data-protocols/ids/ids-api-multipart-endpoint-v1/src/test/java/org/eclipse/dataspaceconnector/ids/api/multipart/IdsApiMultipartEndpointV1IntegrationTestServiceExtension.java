@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021 Daimler TSS GmbH
+ *  Copyright (c) 2021 - 2022 Daimler TSS GmbH
  *
  *  This program and the accompanying materials are made available under the
  *  terms of the Apache License, Version 2.0 which is available at
@@ -11,13 +11,14 @@
  *       Daimler TSS GmbH - Initial API and Implementation
  *       Fraunhofer Institute for Software and Systems Engineering - extend tests
  *       Daimler TSS GmbH - fixed contract dates to epoch seconds
+ *       Microsoft Corporation - Use IDS Webhook address for JWT audience claim
  *
  */
 
 package org.eclipse.dataspaceconnector.ids.api.multipart;
 
 import kotlin.NotImplementedError;
-import org.eclipse.dataspaceconnector.common.annotations.ComponentTest;
+import org.eclipse.dataspaceconnector.common.util.junit.annotations.ComponentTest;
 import org.eclipse.dataspaceconnector.ids.core.serialization.ObjectMapperFactory;
 import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
@@ -35,6 +36,7 @@ import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitio
 import org.eclipse.dataspaceconnector.spi.contract.validation.ContractValidationService;
 import org.eclipse.dataspaceconnector.spi.iam.ClaimToken;
 import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
+import org.eclipse.dataspaceconnector.spi.iam.TokenParameters;
 import org.eclipse.dataspaceconnector.spi.iam.TokenRepresentation;
 import org.eclipse.dataspaceconnector.spi.message.MessageContext;
 import org.eclipse.dataspaceconnector.spi.message.RemoteMessageDispatcher;
@@ -136,12 +138,12 @@ class IdsApiMultipartEndpointV1IntegrationTestServiceExtension implements Servic
 
     private static class FakeIdentityService implements IdentityService {
         @Override
-        public Result<TokenRepresentation> obtainClientCredentials(String scope) {
+        public Result<TokenRepresentation> obtainClientCredentials(TokenParameters parameters) {
             return Result.success(TokenRepresentation.Builder.newInstance().build());
         }
 
         @Override
-        public Result<ClaimToken> verifyJwtToken(TokenRepresentation tokenRepresentation) {
+        public Result<ClaimToken> verifyJwtToken(TokenRepresentation tokenRepresentation, String audience) {
             return Result.success(ClaimToken.Builder.newInstance().build());
         }
     }
@@ -266,11 +268,6 @@ class IdsApiMultipartEndpointV1IntegrationTestServiceExtension implements Servic
         private final List<ContractDefinition> contractDefinitions = new ArrayList<>();
 
         @Override
-        public @NotNull Collection<ContractDefinition> findAll() {
-            return contractDefinitions;
-        }
-
-        @Override
         public @NotNull Stream<ContractDefinition> findAll(QuerySpec spec) {
             throw new UnsupportedOperationException();
         }
@@ -303,11 +300,6 @@ class IdsApiMultipartEndpointV1IntegrationTestServiceExtension implements Servic
         @Override
         public void reload() {
             throw new NotImplementedError();
-        }
-
-        @Override
-        public Stream<ContractDefinition> isReferenced(String policyId) {
-            throw new UnsupportedOperationException();
         }
     }
 

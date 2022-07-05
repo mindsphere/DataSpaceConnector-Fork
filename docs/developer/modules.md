@@ -21,15 +21,16 @@ org.eclipse.dataspaceconnector:http:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:http-provisioner:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:http-receiver:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:jdk-logger-monitor:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:junit:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:mindsphere:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:sql:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:dataloader-cli:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-server:0.0.1-SNAPSHOT
-org.eclipse.dataspaceconnector:junit-extension:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:catalog-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:contract-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:core-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:policy-spi:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:transaction-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:transfer-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:transport-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:web-spi:0.0.1-SNAPSHOT
@@ -60,7 +61,6 @@ org.eclipse.dataspaceconnector:azure-vault:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:catalog-cache:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:federated-catalog-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-api:0.0.1-SNAPSHOT
-org.eclipse.dataspaceconnector:data-plane-cloud-http:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-framework:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-http:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-spi:0.0.1-SNAPSHOT
@@ -72,6 +72,7 @@ org.eclipse.dataspaceconnector:data-plane-selector-store:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-transfer-client:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-transfer-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-transfer-sync:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:cloudevents-http:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:filesystem-configuration:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:filesystem-vault:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:jersey:0.0.1-SNAPSHOT
@@ -92,9 +93,6 @@ org.eclipse.dataspaceconnector:transfer-process-store-sql:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:transaction-atomikos:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:transaction-datasource-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:transaction-local:0.0.1-SNAPSHOT
-org.eclipse.dataspaceconnector:transaction-spi:0.0.1-SNAPSHOT
-org.eclipse.dataspaceconnector:transfer-functions-core:0.0.1-SNAPSHOT
-org.eclipse.dataspaceconnector:transfer-functions-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:api-configuration:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:asset-api:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:catalog-api:0.0.1-SNAPSHOT
@@ -104,10 +102,8 @@ org.eclipse.dataspaceconnector:contractnegotiation-api:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:policydefinition-api:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:transferprocess-api:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:s3-core:0.0.1-SNAPSHOT
-org.eclipse.dataspaceconnector:s3-operator:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:s3-provision:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:blob-core:0.0.1-SNAPSHOT
-org.eclipse.dataspaceconnector:blob-operator:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:blob-provision:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:assetindex-cosmos:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:contract-definition-store-cosmos:0.0.1-SNAPSHOT

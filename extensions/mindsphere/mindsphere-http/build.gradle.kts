@@ -2,7 +2,7 @@ plugins {
     `java-library`
 }
 
-val jodahFailsafeVersion: String by project
+val failsafeVersion: String by project
 val okHttpVersion: String by project
 val jacksonVersion: String by project
 val mockitoVersion: String by project
@@ -10,7 +10,7 @@ val openTelemetryVersion: String by project
 
 dependencies {
     api(project(":spi"))
-    api("net.jodah:failsafe:${jodahFailsafeVersion}")
+    implementation("dev.failsafe:failsafe:${failsafeVersion}")
 
     implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
     implementation("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
@@ -27,7 +27,6 @@ dependencies {
     implementation(project(":extensions:data-plane-selector:selector-store"))
     implementation(project(":extensions:data-plane:data-plane-framework"))
     implementation(project(":extensions:data-plane:data-plane-http"))
-    implementation(project(":extensions:data-plane:data-plane-cloud-http"))
 
     implementation("io.opentelemetry:opentelemetry-extension-annotations:${openTelemetryVersion}")
 
