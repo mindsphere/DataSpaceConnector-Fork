@@ -16,7 +16,8 @@ dependencies {
     implementation(project(":extensions:filesystem:vault-fs"))
     implementation(project(":extensions:filesystem:configuration-fs"))
 
-    implementation(project(":extensions:iam:iam-mock"))
+    implementation(project(":extensions:iam:daps"))
+    implementation(project(":extensions:iam:oauth2:oauth2-core"))
 
     implementation(project(":extensions:http"))
 
@@ -26,10 +27,7 @@ dependencies {
     implementation(project(":data-protocols:ids")) {
         exclude("org.eclipse.dataspaceconnector","ids-token-validation")
     }
-//    implementation(project(":data-protocols:ids:ids-api-multipart-endpoint-v1"))
 
-//    implementation(project(":extensions:data-plane-transfer:data-plane-transfer-client"))
-//    implementation(project(":extensions:data-plane-transfer:data-plane-transfer-sync"))
     implementation(project(":extensions:data-plane:data-plane-api"))
     implementation(project(":extensions:data-plane-selector:selector-client"))
     implementation(project(":extensions:data-plane-selector:selector-core"))
@@ -51,7 +49,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.siemens.mindsphere.datalake.edc.http.CatenaBaseRuntime")
+    mainClass.set("com.siemens.mindsphere.ProviderBaseRuntime")
 }
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
