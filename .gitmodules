@@ -1,4 +1,4 @@
-[submodule "resources/charts/secrets"]
-	path = resources/charts/secrets
+[submodule "resources/charts/configs"]
+	path = resources/charts/configs
 	url = git@code.siemens.com:scxi/edc_secrets.git
 	branch = main
