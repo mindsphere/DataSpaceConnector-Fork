@@ -16,7 +16,6 @@ package com.siemens.mindsphere;
 
 import com.siemens.mindsphere.datalake.edc.http.provision.MindsphereDatalakeSchema;
 import org.eclipse.dataspaceconnector.dataloading.AssetLoader;
-import org.eclipse.dataspaceconnector.dataplane.cloud.http.pipeline.PresignedHttpDataAddressSchema;
 import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
@@ -114,7 +113,7 @@ public class SourceUrlExtension implements ServiceExtension {
 
         var assetUrl1 = context.getSetting(EDC_ASSET_URL, "https://raw.githubusercontent.com/eclipse-dataspaceconnector/DataSpaceConnector/main/styleguide.md");
         var dataAddress1 = DataAddress.Builder.newInstance()
-                .property("type", PresignedHttpDataAddressSchema.TYPE)
+                .property("type", HttpDataAddressSchema.TYPE)
                 .property(ENDPOINT, assetUrl1)
                 .property(NAME, "")
                 .property(MindsphereDatalakeSchema.UPLOAD_DATALAKE_PATH, assetPathSetting)
