@@ -1,4 +1,3 @@
-[submodule "resources/charts/configs"]
-	path = resources/charts/configs
+[submodule "resources/charts/dataspace-connector/configs"]
+	path = resources/charts/dataspace-connector/configs
 	url = git@code.siemens.com:scxi/edc_secrets.git
-	branch = main
