@@ -8,7 +8,6 @@ FROM openjdk:17-slim
 
 WORKDIR /app
 COPY --from=build /home/gradle/project/samples/other/file-transfer-http-to-http/consumer/build/libs/consumer.jar /app
-COPY --from=build /home/gradle/project/samples/other/file-transfer-http-to-http/consumer/config.properties /app
 
 EXPOSE 9191
 EXPOSE 9192
@@ -20,5 +19,8 @@ ENTRYPOINT java \
     -Dedc.ids.description="Eclipse Dataspace Connector with MindSphere HTTP extensions" \
     -Dedc.ids.maintainer="https://example.maintainer.com" \
     -Dedc.ids.curator="https://example.maintainer.com" \
-    -Dedc.fs.config=/app/config.properties \
+    -Dedc.fs.config=$EDC_FS_CONFIG \
+    -Dedc.keystore=$EDC_KEYSTORE \
+    -Dedc.vault=$EDC_VAULT \ 
+    -Dedc.keystore.password=$EDC_KEYSTORE_PASSWORD \
     -jar consumer.jar
