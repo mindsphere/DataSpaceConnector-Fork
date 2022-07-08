@@ -103,6 +103,10 @@ public class SourceUrlExtension implements ServiceExtension {
 
         var dataAddress = DataAddress.Builder.newInstance()
                 .property("type", "HttpData")
+                .property("ten", "castidev")
+                .property("baseUrl", "http://fakesite.com")
+                .property("method", "GET")
+                .property("contentType", "text/csv")
                 .property(MindsphereDatalakeSchema.DOWNLOAD_DATALAKE_PATH, assetPathSetting)
                 .build();
 
@@ -112,9 +116,11 @@ public class SourceUrlExtension implements ServiceExtension {
         var assetUrl1 = context.getSetting(EDC_ASSET_URL, "https://raw.githubusercontent.com/eclipse-dataspaceconnector/DataSpaceConnector/main/styleguide.md");
         var dataAddress1 = DataAddress.Builder.newInstance()
                 .property("type", HttpDataAddress.DATA_TYPE)
-                .property("endpoint", assetUrl1)
+                .property("ten", "presdev")
+                .property("baseUrl", assetUrl1)
+                .property("method", "GET")
+                .property("contentType", "text/plain")
                 .property("name", "")
-                .property(MindsphereDatalakeSchema.UPLOAD_DATALAKE_PATH, assetPathSetting)
                 .build();
 
         var assetId1 = "styleguide.md";
@@ -122,7 +128,11 @@ public class SourceUrlExtension implements ServiceExtension {
 
         var dataAddress2 = DataAddress.Builder.newInstance()
                 .property("type", HttpDataAddress.DATA_TYPE)
-                .property("endpoint", "https://jsonplaceholder.typicode.com/todos/1")
+                .property("baseUrl", "https://jsonplaceholder.typicode.com/todos/1")
+                .property("ten", "castiop")
+                .property("name", "")
+                .property("method", "GET")
+                .property("contentType", "application/json")
                 .build();
 
         var assetId2 = "1";

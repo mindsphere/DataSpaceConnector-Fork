@@ -82,6 +82,8 @@ public class SourceUrlProvisioner
                                                 Map.of(
                                                         "baseUrl", createPresignedUrl(resourceDefinition.getDatalakePath()),
                                                         "name", "",
+                                                        "method", "GET",
+                                                        "contentType", "application/octet-stream",
                                                         MindsphereDatalakeSchema.DOWNLOAD_DATALAKE_PATH, resourceDefinition.getDatalakePath()))
                                         .type(HttpDataAddress.DATA_TYPE).build())
                                 .path(resourceDefinition.getDatalakePath())
