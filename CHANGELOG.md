@@ -37,6 +37,7 @@ in the detailed section referring to by linking pull requests or issues.
 * JWT audience claim check with DID (#1520)
 * Bump `failsafe` library to version 3.2.4 (#1559)
 * Harmonize logics of `HttpDataSource` and `HttpDataSink` (#1475)
+* Helm Chart
 
 #### Removed
 
