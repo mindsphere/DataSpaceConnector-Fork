@@ -26,11 +26,11 @@ import java.util.function.Supplier;
 /**
  * Streams content into an OK HTTP buffered sink.
  */
-public class StreamingRequestBody extends RequestBody {
+public class ChunckedRequestBody extends RequestBody {
     private final Supplier<InputStream> bodySupplier;
     private final String contentType;
 
-    public StreamingRequestBody(Supplier<InputStream> contentSupplier, String contentType) {
+    public ChunckedRequestBody(Supplier<InputStream> contentSupplier, String contentType) {
         this.bodySupplier = contentSupplier;
         this.contentType = contentType;
     }

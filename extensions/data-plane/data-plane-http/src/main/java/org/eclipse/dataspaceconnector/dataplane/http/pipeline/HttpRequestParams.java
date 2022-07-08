@@ -14,9 +14,12 @@
 
 package org.eclipse.dataspaceconnector.dataplane.http.pipeline;
 
+import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,15 +57,30 @@ public class HttpRequestParams {
      * @return HTTP request.
      */
     public Request toRequest(@Nullable Supplier<InputStream> bodySupplier) {
-        var requestBody = (bodySupplier != null && contentType != null) ?
-                new StreamingRequestBody(bodySupplier, contentType) :
-                null;
+        var requestBody = createRequestBody(bodySupplier, method);
+        MediaType mediaType = MediaType.parse(contentType);
+        RequestBody body = null;
+        try {
+            body = (bodySupplier != null && contentType != null) ?
+                    RequestBody.create(bodySupplier.get().readAllBytes(), mediaType) : null;
+        } catch (IOException e) {
+        }
 
         var requestBuilder = new Request.Builder()
                 .url(toUrl())
-                .method(method, requestBody);
+                .method(method, body);
         headers.forEach(requestBuilder::addHeader);
         return requestBuilder.build();
+    }
+
+    @Nullable
+    private RequestBody createRequestBody(@Nullable Supplier<InputStream> bodySupplier, String method) {
+        if (bodySupplier == null || contentType == null) {
+            return null;
+        }
+
+        return "PUT".equals(method) ?
+                new NonChunckedRequestBody(bodySupplier, contentType) : new ChunckedRequestBody(bodySupplier, contentType);
     }
 
     /**
