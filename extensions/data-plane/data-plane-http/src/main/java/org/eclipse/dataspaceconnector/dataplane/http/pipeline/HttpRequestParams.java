@@ -14,12 +14,10 @@
 
 package org.eclipse.dataspaceconnector.dataplane.http.pipeline;
 
-import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
