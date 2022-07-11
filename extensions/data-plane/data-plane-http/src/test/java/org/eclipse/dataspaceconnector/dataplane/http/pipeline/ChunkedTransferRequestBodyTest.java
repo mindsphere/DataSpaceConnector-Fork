@@ -27,7 +27,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+<<<<<<<< HEAD:extensions/data-plane/data-plane-http/src/test/java/org/eclipse/dataspaceconnector/dataplane/http/pipeline/ChunckedRequestBodyTest.java
 class ChunckedRequestBodyTest {
+========
+class ChunkedTransferRequestBodyTest {
+>>>>>>>> bug/sink-aws-s3:extensions/data-plane/data-plane-http/src/test/java/org/eclipse/dataspaceconnector/dataplane/http/pipeline/ChunkedTransferRequestBodyTest.java
     private static final Faker FAKER = new Faker();
 
     @Test
@@ -38,7 +42,11 @@ class ChunckedRequestBodyTest {
 
         when(sink.outputStream()).thenReturn(outputStream);
 
+<<<<<<<< HEAD:extensions/data-plane/data-plane-http/src/test/java/org/eclipse/dataspaceconnector/dataplane/http/pipeline/ChunckedRequestBodyTest.java
         var body = new ChunckedRequestBody(() -> new ByteArrayInputStream(content.getBytes()), HttpDataAddress.OCTET_STREAM);
+========
+        var body = new ChunkedTransferRequestBody(() -> new ByteArrayInputStream(content.getBytes()), HttpDataAddress.OCTET_STREAM);
+>>>>>>>> bug/sink-aws-s3:extensions/data-plane/data-plane-http/src/test/java/org/eclipse/dataspaceconnector/dataplane/http/pipeline/ChunkedTransferRequestBodyTest.java
         body.writeTo(sink);
 
         assertThat(outputStream).hasToString(content);

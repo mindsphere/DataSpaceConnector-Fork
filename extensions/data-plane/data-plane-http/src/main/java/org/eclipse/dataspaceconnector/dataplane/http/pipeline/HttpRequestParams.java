@@ -29,6 +29,7 @@ import java.util.function.Supplier;
 public class HttpRequestParams {
 
     private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
+    private static final Boolean DEFAULT_TRANSFER_CHUNKED = Boolean.TRUE;
 
     private String method;
     private String baseUrl;
@@ -36,6 +37,7 @@ public class HttpRequestParams {
     private String queryParams;
     private String contentType = DEFAULT_CONTENT_TYPE;
     private String body;
+    private Boolean transferChuncked = DEFAULT_TRANSFER_CHUNKED;
     private final Map<String, String> headers = new HashMap<>();
 
     /**
@@ -57,31 +59,24 @@ public class HttpRequestParams {
      * @return HTTP request.
      */
     public Request toRequest(@Nullable Supplier<InputStream> bodySupplier) {
-        var requestBody = createRequestBody(bodySupplier, method);
-        MediaType mediaType = MediaType.parse(contentType);
-        RequestBody body = null;
-        try {
-            body = (bodySupplier != null && contentType != null) ?
-                    RequestBody.create(bodySupplier.get().readAllBytes(), mediaType) : null;
-        } catch (IOException e) {
-        }
+        var requestBody = createRequestBody(bodySupplier);
 
         var requestBuilder = new Request.Builder()
                 .url(toUrl())
-                .method(method, body);
+                .method(method, requestBody);
         headers.forEach(requestBuilder::addHeader);
         return requestBuilder.build();
     }
 
-    @Nullable
-    private RequestBody createRequestBody(@Nullable Supplier<InputStream> bodySupplier, String method) {
+    private RequestBody createRequestBody(@Nullable Supplier<InputStream> bodySupplier) {
         if (bodySupplier == null || contentType == null) {
             return null;
         }
 
-        return "PUT".equals(method) ?
-                new NonChunckedRequestBody(bodySupplier, contentType) : new ChunckedRequestBody(bodySupplier, contentType);
+        return transferChuncked ?
+                new ChunkedTransferRequestBody(bodySupplier, contentType) : new NonChunkedTransferRequestBody(bodySupplier, contentType);
     }
+
 
     /**
      * Creates a URL from the base url, path and query parameters provided in input.
@@ -143,6 +138,11 @@ public class HttpRequestParams {
 
         public HttpRequestParams.Builder path(String path) {
             params.path = path;
+            return this;
+        }
+
+        public HttpRequestParams.Builder transferChuncked(Boolean transferChuncked) {
+            params.transferChuncked = transferChuncked;
             return this;
         }
 
