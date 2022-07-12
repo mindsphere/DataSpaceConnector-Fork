@@ -84,7 +84,7 @@ public class SourceUrlProvisioner
                                                         "name", "",
                                                         "method", "GET",
                                                         "contentType", "application/octet-stream",
-                                                            "transferChunked", "true",
+                                                            "transferInOneGo", "true",
                                                         MindsphereDatalakeSchema.DOWNLOAD_DATALAKE_PATH, resourceDefinition.getDatalakePath()))
                                         .type(HttpDataAddress.DATA_TYPE).build())
                                 .path(resourceDefinition.getDatalakePath())
