@@ -419,7 +419,7 @@
 							"apikey": [
 								{
 									"key": "value",
-									"value": "secret",
+									"value": "passwordProvider",
 									"type": "string"
 								},
 								{
@@ -435,6 +435,11 @@
 								"key": "X-API-KEY",
 								"value": "secret",
 								"type": "text"
+							},
+							{
+								"key": "property_ten",
+								"value": "castidev",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -447,23 +452,116 @@
 							}
 						},
 						"url": {
-							"raw": "http://192.168.52.128:8181/api/control/catalog?provider=http://localhost:8282/api/v1/ids/data",
+							"raw": "http://127.0.0.1:8182/api/v1/data/catalog?providerUrl=http://localhost:8282/api/v1/ids/data",
 							"protocol": "http",
 							"host": [
-								"192",
-								"168",
-								"52",
-								"128"
+								"127",
+								"0",
+								"0",
+								"1"
 							],
-							"port": "8181",
+							"port": "8182",
 							"path": [
 								"api",
-								"control",
+								"v1",
+								"data",
 								"catalog"
 							],
 							"query": [
 								{
-									"key": "provider",
+									"key": "providerUrl",
+									"value": "http://localhost:8282/api/v1/ids/data"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get offers from ids",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseText = pm.response.text();\r",
+									"pm.test(\"Response is OK\", () => {\r",
+									"    pm.expect(responseText).to.be.not.empty\r",
+									"});\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"var offer = response.contractOffers[0];\r",
+									"\r",
+									"offer[\"provider\"] = \"https://provider.com\";\r",
+									"offer[\"consumer\"] = \"https://consumer.com\";\r",
+									"\r",
+									"pm.environment.set(\"contract-offer-body\", JSON.stringify(offer));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "passwordProvider",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "X-Api-Key",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-KEY",
+								"value": "secret",
+								"type": "text"
+							},
+							{
+								"key": "property_ten",
+								"value": "castidev",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8182/api/v1/data/catalog?providerUrl=http://localhost:8282/api/v1/ids/data",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8182",
+							"path": [
+								"api",
+								"v1",
+								"data",
+								"catalog"
+							],
+							"query": [
+								{
+									"key": "providerUrl",
 									"value": "http://localhost:8282/api/v1/ids/data"
 								}
 							]
@@ -1023,6 +1121,205 @@
 								"api",
 								"assets",
 								"d0b85147-01d1-4c8b-8cea-b13100d05283"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. [EDC] get asset Copy",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Api-Key",
+								"type": "text",
+								"value": "VvW#xA5]KQUt"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"dataAddress\": {\r\n\t\t\"properties\": {\r\n\t\t\t\"path\": \"/data/ten=castidev/sample.txt\",\r\n\t\t\t\"keyName\": \"/data/ten=castidev/sample.txt\",\r\n\t\t\t\"type\": \"http\"\r\n\t\t}\r\n\t},\r\n\t\"asset\": {\r\n\t\t\"properties\": {\r\n\t\t\t\"asset:prop:name\": \"/data/ten=castidev/sample.txt\",\r\n\t\t\t\"asset:prop:description\": \"\",\r\n\t\t\t\"asset:prop:contenttype\": \"http\",\r\n\t\t\t\"asset:prop:version\": \"0.1\",\r\n\t\t\t\"asset:prop:id\": \"d0b85147-01d1-4c8b-8cea-b13100d05283\"\r\n\t\t}\r\n\t}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8181/api/assets/d0b85147-01d1-4c8b-8cea-b13100d05283",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8181",
+							"path": [
+								"api",
+								"assets",
+								"d0b85147-01d1-4c8b-8cea-b13100d05283"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "dataplane",
+			"item": [
+				{
+					"name": "1. [Provider -> Consumer] Negociate contract",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json; charset=utf-8"
+							},
+							{
+								"key": "X-API-KEY",
+								"type": "text",
+								"value": "datasecret"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"connectorId\": \"provider\",\r\n  \"connectorAddress\": \"http://localhost:8282/api/v1/ids/data\",\r\n  \"protocol\": \"ids-multipart\",\r\n  \"offer\": {\r\n    \"offerId\": \"8:aa75736e-007d-4364-8b99-9808490ed998\",\r\n    \"assetId\": \"styleguide.md\",\r\n    \"policy\": {\r\n      \"uid\": \"996e172f-2de1-4501-8881-997a57fd0e69\",\r\n      \"permissions\": [\r\n        {\r\n          \"edctype\": \"dataspaceconnector:permission\",\r\n          \"uid\": null,\r\n          \"target\": \"styleguide.md\",\r\n          \"action\": {\r\n            \"type\": \"USE\",\r\n            \"includedIn\": null,\r\n            \"constraint\": null\r\n          },\r\n          \"assignee\": null,\r\n          \"assigner\": null,\r\n          \"constraints\": [],\r\n          \"duties\": []\r\n        }\r\n      ],\r\n      \"prohibitions\": [],\r\n      \"obligations\": [],\r\n      \"extensibleProperties\": {},\r\n      \"inheritsFrom\": null,\r\n      \"assigner\": null,\r\n      \"assignee\": null,\r\n      \"target\": null,\r\n      \"@type\": {\r\n        \"@policytype\": \"set\"\r\n      }\r\n    },\r\n    \"asset\": {\r\n      \"properties\": {\r\n        \"ids:byteSize\": null,\r\n        \"asset:prop:id\": \"styleguide.md\",\r\n        \"ids:fileName\": null\r\n      }\r\n    }\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:9192/api/v1/data/contractnegotiations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9192",
+							"path": [
+								"api",
+								"v1",
+								"data",
+								"contractnegotiations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. [Consumer] Check contract done status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseText = pm.response.text();\r",
+									"pm.test(\"Response is OK\", () => {\r",
+									"    pm.expect(responseText).to.be.not.empty\r",
+									"});\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json; charset=utf-8"
+							},
+							{
+								"key": "X-API-KEY",
+								"type": "text",
+								"value": "datasecret"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:9192/api/v1/data/contractnegotiations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9192",
+							"path": [
+								"api",
+								"v1",
+								"data",
+								"contractnegotiations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. [Provider -> Consumer] Start transfer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json; charset=utf-8"
+							},
+							{
+								"key": "X-API-KEY",
+								"type": "text",
+								"value": "datasecret"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"protocol\": \"ids-multipart\",\r\n  \"assetId\": \"styleguide.md\",\r\n  \"contractId\": \"8:bd77c611-d238-4309-8c99-b1f5f07ea6f4\",\r\n  \"dataDestination\": {\r\n    \"properties\": {\r\n      \"baseUrl\": \"https://datalake-prod-a-castidev-1638992902776.s3.eu-central-1.amazonaws.com/data/ten%3Dcastidev/test2/onboard4.md?...\",\r\n      \"method\":\"PUT\",\r\n      \"name\": \"\",\r\n      \"type\": \"HttpData\",\r\n      \"contentType\" : \"application/octet-stream\",\r\n      \"transferInOneGo\": true,\r\n      \"header:x-ms-blob-type\": \"BlockBlob\"\r\n    }\r\n  },\r\n  \"transferType\": {\r\n    \"contentType\": \"application/octet-stream\",\r\n    \"isFinite\": true\r\n  },\r\n  \"managedResources\": false,\r\n  \"connectorAddress\": \"http://localhost:8282/api/v1/ids/data\",\r\n  \"connectorId\": \"consumer\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:9192/api/v1/data/transferprocess",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9192",
+							"path": [
+								"api",
+								"v1",
+								"data",
+								"transferprocess"
 							]
 						}
 					},
