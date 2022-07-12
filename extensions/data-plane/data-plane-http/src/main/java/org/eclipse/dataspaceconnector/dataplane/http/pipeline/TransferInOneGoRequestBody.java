@@ -24,19 +24,29 @@ import java.io.InputStream;
 import java.util.function.Supplier;
 
 /**
- * Streams content into an OK HTTP buffered sink in chunks.
+ * Writes content into an OK HTTP buffered sink
  *
- * Due to OkHttp implementation an extra header will be created (no-overridable) Transfer-Encoding with value chunked
+ * The extra Transfer-Encoding is not created because the Content-Length is provided upfront.
+ * Note that means that the all content is loaded into memory, so this method can be used for small files (up to 50MB) for e.g.
  *
  * @see <a href="https://github.com/square/okhttp/blob/master/docs/features/calls.md">OkHttp Dcoumentation</a>
  */
-public class ChunkedTransferRequestBody extends RequestBody {
-    private final Supplier<InputStream> bodySupplier;
+public class TransferInOneGoRequestBody extends RequestBody {
+    private byte[] bytes;
     private final String contentType;
 
-    public ChunkedTransferRequestBody(Supplier<InputStream> contentSupplier, String contentType) {
-        this.bodySupplier = contentSupplier;
+    public TransferInOneGoRequestBody(Supplier<InputStream> contentSupplier, String contentType) {
+        try {
+            this.bytes = contentSupplier.get().readAllBytes();
+        } catch (IOException e) {
+            //do nothing
+        }
         this.contentType = contentType;
+    }
+
+    @Override
+    public long contentLength() {
+        return bytes == null ? 0 : bytes.length;
     }
 
     @Override
@@ -46,8 +56,13 @@ public class ChunkedTransferRequestBody extends RequestBody {
 
     @Override
     public void writeTo(@NotNull BufferedSink sink) throws IOException {
-        try (var os = sink.outputStream(); var is = bodySupplier.get()) {
-            is.transferTo(os);
+        if (bytes == null) {
+            return;
+        }
+
+        try (var os = sink.outputStream()) {
+            os.write(bytes);
         }
     }
 }
+
