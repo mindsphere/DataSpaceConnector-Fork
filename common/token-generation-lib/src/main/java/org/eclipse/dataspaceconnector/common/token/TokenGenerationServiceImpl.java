@@ -67,7 +67,8 @@ public class TokenGenerationServiceImpl implements TokenGenerationService {
     }
 
     private static TokenRepresentation createTokenRepresentation(String token, JWTClaimsSet claimsSet) {
-        var builder = TokenRepresentation.Builder.newInstance().token(token);
+        var builder = TokenRepresentation.Builder.newInstance().token(token)
+                .additional(claimsSet.getClaims());
         if (claimsSet.getExpirationTime() != null) {
             builder.expiresIn(claimsSet.getExpirationTime().getTime());
         }

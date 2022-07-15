@@ -111,7 +111,7 @@ abstract class IdsMultipartSender<M extends RemoteMessage, R> implements IdsMess
                 ._tokenFormat_(TokenFormat.JWT)
                 ._tokenValue_(tokenResult.getContent().getToken())
                 .build();
-
+        tokenResult.getContent().getAdditional().forEach(token::setProperty);
 
         // Get recipient address
         var connectorAddress = retrieveRemoteConnectorAddress(request);

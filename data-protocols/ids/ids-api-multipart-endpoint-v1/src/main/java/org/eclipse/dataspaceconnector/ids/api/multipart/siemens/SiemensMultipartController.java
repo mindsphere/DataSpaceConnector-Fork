@@ -102,12 +102,17 @@ public class SiemensMultipartController {
             //payload no connector instance, nothing to do
         }
 
+        dynamicAttributeToken.getProperties().forEach(additional::put);
+
         var tokenRepresentation = TokenRepresentation.Builder.newInstance()
                 .token(dynamicAttributeToken.getTokenValue())
                 .additional(additional)
                 .build();
 
         Result<ClaimToken> verificationResult = identityService.verifyJwtToken(tokenRepresentation);
+        Map<String, Object> claims = verificationResult.getContent().getClaims();
+        additional.forEach(claims::putIfAbsent);
+
         //siemens code
         if (headers.getRequestHeaders().containsKey("ten")) {
             verificationResult.getContent().getClaims().put("ten", headers.getRequestHeaders().get("ten").get(0));
