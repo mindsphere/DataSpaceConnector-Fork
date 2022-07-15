@@ -1,0 +1,40 @@
+version: '3.5'
+
+services:
+  edc-provider:
+    build:
+      context: ../../
+      dockerfile: ./launchers/mdsp-connector/provider.Dockerfile
+    #image: mdsp-connector_edc-provider:latest
+    container_name: 'catena-x-edc-provider'
+    ports:
+      - 8181:8181
+      - 8182:8182
+      - 8282:8282
+    environment:
+      - IDS_WEBHOOK_ADDRESS=http://catena-x-edc-provider:8282
+
+  edc-consumer:
+    build:
+      context: ../../
+      dockerfile: ./launchers/mdsp-connector/consumer.Dockerfile
+    #image: mdsp-connector_edc-consumer:latest
+    container_name: 'catena-x-edc-consumer'
+    ports:
+      - 9191:9191
+      - 9192:9192
+      - 9292:9292
+    environment:
+      - IDS_WEBHOOK_ADDRESS=http://catena-x-edc-consumer:9292
+
+  registry-service:
+    image: ghcr.io/catenax-ng/catenax-at-home/registry:0.0.1
+    container_name: 'catena-x-registry'
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      IDP_ISSUER_URI: ""
+      SPRING_DATASOURCE_URL: "jdbc:h2:mem:semanticsdb;CASE_INSENSITIVE_IDENTIFIERS=TRUE"
+    ports:
+      - "4243:4243" # default
+      #- "5013:8090"

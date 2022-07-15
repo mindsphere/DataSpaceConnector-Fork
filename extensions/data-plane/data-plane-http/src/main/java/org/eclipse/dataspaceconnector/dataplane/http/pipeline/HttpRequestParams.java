@@ -27,7 +27,6 @@ import java.util.function.Supplier;
 public class HttpRequestParams {
 
     private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
-    private static final boolean DEFAULT_NON_CHUNKED_TRANSFER = false;
 
     private String method;
     private String baseUrl;
