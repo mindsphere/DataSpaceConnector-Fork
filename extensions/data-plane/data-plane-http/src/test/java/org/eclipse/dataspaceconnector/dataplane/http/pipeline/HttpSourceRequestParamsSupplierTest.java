@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -228,6 +229,18 @@ class HttpSourceRequestParamsSupplierTest {
         var result = supplier.extractBody(address, request);
 
         assertThat(result).isNull();
+    }
+
+    @Test
+    void extractTransferInOneGo() {
+        var chunked = new Random().nextBoolean();
+        var address = HttpDataAddress.Builder.newInstance()
+                .transferInOneGo(chunked)
+                .build();
+
+        var result = supplier.extractTransferInOneGo(address);
+
+        assertThat(result).isFalse();
     }
 
     private static DataFlowRequest createRequest(DataAddress source) {

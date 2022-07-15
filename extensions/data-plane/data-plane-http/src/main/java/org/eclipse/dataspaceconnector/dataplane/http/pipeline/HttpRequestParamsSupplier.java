@@ -66,9 +66,12 @@ public abstract class HttpRequestParamsSupplier implements Function<DataFlowRequ
                     params.contentType(ct);
                     params.body(extractBody(address, request));
                 });
+        params.transferInOneGo(extractTransferInOneGo(address));
 
         return params.build();
     }
+
+    protected abstract boolean extractTransferInOneGo(HttpDataAddress address);
 
     @NotNull
     protected abstract DataAddress selectAddress(DataFlowRequest request);

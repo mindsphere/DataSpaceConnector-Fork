@@ -16,8 +16,13 @@ dependencies {
     implementation(project(":extensions:filesystem:vault-fs"))
     implementation(project(":extensions:filesystem:configuration-fs"))
 
-    implementation(project(":extensions:iam:daps"))
-    implementation(project(":extensions:iam:oauth2:oauth2-core"))
+    //use like gradle dependencies -P localdevelopment
+    if( project.hasProperty("localdevelopment")) {
+        implementation(project(":extensions:iam:iam-mock"))
+    } else {
+        implementation(project(":extensions:iam:daps"))
+        implementation(project(":extensions:iam:oauth2:oauth2-core"))
+    }
 
     implementation(project(":extensions:http"))
 

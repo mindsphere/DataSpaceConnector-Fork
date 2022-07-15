@@ -35,6 +35,11 @@ public class HttpSinkRequestParamsSupplier extends HttpRequestParamsSupplier {
     }
 
     @Override
+    protected boolean extractTransferInOneGo(HttpDataAddress address) {
+        return address.getTransferInOneGo();
+    }
+
+    @Override
     protected @NotNull DataAddress selectAddress(DataFlowRequest request) {
         return request.getDestinationDataAddress();
     }
