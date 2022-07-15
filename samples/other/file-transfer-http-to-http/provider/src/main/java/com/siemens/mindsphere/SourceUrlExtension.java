@@ -16,6 +16,7 @@ package com.siemens.mindsphere;
 
 import com.siemens.mindsphere.datalake.edc.http.provision.MindsphereDatalakeSchema;
 import org.eclipse.dataspaceconnector.dataloading.AssetLoader;
+import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2JwtDecoratorRegistry;
 import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
@@ -59,8 +60,12 @@ public class SourceUrlExtension implements ServiceExtension {
     @EdcSetting
     private static final String EDC_ASSET_URL = "edc.sample.url";
 
+    @Inject
+    private Oauth2JwtDecoratorRegistry jwtDecoratorRegistry;
+
     @Override
     public void initialize(ServiceExtensionContext context) {
+        jwtDecoratorRegistry.register(new TenantJwtDecorator());
         addTestData(context);
     }
 

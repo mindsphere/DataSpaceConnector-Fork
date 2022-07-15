@@ -31,7 +31,8 @@ dependencies {
     implementation(project(":extensions:filesystem:vault-fs"))
     implementation(project(":extensions:filesystem:configuration-fs"))
 
-    implementation(project(":extensions:iam:iam-mock"))
+    implementation(project(":extensions:iam:daps"))
+    implementation(project(":extensions:iam:oauth2:oauth2-core"))
 
     implementation(project(":extensions:api:auth-tokenbased"))
     implementation(project(":extensions:api:data-management"))
