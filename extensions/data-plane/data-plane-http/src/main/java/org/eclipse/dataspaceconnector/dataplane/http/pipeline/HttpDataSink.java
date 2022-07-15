@@ -37,6 +37,7 @@ public class HttpDataSink extends ParallelSink {
     @Override
     protected StatusResult<Void> transferParts(List<DataSource.Part> parts) {
         for (DataSource.Part part : parts) {
+            monitor.debug(() -> "Sending params " + params.toString());
             var request = params.toRequest(part::openStream);
             try (var response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {

@@ -38,6 +38,20 @@ public class HttpRequestParams {
     private boolean transferInOneGo = DEFAULT_TRANSFER_IN_ONE_GO;
     private final Map<String, String> headers = new HashMap<>();
 
+    @Override
+    public String toString() {
+        return "HttpRequestParams{" +
+                "method='" + method + '\'' +
+                ", baseUrl='" + baseUrl + '\'' +
+                ", path='" + path + '\'' +
+                ", queryParams='" + queryParams + '\'' +
+                ", contentType='" + contentType + '\'' +
+                ", body='" + body + '\'' +
+                ", transferInOneGo=" + transferInOneGo +
+                ", headers=" + headers +
+                '}';
+    }
+
     /**
      * Creates HTTP request from the current set of parameters.
      *
