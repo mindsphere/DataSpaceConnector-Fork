@@ -107,7 +107,7 @@ public class SourceUrlExtension implements ServiceExtension {
                 .property("baseUrl", "http://fakesite.com")
                 .property("method", "GET")
                 .property("contentType", "text/csv")
-                .property("transferInOneGo", "true")
+                .property("nonChunkedTransfer", "true")
                 .property(MindsphereDatalakeSchema.DOWNLOAD_DATALAKE_PATH, assetPathSetting)
                 .build();
 
@@ -120,7 +120,7 @@ public class SourceUrlExtension implements ServiceExtension {
                 .property("ten", "presdev")
                 .property("baseUrl", assetUrl1)
                 .property("method", "GET")
-                .property("transferInOneGo", "true")
+                .property("nonChunkedTransfer", "true")
                 .property("contentType", "text/plain")
                 .property("name", "")
                 .build();
@@ -133,7 +133,7 @@ public class SourceUrlExtension implements ServiceExtension {
                 .property("baseUrl", "https://jsonplaceholder.typicode.com/todos/1")
                 .property("ten", "castiop")
                 .property("name", "")
-                .property("transferInOneGo", "true")
+                .property("nonChunkedTransfer", "true")
                 .property("method", "GET")
                 .property("contentType", "application/json")
                 .build();
