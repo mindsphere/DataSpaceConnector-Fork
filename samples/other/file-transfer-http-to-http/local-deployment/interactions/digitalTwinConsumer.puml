@@ -1,0 +1,27 @@
+@startuml digitalTwinConsumer
+'sequence diagram
+
+skinparam monochrome true
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam style strictuml
+skinparam sequence {
+participantBackgroundColor transparent
+actorBackgroundColor transparent
+GroupBackgroundColor transparent
+}
+skinparam databaseBackgroundColor transparent
+autonumber
+
+participant "UI app" as ui
+participant "Data \nconsumer" as consumer
+participant "Data \nprovider" as provider
+participant "Semantic \nhub" as hub
+participant "Digital twin \nregistry" as registry
+
+ui -> registry : Search by SpecificAssetID
+ui -> ui : Filters submodel endpoints by URN
+ui -> registry : Retrieves data from submodel endpoint
+
+
+@enduml

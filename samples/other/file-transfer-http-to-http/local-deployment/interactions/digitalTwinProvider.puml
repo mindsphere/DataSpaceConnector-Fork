@@ -1,0 +1,34 @@
+@startuml digitalTwinProvider
+'sequence diagram
+
+skinparam monochrome true
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam style strictuml
+skinparam sequence {
+participantBackgroundColor transparent
+actorBackgroundColor transparent
+GroupBackgroundColor transparent
+}
+skinparam databaseBackgroundColor transparent
+autonumber
+
+participant "Data \nconsumer" as consumer
+participant "Data \nprovider" as provider
+participant "Semantic \nhub" as hub
+participant "Digital twin \nregistry" as registry
+
+consumer -> provider : requirements (e.g., \nPCF data for spark plug)
+
+provider -> hub : searches for semantic model 
+consumer -> provider : OR send link for semantic model
+provider -> hub : Accesses the semantic model 
+
+provider -> provider : Implements submodel \nserver, returns semantic model \ncompliant data
+
+provider -> registry : Registers digital twin
+provider -> registry : Assigns Submodel to digital twin
+
+provider -> provider : Creates EDC asset, \ncontract, policy
+
+@enduml
