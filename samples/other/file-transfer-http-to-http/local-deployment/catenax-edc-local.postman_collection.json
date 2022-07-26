@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "ae45bb08-95c7-4289-a6d4-371ff46de042",
-		"name": "catenax-edc-0.0.32",
+		"_postman_id": "7469a270-8bea-4043-9591-dbfda5163d4e",
+		"name": "catenax-edc-local",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -87,7 +87,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"asset\": {\n        \"properties\": {\n            \"asset:prop:id\": \"{{assetID}}\",\n            \"asset:prop:name\": \"{{fileName}}\",\n            \"asset:prop:contenttype\": \"http\"\n        }\n    },\n    \"dataAddress\": {\n        \"properties\": {\n            \"type\": \"http\",\n            \"url\": \"{{downloadFileURL}}\"\n        }\n    }\n}",
+							"raw": "{\n    \"asset\": {\n        \"properties\": {\n            \"asset:prop:id\": \"{{assetID}}\",\n            \"asset:prop:name\": \"{{fileName}}\",\n            \"asset:prop:contenttype\": \"HttpData\"\n        }\n    },\n    \"dataAddress\": {\n        \"properties\": {\n            \"type\": \"HttpData\",\n            \"baseUrl\": \"{{downloadFileURL}}\",\n            \"contentType\": \"application/json\",\n            \"transferInOneGo\": \"true\"\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -511,21 +511,26 @@
 					"response": []
 				},
 				{
-					"name": "Get all digital twins",
+					"name": "Digital twin lookup",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:4243/registry/shell-descriptors/",
+							"raw": "http://localhost:4243/lookup/shells?assetIds=[{\n\t\"key\": \"PartNumber\",\n\t\"value\": \"25SI\"\n}]",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "4243",
 							"path": [
-								"registry",
-								"shell-descriptors",
-								""
+								"lookup",
+								"shells"
+							],
+							"query": [
+								{
+									"key": "assetIds",
+									"value": "[{\n\t\"key\": \"PartNumber\",\n\t\"value\": \"25SI\"\n}]"
+								}
 							]
 						}
 					},
@@ -547,6 +552,27 @@
 								"registry",
 								"shell-descriptors",
 								"{{digitalTwinID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all digital twins",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4243/registry/shell-descriptors/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4243",
+							"path": [
+								"registry",
+								"shell-descriptors",
+								""
 							]
 						}
 					},
@@ -670,7 +696,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"protocol\": \"ids-multipart\",\r\n    \"connectorId\": \"provider\",\r\n    \"connectorAddress\": \"http://catena-x-edc-provider:8282/api/v1/ids/data\",\r\n    \"offer\": {\r\n        \"assetId\": \"0002\",\r\n        \"offerId\": \"0002:1671bf9e-1410-4382-8ce9-d6a15376e6ca\",\r\n        \"policy\": {\r\n            \"uid\": \"c521dccb-9327-416f-bd56-f3bd26337f4d\",\r\n            \"permissions\": [\r\n                {\r\n                    \"edctype\": \"dataspaceconnector:permission\",\r\n                    \"uid\": null,\r\n                    \"target\": \"0002\",\r\n                    \"action\": {\r\n                        \"type\": \"USE\",\r\n                        \"includedIn\": null,\r\n                        \"constraint\": null\r\n                    },\r\n                    \"assignee\": null,\r\n                    \"assigner\": null,\r\n                    \"constraints\": [],\r\n                    \"duties\": []\r\n                }\r\n            ],\r\n            \"prohibitions\": [],\r\n            \"obligations\": [],\r\n            \"extensibleProperties\": {},\r\n            \"inheritsFrom\": null,\r\n            \"assigner\": null,\r\n            \"assignee\": null,\r\n            \"target\": null,\r\n            \"@type\": {\r\n                \"@policytype\": \"set\"\r\n            }\r\n        }\r\n    }\r\n}",
+							"raw": "{\r\n    \"connectorId\": \"provider\",\r\n    \"protocol\": \"ids-multipart\",\r\n    \"connectorAddress\": \"http://catena-x-edc-provider:8282/api/v1/ids/data\",\r\n    \"offer\": {\r\n        \"offerId\": \"0002:4fca4c65-64ed-41ab-a401-285189e15669\",\r\n        \"assetId\": \"{{assetID}}\",\r\n        \"policy\": {\r\n            \"permissions\": [\r\n                {\r\n                    \"edctype\": \"dataspaceconnector:permission\",\r\n                    \"uid\": null,\r\n                    \"target\": \"{{assetID}}\",\r\n                    \"action\": {\r\n                        \"type\": \"USE\",\r\n                        \"includedIn\": null,\r\n                        \"constraint\": null\r\n                    },\r\n                    \"assignee\": null,\r\n                    \"assigner\": null,\r\n                    \"constraints\": [],\r\n                    \"duties\": []\r\n                }\r\n            ],\r\n            \"prohibitions\": [],\r\n            \"obligations\": [],\r\n            \"extensibleProperties\": {},\r\n            \"inheritsFrom\": null,\r\n            \"assigner\": null,\r\n            \"assignee\": null,\r\n            \"target\": null,\r\n            \"@type\": {\r\n                \"@policytype\": \"set\"\r\n            }\r\n        },\r\n        \"asset\": {\r\n            \"properties\": {\r\n                \"ids:byteSize\": null,\r\n                \"asset:prop:id\": \"{{assetID}}\",\r\n                \"ids:fileName\": null\r\n            }\r\n        }\r\n    }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -739,7 +765,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:9192/api/v1/data/contractnegotiations/df238088-737f-4fa9-829b-b724b7aedbdd",
+							"raw": "http://localhost:9192/api/v1/data/contractnegotiations/55056787-3f7f-426a-b466-471a62abf045",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -750,7 +776,7 @@
 								"v1",
 								"data",
 								"contractnegotiations",
-								"df238088-737f-4fa9-829b-b724b7aedbdd"
+								"55056787-3f7f-426a-b466-471a62abf045"
 							]
 						}
 					},
@@ -787,7 +813,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"connectorAddress\": \"http://catena-x-edc-provider:8282/api/v1/ids/data\",\n  \"protocol\": \"ids-multipart\",\n  \"connectorId\": \"consumer\",\n  \"assetId\": \"0002\",\n  \"contractId\": \"0002:41e62e12-3755-486a-badc-61e6dc8cf595\",\n  \"dataDestination\": {\n\n    \"properties\" : {\n        \"keyName\" : \"PowerConsumption.json\",\n        \"type\": \"http\",\n        \"url\" : \"https://catenax-test-destination.s3.eu-central-1.amazonaws.com/PowerConsumption.json?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220527T064056Z&X-Amz-SignedHeaders=host&X-Amz-Expires=43199&X-Amz-Credential=AKIARM37P5UZG7LNQIWM%2F20220527%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Signature=4a108c8075ee6b72d8bd20f034c63f4efcc5739e4cd10f899ba5173b42fa3550\"\n    }\n  },\n  \"managedResources\": false,\n  \"transferType\": {\n    \"contentType\": \"application/octet-stream\",\n    \"isFinite\": true\n  },\n  \"destinationType\": \"http\"\n}",
+							"raw": "{\n    \"connectorAddress\": \"http://catena-x-edc-provider:8282/api/v1/ids/data\",\n    \"protocol\": \"ids-multipart\",\n    \"connectorId\": \"consumer\",\n    \"assetId\": \"0002\",\n    \"contractId\": \"0002:e2570be8-0bdc-4d18-a90d-bef8276337ec\",\n    \"dataDestination\": {\n        \"properties\": {\n            \"baseUrl\": \"{{uploadFileURL}}\",\n            \"method\": \"PUT\",\n            \"name\": \"\",\n            \"type\": \"HttpData\",\n            \"contentType\": \"application/octet-stream\",\n            \"transferInOneGo\": true,\n            \"header:x-ms-blob-type\": \"BlockBlob\"\n        }\n    },\n    \"managedResources\": false,\n    \"transferType\": {\n        \"contentType\": \"application/octet-stream\",\n        \"isFinite\": true\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -879,6 +905,59 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get all contract IDs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseText = pm.response.text();\r",
+									"pm.test(\"Response is OK\", () => {\r",
+									"    pm.expect(responseText).to.be.not.empty\r",
+									"});\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"var offer = response.contractOffers[0];\r",
+									"\r",
+									"pm.environment.set(\"agreement-id\", offer.contractAgreementId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json; charset=utf-8"
+							},
+							{
+								"key": "X-API-KEY",
+								"type": "text",
+								"value": "passwordConsumer"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:9192/api/v1/data/contractnegotiations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9192",
+							"path": [
+								"api",
+								"v1",
+								"data",
+								"contractnegotiations"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
@@ -921,12 +1000,12 @@
 		},
 		{
 			"key": "downloadFileURL",
-			"value": "https://catenax-test-source.s3.eu-central-1.amazonaws.com/PowerConsumption.json?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220527T064043Z&X-Amz-SignedHeaders=host&X-Amz-Expires=43199&X-Amz-Credential=AKIARM37P5UZG7LNQIWM%2F20220527%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Signature=6b4fc0835fa40cc8d07665e3b96da7e44a565fea423f135a965ac9af22d938fe",
+			"value": "https://catenax-test-source.s3.eu-central-1.amazonaws.com/PowerConsumption.json?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220719T111520Z&X-Amz-SignedHeaders=host&X-Amz-Expires=43199&X-Amz-Credential=AKIARM37P5UZG7LNQIWM%2F20220719%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Signature=0b8d46994ec22f9ed611ed50dc696cf5a1f61dfd90afa545708ffd0c7097a752",
 			"type": "default"
 		},
 		{
 			"key": "uploadFileURL",
-			"value": "https://catenax-test-destination.s3.eu-central-1.amazonaws.com/PowerConsumption.json?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220527T064056Z&X-Amz-SignedHeaders=host&X-Amz-Expires=43199&X-Amz-Credential=AKIARM37P5UZG7LNQIWM%2F20220527%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Signature=4a108c8075ee6b72d8bd20f034c63f4efcc5739e4cd10f899ba5173b42fa3550",
+			"value": "https://catenax-test-destination.s3.eu-central-1.amazonaws.com/PowerConsumption.json?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220719T111553Z&X-Amz-SignedHeaders=host&X-Amz-Expires=43199&X-Amz-Credential=AKIARM37P5UZG7LNQIWM%2F20220719%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Signature=8631ecd94d90b96e536d2a88dbc3e16c706b4bfc34576a465c216d86ebb10813",
 			"type": "default"
 		},
 		{
