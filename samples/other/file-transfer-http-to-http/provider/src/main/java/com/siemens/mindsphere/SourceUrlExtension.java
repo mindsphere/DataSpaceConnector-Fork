@@ -86,8 +86,6 @@ public class SourceUrlExtension implements ServiceExtension {
         monitor = context.getMonitor();
         connectorServiceSettings = new ConnectorServiceSettings(context, monitor);
 
-        jwtDecoratorRegistry.register(new TenantJwtDecorator());
-
         //Normally this should have been covered by @Provider
         context.registerService(CatalogService.class, catalogService());
         context.registerService(ConnectorService.class, connectorService());
