@@ -7,6 +7,7 @@ plugins {
 val jupiterVersion: String by project
 val rsApi: String by project
 val openTelemetryVersion: String by project
+val nimbusVersion: String by project
 
 dependencies {
     implementation(project(":core"))
@@ -23,6 +24,12 @@ dependencies {
         implementation(project(":extensions:iam:daps"))
         implementation(project(":extensions:iam:oauth2:oauth2-core"))
     }
+
+    implementation("com.nimbusds:nimbus-jose-jwt:${nimbusVersion}")
+
+    implementation(project(":extensions:iam:oauth2:oauth2-spi"))
+
+    testImplementation(project(":extensions:iam:oauth2:oauth2-core"))
 
     implementation(project(":extensions:http"))
 

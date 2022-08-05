@@ -30,8 +30,6 @@ import org.eclipse.dataspaceconnector.spi.types.domain.transfer.DataRequest;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.TransferProcessStates;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.command.DeprovisionRequest;
 
-import java.util.UUID;
-
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({MediaType.APPLICATION_JSON})
 @Path("/consumer")
@@ -61,8 +59,7 @@ public class ConsumerApiController {
         if (request == null) {
             return Response.status(400).entity("data request cannot be null").build();
         }
-        //Not to be used
-        request = request.copy(UUID.randomUUID().toString()); //assign random ID
+
         monitor.info("Received new data request, ID = " + request.getId());
         var result = processManager.initiateConsumerRequest(request);
         monitor.info("Created new transfer process, ID = " + result.getContent());

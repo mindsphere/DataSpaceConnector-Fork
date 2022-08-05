@@ -16,15 +16,24 @@ package com.siemens.mindsphere;
 
 import com.siemens.mindsphere.datalake.edc.http.provision.MindsphereDatalakeSchema;
 import org.eclipse.dataspaceconnector.dataloading.AssetLoader;
+import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2JwtDecoratorRegistry;
+import org.eclipse.dataspaceconnector.ids.core.service.ConnectorServiceImpl;
+import org.eclipse.dataspaceconnector.ids.core.service.ConnectorServiceSettings;
+import org.eclipse.dataspaceconnector.ids.spi.service.CatalogService;
+import org.eclipse.dataspaceconnector.ids.spi.service.ConnectorService;
 import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.policy.model.PolicyDefinition;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
+import org.eclipse.dataspaceconnector.spi.contract.offer.ContractOfferService;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
+import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.policy.store.PolicyDefinitionStore;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
+import org.eclipse.dataspaceconnector.spi.system.Provider;
+import org.eclipse.dataspaceconnector.spi.system.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
@@ -32,10 +41,16 @@ import org.eclipse.dataspaceconnector.spi.types.domain.HttpDataAddress;
 import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractDefinition;
 
+import static org.eclipse.dataspaceconnector.ids.core.IdsCoreServiceExtension.DEFAULT_EDC_IDS_CATALOG_ID;
+
 
 /**
  * It is possible to be called from outside without any JWT token passed
  */
+@Provides({
+        ConnectorService.class,
+        CatalogService.class
+})
 public class SourceUrlExtension implements ServiceExtension {
 
     private static final Action USE_ACTION = Action.Builder.newInstance().type("USE").build();
@@ -57,9 +72,38 @@ public class SourceUrlExtension implements ServiceExtension {
     @EdcSetting
     private static final String EDC_ASSET_URL = "edc.sample.url";
 
+    @Inject
+    private ContractOfferService contractOfferService;
+
+    @Inject
+    private Oauth2JwtDecoratorRegistry jwtDecoratorRegistry;
+
+    private Monitor monitor;
+    private ConnectorServiceSettings connectorServiceSettings;
+
     @Override
     public void initialize(ServiceExtensionContext context) {
+        monitor = context.getMonitor();
+        connectorServiceSettings = new ConnectorServiceSettings(context, monitor);
+
+        jwtDecoratorRegistry.register(new TenantJwtDecorator());
+
+        //Normally this should have been covered by @Provider
+        context.registerService(CatalogService.class, catalogService());
+        context.registerService(ConnectorService.class, connectorService());
+
         addTestData(context);
+
+    }
+
+    @Provider(isDefault = true)
+    public ConnectorService connectorService() {
+        return new ConnectorServiceImpl(monitor, connectorServiceSettings, catalogService());
+    }
+
+    @Provider(isDefault = true)
+    public CatalogService catalogService() {
+        return new SiemensCatalogServiceImpl(DEFAULT_EDC_IDS_CATALOG_ID, contractOfferService);
     }
 
     /**
@@ -107,33 +151,33 @@ public class SourceUrlExtension implements ServiceExtension {
                 .property("baseUrl", "http://fakesite.com")
                 .property("method", "GET")
                 .property("contentType", "text/csv")
-                .property("transferInOneGo", "true")
+                .property("nonChunkedTransfer", "true")
                 .property(MindsphereDatalakeSchema.DOWNLOAD_DATALAKE_PATH, assetPathSetting)
                 .build();
 
         var assetId = "data.csv";
-        var asset = Asset.Builder.newInstance().id(assetId).build();
+        var asset = Asset.Builder.newInstance().id(assetId).property("tenant", "castiop").build();
 
         var assetUrl1 = context.getSetting(EDC_ASSET_URL, "https://raw.githubusercontent.com/eclipse-dataspaceconnector/DataSpaceConnector/main/styleguide.md");
         var dataAddress1 = DataAddress.Builder.newInstance()
                 .property("type", HttpDataAddress.DATA_TYPE)
-                .property("ten", "presdev")
+                .property("ten", "castiop")
                 .property("baseUrl", assetUrl1)
                 .property("method", "GET")
-                .property("transferInOneGo", "true")
+                .property("nonChunkedTransfer", "true")
                 .property("contentType", "text/plain")
                 .property("name", "")
                 .build();
 
         var assetId1 = "styleguide.md";
-        var asset1 = Asset.Builder.newInstance().id(assetId1).build();
+        var asset1 = Asset.Builder.newInstance().id(assetId1).property("tenant", "castidev").build();
 
         var dataAddress2 = DataAddress.Builder.newInstance()
                 .property("type", HttpDataAddress.DATA_TYPE)
                 .property("baseUrl", "https://jsonplaceholder.typicode.com/todos/1")
-                .property("ten", "castiop")
+                .property("ten", "castidev")
                 .property("name", "")
-                .property("transferInOneGo", "true")
+                .property("nonChunkedTransfer", "true")
                 .property("method", "GET")
                 .property("contentType", "application/json")
                 .build();
