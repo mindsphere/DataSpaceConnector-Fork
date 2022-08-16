@@ -15,6 +15,7 @@ package com.siemens.mindsphere;
 
 
 import com.siemens.mindsphere.datalake.edc.http.provision.MindsphereDatalakeSchema;
+import org.eclipse.dataspaceconnector.core.defaults.assetindex.InMemoryAssetIndex;
 import org.eclipse.dataspaceconnector.dataloading.AssetLoader;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2JwtDecoratorRegistry;
 import org.eclipse.dataspaceconnector.ids.core.service.ConnectorServiceImpl;
@@ -26,6 +27,7 @@ import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.policy.model.PolicyDefinition;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
+import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
 import org.eclipse.dataspaceconnector.spi.contract.offer.ContractOfferService;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
@@ -55,6 +57,8 @@ public class SourceUrlExtension implements ServiceExtension {
 
     private static final Action USE_ACTION = Action.Builder.newInstance().type("USE").build();
 
+    public static final String IDS_API_CONTEXT_ALIAS = "ids";
+
     @Inject
     private PolicyDefinitionStore policyStore;
 
@@ -78,8 +82,14 @@ public class SourceUrlExtension implements ServiceExtension {
     @Inject
     private Oauth2JwtDecoratorRegistry jwtDecoratorRegistry;
 
+    @Inject
+    private WebService webService;
+
+
     private Monitor monitor;
     private ConnectorServiceSettings connectorServiceSettings;
+
+    private InMemoryAssetIndex assetIndex;
 
     @Override
     public void initialize(ServiceExtensionContext context) {
@@ -87,11 +97,26 @@ public class SourceUrlExtension implements ServiceExtension {
         connectorServiceSettings = new ConnectorServiceSettings(context, monitor);
 
         //Normally this should have been covered by @Provider
-        context.registerService(CatalogService.class, catalogService());
-        context.registerService(ConnectorService.class, connectorService());
+        //context.registerService(CatalogService.class, catalogService());
+        //context.registerService(ConnectorService.class, connectorService());
+
+        var contextAlias = IDS_API_CONTEXT_ALIAS;
+        webService.registerResource(contextAlias, new TenantFilter(monitor));
 
         addTestData(context);
 
+    }
+
+    //@Provider(isDefault = true)
+    //public AssetLoader defaultAssetLoader() {
+    //    return getAssetIndex();
+    //}
+
+    private InMemoryAssetIndex getAssetIndex() {
+        if (assetIndex == null) {
+            assetIndex = new SiemensInMemoryAssetIndex();
+        }
+        return assetIndex;
     }
 
     @Provider(isDefault = true)

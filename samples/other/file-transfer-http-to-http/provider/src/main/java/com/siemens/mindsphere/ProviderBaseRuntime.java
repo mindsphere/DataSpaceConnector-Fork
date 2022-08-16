@@ -47,8 +47,8 @@ public class ProviderBaseRuntime extends BaseRuntime {
         new ProviderBaseRuntime().boot();
     }
 
-    @Override
+    /*@Override
     protected @NotNull ServiceExtensionContext createContext(TypeManager typeManager, Monitor monitor, Telemetry telemetry) {
         return new SiemensServiceExtensionContext(typeManager, monitor, telemetry, loadConfigurationExtensions());
-    }
+    }*/
 }
