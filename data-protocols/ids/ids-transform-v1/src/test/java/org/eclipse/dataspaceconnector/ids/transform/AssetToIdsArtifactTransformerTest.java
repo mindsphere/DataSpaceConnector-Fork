@@ -9,14 +9,14 @@
  *
  *  Contributors:
  *       Daimler TSS GmbH - Initial Implementation
+ *       Fraunhofer Institute for Software and Systems Engineering - refactoring
  *
  */
 
 package org.eclipse.dataspaceconnector.ids.transform;
 
-import org.eclipse.dataspaceconnector.ids.spi.IdsId;
-import org.eclipse.dataspaceconnector.ids.spi.IdsType;
-import org.eclipse.dataspaceconnector.ids.spi.transform.TransformKeys;
+import org.eclipse.dataspaceconnector.ids.transform.type.asset.AssetToIdsArtifactTransformer;
+import org.eclipse.dataspaceconnector.ids.transform.type.asset.TransformKeys;
 import org.eclipse.dataspaceconnector.spi.transformer.TransformerContext;
 import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,19 +24,15 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class AssetToIdsArtifactTransformerTest {
-    private static final String ASSET_ID = "test_id";
-    private static final URI ASSET_ID_URI = URI.create("urn:asset:1");
+    private static final String ASSET_ID = "1";
+    private static final URI ASSET_ID_URI = URI.create("urn:artifact:1");
     private static final String ASSET_FILENAME = "test_filename";
     private static final BigInteger ASSET_BYTESIZE = BigInteger.valueOf(5);
 
@@ -90,23 +86,16 @@ class AssetToIdsArtifactTransformerTest {
     void testSuccessfulSimple() {
         var asset = Asset.Builder.newInstance().id(ASSET_ID).build();
 
-        IdsId id = IdsId.Builder.newInstance().value(ASSET_ID).type(IdsType.ARTIFACT).build();
-        when(context.transform(eq(id), eq(URI.class))).thenReturn(ASSET_ID_URI);
-
         var result = transformer.transform(asset, context);
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(ASSET_ID_URI);
-        verify(context).transform(eq(id), eq(URI.class));
     }
 
     @Test
     void testSuccessfulMap() {
-        var properties = new HashMap<>(Map.of(TransformKeys.KEY_ASSET_FILE_NAME, ASSET_FILENAME, TransformKeys.KEY_ASSET_BYTE_SIZE, ASSET_BYTESIZE));
+        var properties = Map.<String, Object>of(TransformKeys.KEY_ASSET_FILE_NAME, ASSET_FILENAME, TransformKeys.KEY_ASSET_BYTE_SIZE, ASSET_BYTESIZE);
         var asset = Asset.Builder.newInstance().properties(properties).id(ASSET_ID).build();
-
-        IdsId id = IdsId.Builder.newInstance().value(ASSET_ID).type(IdsType.ARTIFACT).build();
-        when(context.transform(eq(id), eq(URI.class))).thenReturn(ASSET_ID_URI);
 
         var result = transformer.transform(asset, context);
 
@@ -114,8 +103,6 @@ class AssetToIdsArtifactTransformerTest {
         assertThat(result.getId()).isEqualTo(ASSET_ID_URI);
         assertThat(result.getFileName()).isEqualTo(ASSET_FILENAME);
         assertThat(result.getByteSize()).isEqualTo(ASSET_BYTESIZE);
-
-        verify(context).transform(eq(id), eq(URI.class));
     }
 
 }

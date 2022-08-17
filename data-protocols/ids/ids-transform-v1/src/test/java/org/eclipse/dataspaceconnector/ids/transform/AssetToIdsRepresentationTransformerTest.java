@@ -9,6 +9,7 @@
  *
  *  Contributors:
  *       Daimler TSS GmbH - Initial Implementation
+ *       Fraunhofer Institute for Software and Systems Engineering - refactoring
  *
  */
 
@@ -17,9 +18,8 @@ package org.eclipse.dataspaceconnector.ids.transform;
 import de.fraunhofer.iais.eis.Artifact;
 import de.fraunhofer.iais.eis.ArtifactBuilder;
 import de.fraunhofer.iais.eis.Representation;
-import org.eclipse.dataspaceconnector.ids.spi.IdsId;
-import org.eclipse.dataspaceconnector.ids.spi.IdsType;
-import org.eclipse.dataspaceconnector.ids.spi.transform.TransformKeys;
+import org.eclipse.dataspaceconnector.ids.transform.type.asset.AssetToIdsRepresentationTransformer;
+import org.eclipse.dataspaceconnector.ids.transform.type.asset.TransformKeys;
 import org.eclipse.dataspaceconnector.spi.transformer.TransformerContext;
 import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
 import org.junit.jupiter.api.Assertions;
@@ -27,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -37,7 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class AssetToIdsRepresentationTransformerTest {
-    private static final String REPRESENTATION_ID = "test_id";
+    private static final String REPRESENTATION_ID = "1";
     private static final URI REPRESENTATION_ID_URI = URI.create("urn:representation:1");
     private static final String ASSET_FILE_EXTENSION = "file_extension";
 
@@ -78,26 +77,19 @@ class AssetToIdsRepresentationTransformerTest {
         var artifact = new ArtifactBuilder().build();
         when(context.transform(any(Asset.class), eq(Artifact.class))).thenReturn(artifact);
 
-        IdsId id = IdsId.Builder.newInstance().value(REPRESENTATION_ID).type(IdsType.REPRESENTATION).build();
-        when(context.transform(eq(id), eq(URI.class))).thenReturn(REPRESENTATION_ID_URI);
-
         var result = transformer.transform(asset, context);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(REPRESENTATION_ID_URI, result.getId());
         verify(context).transform(any(Asset.class), eq(Artifact.class));
-        verify(context).transform(eq(id), eq(URI.class));
     }
 
     @Test
     void testSuccessfulMap() {
-        var properties = new HashMap<>(Map.of(TransformKeys.KEY_ASSET_FILE_EXTENSION, ASSET_FILE_EXTENSION));
+        var properties = Map.<String, Object>of(TransformKeys.KEY_ASSET_FILE_EXTENSION, ASSET_FILE_EXTENSION);
         var asset = Asset.Builder.newInstance().properties(properties).id(REPRESENTATION_ID).build();
         var artifact = new ArtifactBuilder().build();
         when(context.transform(any(Asset.class), eq(Artifact.class))).thenReturn(artifact);
-
-        IdsId id = IdsId.Builder.newInstance().value(REPRESENTATION_ID).type(IdsType.REPRESENTATION).build();
-        when(context.transform(eq(id), eq(URI.class))).thenReturn(REPRESENTATION_ID_URI);
 
         Representation result = transformer.transform(asset, context);
 
@@ -105,6 +97,5 @@ class AssetToIdsRepresentationTransformerTest {
         Assertions.assertEquals(REPRESENTATION_ID_URI, result.getId());
         Assertions.assertEquals(ASSET_FILE_EXTENSION, result.getMediaType().getFilenameExtension());
         verify(context).transform(any(Asset.class), eq(Artifact.class));
-        verify(context).transform(eq(id), eq(URI.class));
     }
 }
