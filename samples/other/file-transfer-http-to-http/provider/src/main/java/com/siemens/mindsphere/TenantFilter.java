@@ -9,6 +9,7 @@ import jakarta.ws.rs.ext.Provider;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 @Provider
 public class TenantFilter implements ContainerRequestFilter, ContainerResponseFilter {
@@ -23,6 +24,8 @@ public class TenantFilter implements ContainerRequestFilter, ContainerResponseFi
     public void filter(ContainerRequestContext requestContext) {
         try {
             var headers = requestContext.getHeaders();
+            monitor.debug(() -> "Headers --> " + headers.keySet().stream().map(key -> key + "=" + headers.get(key)).collect(Collectors.joining("\t")));
+
             var ten = headers.get("ten").stream().findFirst();
 
             if (ten.isPresent()) {
