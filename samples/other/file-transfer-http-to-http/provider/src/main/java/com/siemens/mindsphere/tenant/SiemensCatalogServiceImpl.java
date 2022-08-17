@@ -13,7 +13,7 @@
  *
  */
 
-package com.siemens.mindsphere;
+package com.siemens.mindsphere.tenant;
 
 import org.eclipse.dataspaceconnector.ids.spi.service.CatalogService;
 import org.eclipse.dataspaceconnector.spi.contract.offer.ContractOfferQuery;
@@ -31,12 +31,15 @@ import static java.util.stream.Collectors.toList;
 public class SiemensCatalogServiceImpl implements CatalogService {
     private final String dataCatalogId;
     private final ContractOfferService contractOfferService;
+    private final TenantService tenantService;
 
     public SiemensCatalogServiceImpl(
             @NotNull String dataCatalogId,
-            @NotNull ContractOfferService contractOfferService) {
+            @NotNull ContractOfferService contractOfferService,
+            @NotNull TenantService tenantService) {
         this.dataCatalogId = Objects.requireNonNull(dataCatalogId);
         this.contractOfferService = Objects.requireNonNull(contractOfferService);
+        this.tenantService = Objects.requireNonNull(tenantService);
     }
 
     /**
@@ -62,7 +65,6 @@ public class SiemensCatalogServiceImpl implements CatalogService {
     }
 
     private String getTenant(Object clientId) {
-        //TODO: map based on client_id
-        return "castidev";
+        return tenantService.tenantFromClientId(clientId);
     }
 }

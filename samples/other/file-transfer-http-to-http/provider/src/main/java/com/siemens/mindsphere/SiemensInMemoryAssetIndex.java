@@ -14,30 +14,12 @@
 
 package com.siemens.mindsphere;
 
-import org.eclipse.dataspaceconnector.common.collection.CollectionUtil;
 import org.eclipse.dataspaceconnector.core.defaults.assetindex.InMemoryAssetIndex;
-import org.eclipse.dataspaceconnector.dataloading.AssetEntry;
-import org.eclipse.dataspaceconnector.dataloading.AssetLoader;
-import org.eclipse.dataspaceconnector.spi.asset.AssetIndex;
-import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
-import org.eclipse.dataspaceconnector.spi.asset.DataAddressResolver;
 import org.eclipse.dataspaceconnector.spi.query.QuerySpec;
-import org.eclipse.dataspaceconnector.spi.query.SortOrder;
-import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
 import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.lang.String.format;
 
 /**
  * An ephemeral asset index, that is also a DataAddressResolver and an AssetLoader
