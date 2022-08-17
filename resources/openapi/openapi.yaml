@@ -79,7 +79,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AssetDto'
+                  $ref: '#/components/schemas/AssetResponseDto'
         "400":
           description: Request body was malformed
           content:
@@ -138,7 +138,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssetDto'
+                $ref: '#/components/schemas/AssetResponseDto'
         "400":
           description: "Request was malformed, e.g. id was null"
           content:
@@ -778,7 +778,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ContractDefinitionDto'
+                  $ref: '#/components/schemas/ContractDefinitionResponseDto'
         "400":
           description: Request was malformed
           content:
@@ -796,7 +796,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/ContractDefinitionDto'
+              $ref: '#/components/schemas/ContractDefinitionRequestDto'
       responses:
         "200":
           description: contract definition was created successfully
@@ -837,7 +837,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContractDefinitionDto'
+                $ref: '#/components/schemas/ContractDefinitionResponseDto'
         "400":
           description: "Request was malformed, e.g. id was null"
           content:
@@ -984,74 +984,6 @@ paths:
           description: Access token is expired or invalid
         "500":
           description: Failed to transfer data
-  /identity-hub/collections:
-    post:
-      tags:
-      - Identity Hub
-      operationId: write
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: string
-      responses:
-        default:
-          description: default response
-          content:
-            application/json:
-              schema:
-                type: string
-  /identity-hub/collections-commit:
-    post:
-      tags:
-      - Identity Hub
-      operationId: writeCommit
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties:
-                type: string
-      responses:
-        default:
-          description: default response
-          content:
-            application/json: {}
-  /identity-hub/query-commits:
-    post:
-      tags:
-      - Identity Hub
-      operationId: queryCommits
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: string
-      responses:
-        default:
-          description: default response
-          content:
-            application/json:
-              schema:
-                type: string
-  /identity-hub/query-objects:
-    post:
-      tags:
-      - Identity Hub
-      operationId: queryObjects
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: string
-      responses:
-        default:
-          description: default response
-          content:
-            application/json:
-              schema:
-                type: string
   /federatedcatalog:
     post:
       operationId: getCachedCatalog
@@ -1619,15 +1551,11 @@ components:
     Asset:
       type: object
       properties:
-        properties:
-          type: object
-          additionalProperties:
-            type: object
-    AssetDto:
-      required:
-      - properties
-      type: object
-      properties:
+        createdAt:
+          type: integer
+          format: int64
+        id:
+          type: string
         properties:
           type: object
           additionalProperties:
@@ -1639,9 +1567,32 @@ components:
       type: object
       properties:
         asset:
-          $ref: '#/components/schemas/AssetDto'
+          $ref: '#/components/schemas/AssetRequestDto'
         dataAddress:
           $ref: '#/components/schemas/DataAddressDto'
+    AssetRequestDto:
+      required:
+      - properties
+      type: object
+      properties:
+        id:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: object
+    AssetResponseDto:
+      type: object
+      properties:
+        createdAt:
+          type: integer
+          format: int64
+        id:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: object
     Catalog:
       type: object
       properties:
@@ -1688,18 +1639,33 @@ components:
           $ref: '#/components/schemas/Policy'
         providerAgentId:
           type: string
-    ContractDefinitionDto:
+    ContractDefinitionRequestDto:
       required:
       - accessPolicyId
       - contractPolicyId
       - criteria
-      - id
       type: object
       properties:
         accessPolicyId:
           type: string
         contractPolicyId:
           type: string
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/Criterion'
+        id:
+          type: string
+    ContractDefinitionResponseDto:
+      type: object
+      properties:
+        accessPolicyId:
+          type: string
+        contractPolicyId:
+          type: string
+        createdAt:
+          type: integer
+          format: int64
         criteria:
           type: array
           items:
@@ -1713,6 +1679,9 @@ components:
           type: string
         counterPartyAddress:
           type: string
+        createdAt:
+          type: integer
+          format: int64
         errorDetail:
           type: string
         id:
@@ -1726,6 +1695,9 @@ components:
           enum:
           - CONSUMER
           - PROVIDER
+        updatedAt:
+          type: integer
+          format: int64
     ContractOffer:
       type: object
       properties:
@@ -1995,6 +1967,11 @@ components:
     PolicyDefinition:
       type: object
       properties:
+        createdAt:
+          type: integer
+          format: int64
+        id:
+          type: string
         policy:
           $ref: '#/components/schemas/Policy'
         uid:
@@ -2054,7 +2031,7 @@ components:
     TransferProcessDto:
       type: object
       properties:
-        createdTimestamp:
+        createdAt:
           type: integer
           format: int64
         dataDestination:
@@ -2072,6 +2049,9 @@ components:
           format: int64
         type:
           type: string
+        updatedAt:
+          type: integer
+          format: int64
     TransferRequestDto:
       required:
       - assetId

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, 2021 Microsoft Corporation
+ *  Copyright (c) 2022 Microsoft Corporation
  *
  *  This program and the accompanying materials are made available under the
  *  terms of the Apache License, Version 2.0 which is available at
@@ -9,7 +9,6 @@
  *
  *  Contributors:
  *       Microsoft Corporation - initial API and implementation
- *       Fraunhofer Institute for Software and Systems Engineering - added method
  *
  */
 
@@ -30,8 +29,7 @@ import java.util.stream.Collectors;
 /**
  * A collection of permissions, prohibitions, and obligations. Subtypes are defined by
  * {@link PolicyType}.
- * This is a value object. In order to have it identifiable and individually addressable, consider the use of
- * {@link PolicyDefinition}.
+ * This is a value object. In order to have it identifiable and individually addressable, consider the use of PolicyDefinition.
  */
 @JsonDeserialize(builder = Policy.Builder.class)
 public class Policy {

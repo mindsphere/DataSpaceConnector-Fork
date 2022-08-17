@@ -57,7 +57,8 @@ class TransferProcessTest {
                 .newInstance()
                 .id(UUID.randomUUID().toString())
                 .type(TransferProcess.Type.PROVIDER)
-                .createdTimestamp(3)
+                .createdAt(3)
+                .updatedAt(1234)
                 .state(TransferProcessStates.COMPLETED.code())
                 .contentDataAddress(DataAddress.Builder.newInstance().type("test").build())
                 .stateCount(1)
@@ -68,12 +69,12 @@ class TransferProcessTest {
 
         assertEquals(process.getState(), copy.getState());
         assertEquals(process.getType(), copy.getType());
-        assertEquals(process.getCreatedTimestamp(), copy.getCreatedTimestamp());
+        assertEquals(process.getCreatedAt(), copy.getCreatedAt());
         assertEquals(process.getStateCount(), copy.getStateCount());
         assertEquals(process.getStateTimestamp(), copy.getStateTimestamp());
         assertNotNull(process.getContentDataAddress());
 
-        assertEquals(process, copy);
+        assertThat(process).usingRecursiveComparison().isEqualTo(copy);
     }
 
     @Test
@@ -213,23 +214,27 @@ class TransferProcessTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = TransferProcessStates.class, names = {"COMPLETED", "ENDED", "ERROR"}, mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = TransferProcessStates.class, names = { "COMPLETED", "ENDED", "ERROR" }, mode = EnumSource.Mode.EXCLUDE)
     void verifyCancel_validStates(TransferProcessStates state) {
-        var builder = TransferProcess.Builder.newInstance().id(UUID.randomUUID().toString());
-        builder.state(state.code());
-        var tp = builder.build();
-        tp.transitionCancelled();
-        assertThat(tp.getState()).isEqualTo(TransferProcessStates.CANCELLED.code());
+        var transferProcess = TransferProcess.Builder.newInstance()
+                .id(UUID.randomUUID().toString())
+                .state(state.code())
+                .build();
 
+        transferProcess.transitionCancelled();
+
+        assertThat(transferProcess.getState()).isEqualTo(TransferProcessStates.CANCELLED.code());
     }
 
     @ParameterizedTest
-    @EnumSource(value = TransferProcessStates.class, names = {"COMPLETED", "ENDED", "ERROR"}, mode = EnumSource.Mode.INCLUDE)
+    @EnumSource(value = TransferProcessStates.class, names = { "COMPLETED", "ENDED", "ERROR" }, mode = EnumSource.Mode.INCLUDE)
     void verifyCancel_invalidStates(TransferProcessStates state) {
-        var builder = TransferProcess.Builder.newInstance().id(UUID.randomUUID().toString());
-        builder.state(state.code());
-        var tp = builder.build();
-        assertThatThrownBy(tp::transitionCancelled).isInstanceOf(IllegalStateException.class);
+        var process = TransferProcess.Builder.newInstance()
+                .id(UUID.randomUUID().toString())
+                .state(state.code())
+                .build();
+
+        assertThatThrownBy(process::transitionCancelled).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
