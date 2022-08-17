@@ -102,8 +102,8 @@ public class SourceUrlExtension implements ServiceExtension {
         context.registerService(CatalogService.class, catalogService);
         context.registerService(ConnectorService.class, connectorService(catalogService));
 
-        //var contextAlias = IDS_API_CONTEXT_ALIAS;
-        //webService.registerResource(contextAlias, new TenantFilter(monitor));
+        var contextAlias = IDS_API_CONTEXT_ALIAS;
+        webService.registerResource(contextAlias, new TenantFilter(monitor));
 
         addTestData(context);
 

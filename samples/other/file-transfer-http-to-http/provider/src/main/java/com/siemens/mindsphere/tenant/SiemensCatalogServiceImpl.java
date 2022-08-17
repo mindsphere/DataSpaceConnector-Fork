@@ -53,7 +53,7 @@ public class SiemensCatalogServiceImpl implements CatalogService {
         var query = ContractOfferQuery.Builder.newInstance().claimToken(claimToken).build();
 
         var offers = contractOfferService.queryContractOffers(query, range).collect(toList());
-        var ten = getTenant(claimToken.getClaims().get("client_id"));
+        var ten = TenantService.TLS_TENANT.get();
 
         if (Objects.isNull(ten)) {
             return Catalog.Builder.newInstance().id(dataCatalogId).contractOffers(offers).build();

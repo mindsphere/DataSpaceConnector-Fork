@@ -14,6 +14,7 @@
 
 package com.siemens.mindsphere;
 
+import com.siemens.mindsphere.tenant.TenantService;
 import org.eclipse.dataspaceconnector.core.defaults.assetindex.InMemoryAssetIndex;
 import org.eclipse.dataspaceconnector.spi.query.QuerySpec;
 import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
@@ -29,7 +30,7 @@ public class SiemensInMemoryAssetIndex extends InMemoryAssetIndex {
     @Override
     public Stream<Asset> queryAssets(QuerySpec querySpec) {
         final Stream<Asset> assetStream = super.queryAssets(querySpec);
-        final var tenant = TenantFilter.TLS.get();
+        final var tenant = TenantService.TLS_TENANT.get();
 
         return assetStream.filter(asset -> Objects.equals(asset.getProperty("tenant"), tenant));
     }
