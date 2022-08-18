@@ -17,17 +17,18 @@ plugins {
     id("io.swagger.core.v3.swagger-gradle-plugin")
 }
 
-val okHttpVersion: String by project
+val awaitility: String by project
 val failsafeVersion: String by project
-val rsApi: String by project
-val restAssured: String by project
 val jerseyVersion: String by project
+val okHttpVersion: String by project
+val restAssured: String by project
+val rsApi: String by project
 
 
 dependencies {
-    api(project(":spi:transfer-spi"))
-    api(project(":spi:web-spi"))
-    implementation(project(":extensions:api:auth-spi"))
+    api(project(":spi:control-plane:transfer-spi"))
+    api(project(":spi:common:web-spi"))
+    implementation(project(":spi:common:auth-spi"))
     implementation(project(":extensions:api:api-core"))
     implementation(project(":core:transfer")) // needs the AddProvisionedResourceCommand
 
@@ -41,6 +42,8 @@ dependencies {
     testImplementation(project(":extensions:http"))
     testImplementation(project(":extensions:junit"))
     testImplementation("io.rest-assured:rest-assured:${restAssured}")
+
+    testImplementation("org.awaitility:awaitility:${awaitility}")
 }
 
 
