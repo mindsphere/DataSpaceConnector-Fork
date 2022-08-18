@@ -81,7 +81,7 @@ window.swaggerSpec={
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/AssetDto"
+                    "$ref" : "#/components/schemas/AssetResponseDto"
                   }
                 }
               }
@@ -169,7 +169,7 @@ window.swaggerSpec={
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/AssetDto"
+                  "$ref" : "#/components/schemas/AssetResponseDto"
                 }
               }
             }
@@ -1047,7 +1047,7 @@ window.swaggerSpec={
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/ContractDefinitionDto"
+                    "$ref" : "#/components/schemas/ContractDefinitionResponseDto"
                   }
                 }
               }
@@ -1076,7 +1076,7 @@ window.swaggerSpec={
           "content" : {
             "*/*" : {
               "schema" : {
-                "$ref" : "#/components/schemas/ContractDefinitionDto"
+                "$ref" : "#/components/schemas/ContractDefinitionRequestDto"
               }
             }
           }
@@ -1135,7 +1135,7 @@ window.swaggerSpec={
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ContractDefinitionDto"
+                  "$ref" : "#/components/schemas/ContractDefinitionResponseDto"
                 }
               }
             }
@@ -1339,113 +1339,6 @@ window.swaggerSpec={
           },
           "500" : {
             "description" : "Failed to transfer data"
-          }
-        }
-      }
-    },
-    "/identity-hub/collections" : {
-      "post" : {
-        "tags" : [ "Identity Hub" ],
-        "operationId" : "write",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity-hub/collections-commit" : {
-      "post" : {
-        "tags" : [ "Identity Hub" ],
-        "operationId" : "writeCommit",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "additionalProperties" : {
-                  "type" : "string"
-                }
-              }
-            }
-          }
-        },
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "content" : {
-              "application/json" : { }
-            }
-          }
-        }
-      }
-    },
-    "/identity-hub/query-commits" : {
-      "post" : {
-        "tags" : [ "Identity Hub" ],
-        "operationId" : "queryCommits",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity-hub/query-objects" : {
-      "post" : {
-        "tags" : [ "Identity Hub" ],
-        "operationId" : "queryObjects",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
           }
         }
       }
@@ -2242,18 +2135,13 @@ window.swaggerSpec={
       "Asset" : {
         "type" : "object",
         "properties" : {
-          "properties" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "object"
-            }
-          }
-        }
-      },
-      "AssetDto" : {
-        "required" : [ "properties" ],
-        "type" : "object",
-        "properties" : {
+          "createdAt" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "id" : {
+            "type" : "string"
+          },
           "properties" : {
             "type" : "object",
             "additionalProperties" : {
@@ -2267,10 +2155,43 @@ window.swaggerSpec={
         "type" : "object",
         "properties" : {
           "asset" : {
-            "$ref" : "#/components/schemas/AssetDto"
+            "$ref" : "#/components/schemas/AssetRequestDto"
           },
           "dataAddress" : {
             "$ref" : "#/components/schemas/DataAddressDto"
+          }
+        }
+      },
+      "AssetRequestDto" : {
+        "required" : [ "properties" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "properties" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object"
+            }
+          }
+        }
+      },
+      "AssetResponseDto" : {
+        "type" : "object",
+        "properties" : {
+          "createdAt" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "properties" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object"
+            }
           }
         }
       },
@@ -2333,8 +2254,8 @@ window.swaggerSpec={
           }
         }
       },
-      "ContractDefinitionDto" : {
-        "required" : [ "accessPolicyId", "contractPolicyId", "criteria", "id" ],
+      "ContractDefinitionRequestDto" : {
+        "required" : [ "accessPolicyId", "contractPolicyId", "criteria" ],
         "type" : "object",
         "properties" : {
           "accessPolicyId" : {
@@ -2342,6 +2263,30 @@ window.swaggerSpec={
           },
           "contractPolicyId" : {
             "type" : "string"
+          },
+          "criteria" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Criterion"
+            }
+          },
+          "id" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ContractDefinitionResponseDto" : {
+        "type" : "object",
+        "properties" : {
+          "accessPolicyId" : {
+            "type" : "string"
+          },
+          "contractPolicyId" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "integer",
+            "format" : "int64"
           },
           "criteria" : {
             "type" : "array",
@@ -2363,6 +2308,10 @@ window.swaggerSpec={
           "counterPartyAddress" : {
             "type" : "string"
           },
+          "createdAt" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
           "errorDetail" : {
             "type" : "string"
           },
@@ -2378,6 +2327,10 @@ window.swaggerSpec={
           "type" : {
             "type" : "string",
             "enum" : [ "CONSUMER", "PROVIDER" ]
+          },
+          "updatedAt" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },
@@ -2770,6 +2723,13 @@ window.swaggerSpec={
       "PolicyDefinition" : {
         "type" : "object",
         "properties" : {
+          "createdAt" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "id" : {
+            "type" : "string"
+          },
           "policy" : {
             "$ref" : "#/components/schemas/Policy"
           },
@@ -2853,7 +2813,7 @@ window.swaggerSpec={
       "TransferProcessDto" : {
         "type" : "object",
         "properties" : {
-          "createdTimestamp" : {
+          "createdAt" : {
             "type" : "integer",
             "format" : "int64"
           },
@@ -2878,6 +2838,10 @@ window.swaggerSpec={
           },
           "type" : {
             "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },

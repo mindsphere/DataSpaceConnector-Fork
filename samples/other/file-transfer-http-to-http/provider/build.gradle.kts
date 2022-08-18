@@ -61,7 +61,7 @@ dependencies {
 
     implementation("io.opentelemetry:opentelemetry-extension-annotations:${openTelemetryVersion}")
 
-    implementation(project(":extensions:data-plane:data-plane-spi"))
+    implementation(project(":spi:data-plane"))
 
     implementation(project(":extensions:mindsphere:mindsphere-http"))
 
