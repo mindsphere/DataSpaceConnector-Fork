@@ -54,7 +54,7 @@ dependencies {
     implementation(project(":extensions:data-plane:data-plane-framework"))
     implementation(project(":extensions:data-plane:data-plane-http"))
 
-    implementation(project(":samples:other:file-transfer-http-to-http:api"))
+    // implementation(project(":samples:other:file-transfer-http-to-http:api"))
 }
 
 application {
