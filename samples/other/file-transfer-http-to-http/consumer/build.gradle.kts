@@ -28,7 +28,8 @@ dependencies {
 
     implementation(project(":extensions:api:observability"))
 
-    implementation(project(":extensions:filesystem:vault-fs"))
+    // implementation(project(":extensions:filesystem:vault-fs"))
+    implementation(project(":extensions:hashicorp-vault"))
     implementation(project(":extensions:filesystem:configuration-fs"))
 
     //use like gradle dependencies -P localdevelopment

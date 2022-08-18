@@ -62,7 +62,7 @@ public class ConsumerApiController {
             return Response.status(400).entity("data request cannot be null").build();
         }
         //Not to be used
-        request = request.copy(UUID.randomUUID().toString()); //assign random ID
+        // request = request.copy(UUID.randomUUID().toString()); //assign random ID
         monitor.info("Received new data request, ID = " + request.getId());
         var result = processManager.initiateConsumerRequest(request);
         monitor.info("Created new transfer process, ID = " + result.getContent());
