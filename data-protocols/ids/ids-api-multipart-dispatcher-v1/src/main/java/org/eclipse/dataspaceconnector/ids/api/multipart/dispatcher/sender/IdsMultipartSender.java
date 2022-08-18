@@ -190,7 +190,6 @@ abstract class IdsMultipartSender<M extends RemoteMessage, R> implements IdsMess
         var httpRequest = new Request.Builder()
                 .url(requestUrl)
                 .addHeader("Content-Type", MediaType.MULTIPART_FORM_DATA)
-                .addHeader("ten", "castidev")
                 .post(multipartRequestBody)
                 .build();
 

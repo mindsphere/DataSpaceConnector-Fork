@@ -186,7 +186,7 @@ public class SourceUrlExtension implements ServiceExtension {
         var dataAddress2 = DataAddress.Builder.newInstance()
                 .property("type", HttpDataAddress.DATA_TYPE)
                 .property("baseUrl", "https://jsonplaceholder.typicode.com/todos/1")
-                .property("ten", "castidev")
+                .property("ten", "presdev")
                 .property("name", "")
                 .property("nonChunkedTransfer", "true")
                 .property("method", "GET")
@@ -194,7 +194,7 @@ public class SourceUrlExtension implements ServiceExtension {
                 .build();
 
         var assetId2 = "1";
-        var asset2 = Asset.Builder.newInstance().id(assetId2).build();
+        var asset2 = Asset.Builder.newInstance().id(assetId2).property("tenant", "presdev").build();
 
         loader.accept(asset, dataAddress);
         loader.accept(asset1, dataAddress1);
