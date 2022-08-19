@@ -60,7 +60,7 @@ public class SiemensCatalogServiceImpl implements CatalogService {
         }
 
         return Catalog.Builder.newInstance().id(dataCatalogId)
-                .contractOffers(offers.stream().filter(offer -> Objects.equals(offer.getAsset().getProperty("tenant"), ten)).collect(Collectors.toUnmodifiableList()))
+                .contractOffers(offers.stream().filter(offer -> Objects.equals(offer.getAsset().getProperty(TenantService.TENANT_PROPERTY), ten)).collect(Collectors.toUnmodifiableList()))
                 .build();
     }
 

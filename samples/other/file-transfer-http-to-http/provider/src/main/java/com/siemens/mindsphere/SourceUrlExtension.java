@@ -44,6 +44,8 @@ import org.eclipse.dataspaceconnector.spi.types.domain.HttpDataAddress;
 import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractDefinition;
 
+import java.util.UUID;
+
 import static org.eclipse.dataspaceconnector.ids.core.IdsCoreServiceExtension.DEFAULT_EDC_IDS_CATALOG_ID;
 
 
@@ -166,35 +168,53 @@ public class SourceUrlExtension implements ServiceExtension {
                 .property(MindsphereDatalakeSchema.DOWNLOAD_DATALAKE_PATH, assetPathSetting)
                 .build();
 
-        var assetId = "data.csv";
-        var asset = Asset.Builder.newInstance().id(assetId).property("tenant", "castiop").build();
+
+        var asset = Asset.Builder.newInstance()
+                .id(UUID.randomUUID().toString())
+                .name("data.csv")
+                .description("castidev data.csv")
+                .version("1.0")
+                .contentType("text/csv")
+                .property(TenantService.TENANT_PROPERTY, "castidev")
+                .build();
 
         var assetUrl1 = context.getSetting(EDC_ASSET_URL, "https://raw.githubusercontent.com/eclipse-dataspaceconnector/DataSpaceConnector/main/styleguide.md");
         var dataAddress1 = DataAddress.Builder.newInstance()
                 .property("type", HttpDataAddress.DATA_TYPE)
-                .property("ten", "castiop")
                 .property("baseUrl", assetUrl1)
                 .property("method", "GET")
                 .property("nonChunkedTransfer", "true")
-                .property("contentType", "text/plain")
+                .property("contentType", "text/markdown")
                 .property("name", "")
                 .build();
 
-        var assetId1 = "styleguide.md";
-        var asset1 = Asset.Builder.newInstance().id(assetId1).property("tenant", "castidev").build();
+        var asset1 = Asset.Builder.newInstance()
+                .id(UUID.randomUUID().toString())
+                .name("styleguide.md")
+                .description("Castidev styleguide.md")
+                .version("1.0")
+                .contentType("text/markdown")
+                .property(TenantService.TENANT_PROPERTY, "castidev")
+                .build();
 
         var dataAddress2 = DataAddress.Builder.newInstance()
                 .property("type", HttpDataAddress.DATA_TYPE)
                 .property("baseUrl", "https://jsonplaceholder.typicode.com/todos/1")
-                .property("ten", "presdev")
+
                 .property("name", "")
                 .property("nonChunkedTransfer", "true")
                 .property("method", "GET")
                 .property("contentType", "application/json")
                 .build();
 
-        var assetId2 = "1";
-        var asset2 = Asset.Builder.newInstance().id(assetId2).property("tenant", "presdev").build();
+        var asset2 = Asset.Builder.newInstance()
+                .id(UUID.randomUUID().toString())
+                .name("todo1")
+                .description("Presdev todo server")
+                .version("1.0")
+                .contentType("application/json")
+                .property(TenantService.TENANT_PROPERTY, "presdev")
+                .build();
 
         loader.accept(asset, dataAddress);
         loader.accept(asset1, dataAddress1);

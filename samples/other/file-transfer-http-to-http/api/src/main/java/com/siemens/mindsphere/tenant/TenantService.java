@@ -2,7 +2,9 @@ package com.siemens.mindsphere.tenant;
 
 public interface TenantService {
 
-    static final ThreadLocal<String> TLS_TENANT = new InheritableThreadLocal<>();
+    ThreadLocal<String> TLS_TENANT = new InheritableThreadLocal<>();
+
+    String TENANT_PROPERTY = "ten";
 
     String tenantFromClientId(Object clientId);
 
