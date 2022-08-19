@@ -37,8 +37,6 @@ dependencies {
 
     implementation("com.nimbusds:nimbus-jose-jwt:${nimbusVersion}")
 
-    implementation(project(":extensions:iam:oauth2:oauth2-spi"))
-
     testImplementation(project(":extensions:iam:oauth2:oauth2-core"))
 
     implementation(project(":extensions:http"))
