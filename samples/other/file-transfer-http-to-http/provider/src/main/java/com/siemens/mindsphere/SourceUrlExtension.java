@@ -227,21 +227,21 @@ public class SourceUrlExtension implements ServiceExtension {
                 .id("9")
                 .accessPolicyId(uid)
                 .contractPolicyId(uid)
-                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_ID, "data.csv").build())
+                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_NAME, "data.csv").build())
                 .build();
 
         var contractDefinition8 = ContractDefinition.Builder.newInstance()
                 .id("8")
                 .accessPolicyId(uid)
                 .contractPolicyId(uid)
-                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_ID, "styleguide.md").build())
+                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_NAME, "styleguide.md").build())
                 .build();
 
         var contractDefinition7 = ContractDefinition.Builder.newInstance()
                 .id("7")
                 .accessPolicyId(uid)
                 .contractPolicyId(uid)
-                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_ID, "1").build())
+                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_NAME, "todo1").build())
                 .build();
 
         contractStore.save(contractDefinition9);

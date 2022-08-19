@@ -152,7 +152,6 @@ include(":extensions:mindsphere:mindsphere-http")
 // include(":samples:other:file-transfer-http-to-http:api")
 include(":samples:other:file-transfer-http-to-http:consumer")
 include(":samples:other:file-transfer-http-to-http:provider")
-include(":samples:other:file-transfer-http-to-http:transfer-file")
 include(":samples:other:file-transfer-http-to-http:api")
 //end siemens
 

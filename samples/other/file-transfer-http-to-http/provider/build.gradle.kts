@@ -63,8 +63,6 @@ dependencies {
 
     implementation(project(":extensions:mindsphere:mindsphere-http"))
 
-    implementation(project(":samples:other:file-transfer-http-to-http:transfer-file"))
-
     implementation(project(":samples:other:file-transfer-http-to-http:api"))
 
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
