@@ -22,6 +22,7 @@ plugins {
 dependencies {
     api(project(":spi:common:core-spi"))
     api(project(":core:base"))
+    api(project(":core:defaults"))
 
     implementation(project(":common:util"))
     implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
