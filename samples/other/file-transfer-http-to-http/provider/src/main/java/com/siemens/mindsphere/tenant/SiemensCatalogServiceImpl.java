@@ -13,33 +13,33 @@
  *
  */
 
-package org.eclipse.dataspaceconnector.ids.core.service;
+package com.siemens.mindsphere.tenant;
 
 import org.eclipse.dataspaceconnector.ids.spi.service.CatalogService;
 import org.eclipse.dataspaceconnector.spi.contract.offer.ContractOfferQuery;
 import org.eclipse.dataspaceconnector.spi.contract.offer.ContractOfferService;
 import org.eclipse.dataspaceconnector.spi.iam.ClaimToken;
 import org.eclipse.dataspaceconnector.spi.message.Range;
-import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.types.domain.catalog.Catalog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public class CatalogServiceImpl implements CatalogService {
-    private final Monitor monitor;
+public class SiemensCatalogServiceImpl implements CatalogService {
     private final String dataCatalogId;
     private final ContractOfferService contractOfferService;
+    private final TenantService tenantService;
 
-    public CatalogServiceImpl(
-            @NotNull Monitor monitor,
+    public SiemensCatalogServiceImpl(
             @NotNull String dataCatalogId,
-            @NotNull ContractOfferService contractOfferService) {
-        this.monitor = Objects.requireNonNull(monitor);
+            @NotNull ContractOfferService contractOfferService,
+            @NotNull TenantService tenantService) {
         this.dataCatalogId = Objects.requireNonNull(dataCatalogId);
         this.contractOfferService = Objects.requireNonNull(contractOfferService);
+        this.tenantService = Objects.requireNonNull(tenantService);
     }
 
     /**
@@ -50,11 +50,21 @@ public class CatalogServiceImpl implements CatalogService {
     @Override
     @NotNull
     public Catalog getDataCatalog(ClaimToken claimToken, Range range) {
-        monitor.debug("Calling getDataCatalog");
         var query = ContractOfferQuery.Builder.newInstance().claimToken(claimToken).build();
 
         var offers = contractOfferService.queryContractOffers(query, range).collect(toList());
+        var ten = TenantService.TLS_TENANT.get();
 
-        return Catalog.Builder.newInstance().id(dataCatalogId).contractOffers(offers).build();
+        if (Objects.isNull(ten)) {
+            return Catalog.Builder.newInstance().id(dataCatalogId).contractOffers(offers).build();
+        }
+
+        return Catalog.Builder.newInstance().id(dataCatalogId)
+                .contractOffers(offers.stream().filter(offer -> Objects.equals(offer.getAsset().getProperty(TenantService.TENANT_PROPERTY), ten)).collect(Collectors.toUnmodifiableList()))
+                .build();
+    }
+
+    private String getTenant(Object clientId) {
+        return tenantService.tenantFromClientId(clientId);
     }
 }

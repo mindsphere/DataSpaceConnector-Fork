@@ -7,9 +7,20 @@ plugins {
 val jupiterVersion: String by project
 val rsApi: String by project
 val openTelemetryVersion: String by project
+val nimbusVersion: String by project
+val jerseyVersion: String by project
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":core:defaults"))
+
+    implementation("org.glassfish.jersey.core:jersey-server:${jerseyVersion}")
+    implementation("org.glassfish.jersey.containers:jersey-container-servlet-core:${jerseyVersion}")
+    implementation("org.glassfish.jersey.core:jersey-common:${jerseyVersion}")
+    implementation("org.glassfish.jersey.media:jersey-media-json-jackson:${jerseyVersion}")
+    implementation("org.glassfish.jersey.media:jersey-media-multipart:${jerseyVersion}")
+
+    implementation(project(":data-protocols:ids:ids-jsonld-serdes-lib"))
 
     implementation(project(":extensions:api:observability"))
 
@@ -24,6 +35,10 @@ dependencies {
         implementation(project(":extensions:iam:daps"))
         implementation(project(":extensions:iam:oauth2:oauth2-core"))
     }
+
+    implementation("com.nimbusds:nimbus-jose-jwt:${nimbusVersion}")
+
+    testImplementation(project(":extensions:iam:oauth2:oauth2-core"))
 
     implementation(project(":extensions:http"))
 
@@ -49,7 +64,7 @@ dependencies {
 
     implementation(project(":extensions:mindsphere:mindsphere-http"))
 
-    implementation(project(":samples:other:file-transfer-http-to-http:transfer-file"))
+    implementation(project(":samples:other:file-transfer-http-to-http:api"))
 
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
 }

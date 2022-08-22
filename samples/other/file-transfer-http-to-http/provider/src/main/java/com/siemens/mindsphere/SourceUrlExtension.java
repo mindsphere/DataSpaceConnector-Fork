@@ -15,16 +15,28 @@ package com.siemens.mindsphere;
 
 
 import com.siemens.mindsphere.datalake.edc.http.provision.MindsphereDatalakeSchema;
+import com.siemens.mindsphere.tenant.PropertiesBasedTenantServiceImpl;
+import com.siemens.mindsphere.tenant.SiemensCatalogServiceImpl;
+import com.siemens.mindsphere.tenant.SiemensConnectorServiceImpl;
+import com.siemens.mindsphere.tenant.TenantService;
 import org.eclipse.dataspaceconnector.dataloading.AssetLoader;
+import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2JwtDecoratorRegistry;
+import org.eclipse.dataspaceconnector.ids.core.service.ConnectorServiceSettings;
+import org.eclipse.dataspaceconnector.ids.spi.service.CatalogService;
+import org.eclipse.dataspaceconnector.ids.spi.service.ConnectorService;
 import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
+import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
+import org.eclipse.dataspaceconnector.spi.contract.offer.ContractOfferService;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
+import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.policy.PolicyDefinition;
 import org.eclipse.dataspaceconnector.spi.policy.store.PolicyDefinitionStore;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
+import org.eclipse.dataspaceconnector.spi.system.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
@@ -32,13 +44,23 @@ import org.eclipse.dataspaceconnector.spi.types.domain.HttpDataAddress;
 import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractDefinition;
 
+import java.util.UUID;
+
+import static org.eclipse.dataspaceconnector.ids.core.IdsCoreServiceExtension.DEFAULT_EDC_IDS_CATALOG_ID;
+
 
 /**
  * It is possible to be called from outside without any JWT token passed
  */
+@Provides({
+        ConnectorService.class,
+        CatalogService.class
+})
 public class SourceUrlExtension implements ServiceExtension {
 
     private static final Action USE_ACTION = Action.Builder.newInstance().type("USE").build();
+
+    public static final String IDS_API_CONTEXT_ALIAS = "ids";
 
     @Inject
     private PolicyDefinitionStore policyStore;
@@ -57,9 +79,44 @@ public class SourceUrlExtension implements ServiceExtension {
     @EdcSetting
     private static final String EDC_ASSET_URL = "edc.sample.url";
 
+    @Inject
+    private ContractOfferService contractOfferService;
+
+    @Inject
+    private Oauth2JwtDecoratorRegistry jwtDecoratorRegistry;
+
+    @Inject
+    private WebService webService;
+
+
+    private Monitor monitor;
+    private ConnectorServiceSettings connectorServiceSettings;
+
     @Override
     public void initialize(ServiceExtensionContext context) {
+        monitor = context.getMonitor();
+        connectorServiceSettings = new ConnectorServiceSettings(context, monitor);
+
+        var tenantService = new PropertiesBasedTenantServiceImpl(context);
+        var catalogService = catalogService(tenantService);
+
+        context.registerService(TenantService.class, tenantService);
+        context.registerService(CatalogService.class, catalogService);
+        context.registerService(ConnectorService.class, connectorService(catalogService));
+
+        var contextAlias = IDS_API_CONTEXT_ALIAS;
+        webService.registerResource(contextAlias, new TenantFilter(monitor));
+
         addTestData(context);
+
+    }
+
+    public ConnectorService connectorService(CatalogService catalogService) {
+        return new SiemensConnectorServiceImpl(monitor, connectorServiceSettings, catalogService);
+    }
+
+    public CatalogService catalogService(TenantService tenantService) {
+        return new SiemensCatalogServiceImpl(DEFAULT_EDC_IDS_CATALOG_ID, contractOfferService, tenantService);
     }
 
     /**
@@ -107,39 +164,57 @@ public class SourceUrlExtension implements ServiceExtension {
                 .property("baseUrl", "http://fakesite.com")
                 .property("method", "GET")
                 .property("contentType", "text/csv")
-                .property("transferInOneGo", "true")
+                .property("nonChunkedTransfer", "true")
                 .property(MindsphereDatalakeSchema.DOWNLOAD_DATALAKE_PATH, assetPathSetting)
                 .build();
 
-        var assetId = "data.csv";
-        var asset = Asset.Builder.newInstance().id(assetId).build();
+
+        var asset = Asset.Builder.newInstance()
+                .id(UUID.randomUUID().toString())
+                .name("data.csv")
+                .description("castidev data.csv")
+                .version("1.0")
+                .contentType("text/csv")
+                .property(TenantService.TENANT_PROPERTY, "castidev")
+                .build();
 
         var assetUrl1 = context.getSetting(EDC_ASSET_URL, "https://raw.githubusercontent.com/eclipse-dataspaceconnector/DataSpaceConnector/main/styleguide.md");
         var dataAddress1 = DataAddress.Builder.newInstance()
                 .property("type", HttpDataAddress.DATA_TYPE)
-                .property("ten", "presdev")
                 .property("baseUrl", assetUrl1)
                 .property("method", "GET")
-                .property("transferInOneGo", "true")
-                .property("contentType", "text/plain")
+                .property("nonChunkedTransfer", "true")
+                .property("contentType", "text/markdown")
                 .property("name", "")
                 .build();
 
-        var assetId1 = "styleguide.md";
-        var asset1 = Asset.Builder.newInstance().id(assetId1).build();
+        var asset1 = Asset.Builder.newInstance()
+                .id(UUID.randomUUID().toString())
+                .name("styleguide.md")
+                .description("Castidev styleguide.md")
+                .version("1.0")
+                .contentType("text/markdown")
+                .property(TenantService.TENANT_PROPERTY, "castidev")
+                .build();
 
         var dataAddress2 = DataAddress.Builder.newInstance()
                 .property("type", HttpDataAddress.DATA_TYPE)
                 .property("baseUrl", "https://jsonplaceholder.typicode.com/todos/1")
-                .property("ten", "castiop")
+
                 .property("name", "")
-                .property("transferInOneGo", "true")
+                .property("nonChunkedTransfer", "true")
                 .property("method", "GET")
                 .property("contentType", "application/json")
                 .build();
 
-        var assetId2 = "1";
-        var asset2 = Asset.Builder.newInstance().id(assetId2).build();
+        var asset2 = Asset.Builder.newInstance()
+                .id(UUID.randomUUID().toString())
+                .name("todo1")
+                .description("Presdev todo server")
+                .version("1.0")
+                .contentType("application/json")
+                .property(TenantService.TENANT_PROPERTY, "presdev")
+                .build();
 
         loader.accept(asset, dataAddress);
         loader.accept(asset1, dataAddress1);
@@ -152,21 +227,21 @@ public class SourceUrlExtension implements ServiceExtension {
                 .id("9")
                 .accessPolicyId(uid)
                 .contractPolicyId(uid)
-                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_ID, "data.csv").build())
+                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_NAME, "data.csv").build())
                 .build();
 
         var contractDefinition8 = ContractDefinition.Builder.newInstance()
                 .id("8")
                 .accessPolicyId(uid)
                 .contractPolicyId(uid)
-                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_ID, "styleguide.md").build())
+                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_NAME, "styleguide.md").build())
                 .build();
 
         var contractDefinition7 = ContractDefinition.Builder.newInstance()
                 .id("7")
                 .accessPolicyId(uid)
                 .contractPolicyId(uid)
-                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_ID, "1").build())
+                .selectorExpression(AssetSelectorExpression.Builder.newInstance().whenEquals(Asset.PROPERTY_NAME, "todo1").build())
                 .build();
 
         contractStore.save(contractDefinition9);
