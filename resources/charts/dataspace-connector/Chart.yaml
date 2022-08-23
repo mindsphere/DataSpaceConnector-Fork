@@ -27,3 +27,4 @@ dependencies:
     repository: https://helm.releases.hashicorp.com
     version: 0.19.0
     alias: vault
+    condition: vault.enabled
