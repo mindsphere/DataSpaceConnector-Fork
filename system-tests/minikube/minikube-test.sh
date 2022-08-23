@@ -12,6 +12,7 @@ dir=$(dirname $0)
 
 for target in consumer provider; do
   docker build -t $target --build-arg JAR=system-tests/runtimes/file-transfer-$target/build/libs/$target.jar -f launchers/generic/Dockerfile .
+  helm dependency build
   helm upgrade --install -f $dir/values-controlplane.yaml -f $dir/values-$target.yaml $target resources/charts/dataspace-connector
 done
 
