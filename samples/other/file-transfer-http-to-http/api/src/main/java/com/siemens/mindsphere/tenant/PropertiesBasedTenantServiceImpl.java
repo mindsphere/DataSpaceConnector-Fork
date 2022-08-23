@@ -8,15 +8,15 @@ import java.util.Objects;
 
 public class PropertiesBasedTenantServiceImpl implements TenantService {
 
-    private final static String CLIENT_ID_TO_TENANT = "tenants.clientid.to.tenant";
-    private final static String TENANT_TO_BPN = "tenants.tenant.to.bpn";
+    private static final String CLIENT_ID_TO_TENANT = "tenants.clientid.to.tenant";
+    private static final String TENANT_TO_BPN = "tenants.tenant.to.bpn";
 
     private final Map<String, String> clientToTenant;
     private final Map<String, String> tenantToBpn;
 
     public PropertiesBasedTenantServiceImpl(ServiceExtensionContext context) {
-        var tenantMapping = context.getSetting(CLIENT_ID_TO_TENANT,"");
-        var bpnMapping = context.getSetting(TENANT_TO_BPN,"");
+        var tenantMapping = context.getSetting(CLIENT_ID_TO_TENANT, "");
+        var bpnMapping = context.getSetting(TENANT_TO_BPN, "");
 
         clientToTenant = extractMapFromString(tenantMapping);
         tenantToBpn = extractMapFromString(bpnMapping);
