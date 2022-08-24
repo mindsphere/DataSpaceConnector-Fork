@@ -21,16 +21,16 @@ plugins {
 }
 
 dependencies {
-    api(project(":spi:data-plane-selector:selector-spi"))
+    api(project(":spi:data-plane-selector:data-plane-selector-spi"))
     implementation(project(":common:util"))
     implementation("dev.failsafe:failsafe:${failsafeVersion}")
     implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
 
-    testImplementation(project(":extensions:http"))
+    testImplementation(project(":extensions:common:http"))
     testImplementation(project(":extensions:data-plane-selector:selector-api"))
-    testImplementation(project(":extensions:api:api-core"))
+    testImplementation(project(":extensions:common:api:api-core"))
 
-    testImplementation(project(":extensions:junit"))
+    testImplementation(project(":extensions:common:junit"))
 }
 
 publishing {
