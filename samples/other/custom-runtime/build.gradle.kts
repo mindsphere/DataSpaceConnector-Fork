@@ -21,11 +21,11 @@ plugins {
 val jupiterVersion: String by project
 
 dependencies {
-    api(project(":core:boot"))
+    api(project(":core:common:boot"))
     implementation(project(":data-protocols:ids"))
 
-    implementation(project(":extensions:iam:iam-mock"))
-    implementation(project(":extensions:filesystem:configuration-fs"))
+    implementation(project(":extensions:common:iam:iam-mock"))
+    implementation(project(":extensions:common:configuration:filesystem-configuration"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")

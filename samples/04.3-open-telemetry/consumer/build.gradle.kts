@@ -23,19 +23,19 @@ val jupiterVersion: String by project
 val rsApi: String by project
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":core:micrometer"))
+    implementation(project(":core:control-plane:control-plane-core"))
+    implementation(project(":extensions:common:micrometer"))
 
-    implementation(project(":extensions:filesystem:configuration-fs"))
-    implementation(project(":extensions:iam:iam-mock"))
+    implementation(project(":extensions:common:configuration:filesystem-configuration"))
+    implementation(project(":extensions:common:iam:iam-mock"))
 
-    implementation(project(":extensions:api:auth-tokenbased"))
-    implementation(project(":extensions:api:data-management"))
+    implementation(project(":extensions:common:auth:auth-tokenbased"))
+    implementation(project(":extensions:control-plane:api:data-management"))
 
     implementation(project(":data-protocols:ids"))
-    runtimeOnly(project(":extensions:http:jersey-micrometer"))
-    runtimeOnly(project(":extensions:http:jetty-micrometer"))
-    runtimeOnly(project(":extensions:jdk-logger-monitor"))
+    runtimeOnly(project(":extensions:common:http:jersey-micrometer"))
+    runtimeOnly(project(":extensions:common:http:jetty-micrometer"))
+    runtimeOnly(project(":extensions:common:monitor:jdk-logger-monitor"))
 }
 
 application {
