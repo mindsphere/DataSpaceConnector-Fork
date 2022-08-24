@@ -21,16 +21,14 @@ plugins {
 val openTelemetryVersion: String by project
 
 dependencies {
+    api(project(":spi:control-plane:control-plane-spi"))
     api(project(":spi:data-plane:data-plane-spi"))
-    implementation(project(":core:transfer"))
-    implementation(project(":extensions:data-plane-transfer:data-plane-transfer-client"))
+    implementation(project(":core:control-plane:control-plane-core"))
+    implementation(project(":core:data-plane:data-plane-core"))
+    implementation(project(":extensions:control-plane:data-plane-transfer:data-plane-transfer-client"))
     implementation(project(":extensions:data-plane-selector:selector-client"))
-    implementation(project(":extensions:data-plane-selector:selector-core"))
-    implementation(project(":extensions:data-plane-selector:selector-store"))
-    implementation(project(":extensions:data-plane:data-plane-framework"))
+    implementation(project(":core:data-plane-selector:data-plane-selector-core"))
     implementation("io.opentelemetry:opentelemetry-extension-annotations:${openTelemetryVersion}")
 
     implementation(project(":spi:data-plane:data-plane-spi"))
-
-    api(project(":extensions:dataloading"))
 }

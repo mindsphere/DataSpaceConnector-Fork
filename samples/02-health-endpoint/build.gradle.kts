@@ -22,9 +22,9 @@ plugins {
 val rsApi: String by project
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":core:control-plane:control-plane-core"))
 
-    implementation(project(":extensions:http"))
+    implementation(project(":extensions:common:http"))
 
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
 }

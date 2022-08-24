@@ -11,17 +11,16 @@
 | :extensions:data-plane          | Covers the Data Plane Framework (DPF), which is the entity in charge of performing the actual data transfer between consumer and provider. |
 | :extensions:data-plane-selector |  |
 | :extensions:data-plane-transfer | Provides resources used to delegate data transfer to the Data Plane, or to use the Data Plane as a proxy for querying the data. |
-| :extensions:dataloading         |  |
 | :extensions:events              | Provides a way to register endpoints where the domain events will be sent as soon as they occur. |
 | :extensions:filesystem          |  |
-| :extensions:http                |  |
-| :extensions:http-provisioner    |  |
-| :extensions:http-receiver       |  |
-| :extensions:iam                 | Provides multiple implementations of identity management. |
-| :extensions:jdk-logger-monitor  | Provides a `Logger` which is an implementation of edc `Monitor` interface. |
-| :extensions:junit                 |  |
-| :extensions:sql                 |  |
-| :extensions:transaction         |  |
+| :extensions:common:http                |  |
+| :extensions:common:http-provisioner    |  |
+| :extensions:common:http-receiver       |  |
+| :extensions:common:iam                 | Provides multiple implementations of identity management. |
+| :extensions:common:monitor:jdk-logger-monitor  | Provides a `Logger` which is an implementation of edc `Monitor` interface. |
+| :extensions:common:junit                 |  |
+| :extensions:common:sql                 |  |
+| :extensions:common:transaction         |  |
 
 ## :extensions:api
 
@@ -51,15 +50,14 @@
 | :cosmos             | provides persistent implementations of `AssetIndex`, `ContractDefinition`, etc. using a CosmosDB container | [link]({{extensions}}azure/cosmos) |
 | :data-plane:storage | contains a Data Plane extension to copy data to and from Azure Blob storage | [link]({{extensions}}azure/data-plane/storage) |
 | :events             |  | [link]({{extensions}}azure/events) |
-| :events-config      |  | [link]({{extensions}}azure/events-config) |
 | :vault              |  | [link]({{extensions}}azure/vault) |
 
 ## :extensions:catalog
 
-| Module | Description | Details
-| :----- | :---------- | :------ |
-| :federated-catalog-cache | Contains implementations for the Federated Catalog Cache, which is a database that contains a snapshot of all the catalogs offered by all the connectors in a dataspace | [link]({{extensions}}catalog/federated-catalog-cache) |
-| :federated-catalog-spi   | This module contains extension points and interfaces specifically for the Federated Catalog feature. | [link]({{extensions}}catalog/federated-catalog-spi) |
+| Module                  | Description | Details                                                 
+|:------------------------| :---------- |:--------------------------------------------------------|
+| :federated-catalog-core | Contains implementations for the Federated Catalog Cache, which is a database that contains a snapshot of all the catalogs offered by all the connectors in a dataspace | [link]({{core}}federate-catalog/federated-catalog-core) |
+| :federated-catalog-spi  | This module contains extension points and interfaces specifically for the Federated Catalog feature. | [link]({{extensions}}catalog/federated-catalog-spi)     |
 
 ## :extensions:data-plane
 
@@ -79,7 +77,6 @@
 | :selector-client | contains implementations for running a DPF Selector embedded in the Control Plane, or as remote instance, accessing it's REST API | [link]({{extensions}}data-plane-selector/selector-client) |
 | :selector-core   |  | [link]({{extensions}}data-plane-selector/selector-core) |
 | :selector-spi    |  | [link]({{extensions}}data-plane-selector/selector-spi) |
-| :selector-store  |  | [link]({{extensions}}data-plane-selector/selector-store) |
 
 ## :extensions:data-plane-transfer
 
@@ -88,10 +85,6 @@
 | :data-plane-transfer-client |  | [link]({{extensions}}data-plane-transfer/data-plane-transfer-client) |
 | :data-plane-transfer-spi    |  | [link]({{extensions}}data-plane-transfer/data-plane-transfer-spi) |
 | :data-plane-transfer-sync   |  | [link]({{extensions}}data-plane-transfer/data-plane-transfer-sync) |
-
-## :extensions:dataloading
-
-No submodules
 
 ## :extensions:events
 
@@ -106,7 +99,7 @@ No submodules
 | :configuration-fs |  | [link]({{extensions}}filesystem/configuration-fs) |
 | :vault-fs         |  | [link]({{extensions}}filesystem/vault-fs) |
 
-## :extensions:http
+## :extensions:common:http
 
 | Module | Description | Details
 | :----- | :---------- | :------ |
@@ -115,15 +108,15 @@ No submodules
 | :jetty             | provides a `JettyService`, a Servlet Context Container that can expose REST API on a Jersey based WebServer | [link]({{extensions}}http/jetty) |
 | :jetty-micrometer  |  | [link]({{extensions}}http/jetty-micrometer) |
 
-## :extensions:http-provisioner
+## :extensions:common:http-provisioner
 
 No submodules
 
-## :extensions:http-receiver
+## :extensions:common:http-receiver
 
 No submodules
 
-## :extensions:iam
+## :extensions:common:iam
 
 | Module | Description | Details
 | :----- | :---------- | :------ |
@@ -132,7 +125,7 @@ No submodules
 | :iam-mock               |  | [link]({{extensions}}iam/iam-mock) |
 | :oauth2                 | provides an `IdentityService` implementation based on the OAuth2 protocol for authorization | [link]({{extensions}}iam/iam-oauth2) |
 
-## :extensions:jdk-logger-monitor
+## :extensions:common:monitor:jdk-logger-monitor
 
 No submodules
 
@@ -140,11 +133,11 @@ No submodules
 
 No submodules
 
-## :extensions:junit
+## :extensions:common:junit
 
 No submodules
 
-## :extensions:sql
+## :extensions:common:sql
 
 | Module | Description | Details
 | :----- | :---------- | :------ |
@@ -157,7 +150,7 @@ No submodules
 | :pool-sql                       | registers named `javax.sql.DataSource`s to the `org.eclipse.dataspaceconnector.spi.transaction.datasource.DataSourceRegistry` capable of pooling `java.sql.Connection`s | [link]({{extensions}}sql/pool-sql) |
 | :transfer-process-store-sql     | provides SQL persistence for transfer processes | [link]({{extensions}}sql/transfer-process-store-sql) |
 
-## :extensions:transaction
+## :extensions:common:transaction
 
 | Module | Description | Details
 | :----- | :---------- | :------ |

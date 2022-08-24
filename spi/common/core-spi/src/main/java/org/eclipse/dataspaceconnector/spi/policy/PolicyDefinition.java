@@ -77,10 +77,6 @@ public class PolicyDefinition extends Entity {
             return new Builder();
         }
 
-        public Builder uid(String uid) {
-            return super.id(uid);
-        }
-
         public Builder policy(Policy policy) {
             entity.policy = policy;
             return this;
