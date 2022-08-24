@@ -23,8 +23,8 @@ version: 0.0.3
 appVersion: 0.0.1-SNAPSHOT
 
 dependencies:
-  - name: hashicorp/vault
+  - name: vault
     repository: https://helm.releases.hashicorp.com
     version: 0.19.0
-    alias: vault
+    # alias: vault
     condition: vault.enabled
