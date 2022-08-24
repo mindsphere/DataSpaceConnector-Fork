@@ -21,11 +21,10 @@ dependencies {
     testImplementation("org.mockito:mockito-core:${mockitoVersion}")
     testImplementation(testFixtures(project(":common:util")))
 
-    implementation(project(":extensions:data-plane-transfer:data-plane-transfer-client"))
+    implementation(project(":extensions:control-plane:data-plane-transfer:data-plane-transfer-client"))
     implementation(project(":extensions:data-plane-selector:selector-client"))
-    implementation(project(":extensions:data-plane-selector:selector-core"))
-    implementation(project(":extensions:data-plane-selector:selector-store"))
-    implementation(project(":extensions:data-plane:data-plane-framework"))
+    implementation(project(":core:data-plane-selector:data-plane-selector-core"))
+    implementation(project(":core:data-plane:data-plane-framework"))
     implementation(project(":extensions:data-plane:data-plane-http"))
 
     implementation("io.opentelemetry:opentelemetry-extension-annotations:${openTelemetryVersion}")
