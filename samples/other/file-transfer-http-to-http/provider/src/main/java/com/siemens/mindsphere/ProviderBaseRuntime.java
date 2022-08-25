@@ -13,30 +13,14 @@
 
 package com.siemens.mindsphere;
 
-import org.eclipse.dataspaceconnector.boot.system.DefaultServiceExtensionContext;
+import com.siemens.mindsphere.context.SiemensServiceExtensionContext;
 import org.eclipse.dataspaceconnector.boot.system.runtime.BaseRuntime;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.system.ConfigurationExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.telemetry.Telemetry;
 import org.eclipse.dataspaceconnector.spi.types.TypeManager;
 
-import java.util.List;
-
 public class ProviderBaseRuntime extends BaseRuntime {
-
-    private static class SiemensServiceExtensionContext extends DefaultServiceExtensionContext {
-        SiemensServiceExtensionContext(TypeManager typeManager, Monitor monitor, Telemetry telemetry, List<ConfigurationExtension> configurationExtensions) {
-            super(typeManager, monitor, telemetry, configurationExtensions);
-        }
-
-        @Override
-        public <T> void registerService(Class<T> type, T service) {
-            if (!super.hasService(type) || type.getName().startsWith("Siemens")) {
-                super.registerService(type, service);
-            }
-        }
-    }
 
     /**
      * The {@code main} method must be re-implemented, otherwise {@link BaseRuntime#main(String[])} would be called, which would

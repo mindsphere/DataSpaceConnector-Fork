@@ -16,7 +16,6 @@ package org.eclipse.dataspaceconnector.core.security.hashicorpvault;
 
 import dev.failsafe.RetryPolicy;
 import okhttp3.OkHttpClient;
-import org.eclipse.dataspaceconnector.core.defaults.certificateresolver.DefaultCertificateResolver;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.security.CertificateResolver;

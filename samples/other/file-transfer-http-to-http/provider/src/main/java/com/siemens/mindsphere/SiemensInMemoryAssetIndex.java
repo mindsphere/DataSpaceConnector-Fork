@@ -15,7 +15,7 @@
 package com.siemens.mindsphere;
 
 import com.siemens.mindsphere.tenant.TenantService;
-import org.eclipse.dataspaceconnector.core.defaults.assetindex.InMemoryAssetIndex;
+import org.eclipse.dataspaceconnector.core.controlplane.defaults.assetindex.InMemoryAssetIndex;
 import org.eclipse.dataspaceconnector.spi.query.QuerySpec;
 import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
 
