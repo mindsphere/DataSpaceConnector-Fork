@@ -26,21 +26,22 @@ val rsApi: String by project
 dependencies {
     implementation(project(":core"))
 
-    implementation(project(":extensions:api:observability"))
+    implementation(project(":extensions:common:api:observability"))
 
-    implementation(project(":extensions:filesystem:vault-fs"))
-    implementation(project(":extensions:filesystem:configuration-fs"))
+    // implementation(project(":extensions:filesystem:vault-fs"))
+    implementation(project(":extensions:common:vault:hashicorp-vault"))
+    implementation(project(":extensions:common:configuration:filesystem-configuration"))
 
     //use like gradle dependencies -P localdevelopment
     if( project.hasProperty("localdevelopment")) {
-        implementation(project(":extensions:iam:iam-mock"))
+        implementation(project(":extensions:common:iam:iam-mock"))
     } else {
-        implementation(project(":extensions:iam:daps"))
-        implementation(project(":extensions:iam:oauth2:oauth2-core"))
+        implementation(project(":extensions:common:iam:oauth2:daps"))
+        implementation(project(":extensions:common:iam:oauth2:oauth2-core"))
     }
 
-    implementation(project(":extensions:api:auth-tokenbased"))
-    implementation(project(":extensions:api:data-management"))
+    implementation(project(":extensions:common:auth:auth-tokenbased"))
+    implementation(project(":extensions:control-plane:api:data-management"))
 
     implementation(project(":data-protocols:ids")) {
         exclude("org.eclipse.dataspaceconnector","ids-token-validation")
@@ -48,12 +49,13 @@ dependencies {
 
     implementation(project(":extensions:data-plane:data-plane-api"))
     implementation(project(":extensions:data-plane-selector:selector-client"))
-    implementation(project(":extensions:data-plane-selector:selector-core"))
-    implementation(project(":extensions:data-plane-selector:selector-store"))
-    implementation(project(":extensions:data-plane:data-plane-framework"))
+    implementation(project(":core:data-plane-selector:data-plane-selector-core"))
+    implementation(project(":core:data-plane:data-plane-framework"))
     implementation(project(":extensions:data-plane:data-plane-http"))
 
     // implementation(project(":samples:other:file-transfer-http-to-http:api"))
+
+    implementation(project(":spi:common:core-spi"))
 }
 
 application {

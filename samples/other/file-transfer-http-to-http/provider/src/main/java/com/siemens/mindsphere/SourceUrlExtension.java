@@ -15,11 +15,11 @@ package com.siemens.mindsphere;
 
 
 import com.siemens.mindsphere.datalake.edc.http.provision.MindsphereDatalakeSchema;
-import org.eclipse.dataspaceconnector.dataloading.AssetLoader;
 import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
+import org.eclipse.dataspaceconnector.spi.asset.AssetLoader;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
 import org.eclipse.dataspaceconnector.spi.policy.PolicyDefinition;
@@ -91,7 +91,7 @@ public class SourceUrlExtension implements ServiceExtension {
                 .build();
 
         return PolicyDefinition.Builder.newInstance()
-                .uid(USE_POLICY)
+                .id(USE_POLICY)
                 .policy(Policy.Builder.newInstance()
                         .permission(usePermission)
                         .build())
