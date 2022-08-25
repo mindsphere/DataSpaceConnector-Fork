@@ -28,7 +28,7 @@ dependencies {
 
     implementation(project(":extensions:common:api:observability"))
 
-    implementation(project(":extensions:filesystem:vault-fs"))
+    implementation(project(":extensions:common:vault:filesystem-vault"))
     // implementation(project(":extensions:common:vault:hashicorp-vault"))
     implementation(project(":extensions:common:configuration:filesystem-configuration"))
 
