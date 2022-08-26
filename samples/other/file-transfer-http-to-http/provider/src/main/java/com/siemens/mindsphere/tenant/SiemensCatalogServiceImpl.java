@@ -63,8 +63,4 @@ public class SiemensCatalogServiceImpl implements CatalogService {
                 .contractOffers(offers.stream().filter(offer -> Objects.equals(offer.getAsset().getProperty(TenantService.TENANT_PROPERTY), ten)).collect(Collectors.toUnmodifiableList()))
                 .build();
     }
-
-    private String getTenant(Object clientId) {
-        return tenantService.tenantFromClientId(clientId);
-    }
 }

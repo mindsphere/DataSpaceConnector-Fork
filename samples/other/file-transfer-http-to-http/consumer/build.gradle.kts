@@ -1,19 +1,3 @@
-/*
- *  Copyright (c) 2020, 2021 Microsoft Corporation
- *
- *  This program and the accompanying materials are made available under the
- *  terms of the Apache License, Version 2.0 which is available at
- *  https://www.apache.org/licenses/LICENSE-2.0
- *
- *  SPDX-License-Identifier: Apache-2.0
- *
- *  Contributors:
- *       Microsoft Corporation - initial API and implementation
- *       Fraunhofer Institute for Software and Systems Engineering - added dependencies
- *       ZF Friedrichshafen AG - add dependency
- *
- */
-
 plugins {
     `java-library`
     id("application")
@@ -22,14 +6,24 @@ plugins {
 
 val jupiterVersion: String by project
 val rsApi: String by project
+val openTelemetryVersion: String by project
+val nimbusVersion: String by project
+val jerseyVersion: String by project
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":core:control-plane:control-plane-core"))
+
+    implementation("org.glassfish.jersey.core:jersey-server:${jerseyVersion}")
+    implementation("org.glassfish.jersey.containers:jersey-container-servlet-core:${jerseyVersion}")
+    implementation("org.glassfish.jersey.core:jersey-common:${jerseyVersion}")
+    implementation("org.glassfish.jersey.media:jersey-media-json-jackson:${jerseyVersion}")
+    implementation("org.glassfish.jersey.media:jersey-media-multipart:${jerseyVersion}")
+
+    implementation(project(":data-protocols:ids:ids-jsonld-serdes-lib"))
 
     implementation(project(":extensions:common:api:observability"))
 
-    // implementation(project(":extensions:filesystem:vault-fs"))
-    implementation(project(":extensions:common:vault:hashicorp-vault"))
     implementation(project(":extensions:common:configuration:filesystem-configuration"))
 
     //use like gradle dependencies -P localdevelopment
@@ -38,7 +32,12 @@ dependencies {
     } else {
         implementation(project(":extensions:common:iam:oauth2:daps"))
         implementation(project(":extensions:common:iam:oauth2:oauth2-core"))
+        implementation(project(":extensions:common:vault:hashicorp-vault"))
     }
+
+    implementation("com.nimbusds:nimbus-jose-jwt:${nimbusVersion}")
+
+    implementation(project(":extensions:common:http"))
 
     implementation(project(":extensions:common:auth:auth-tokenbased"))
     implementation(project(":extensions:control-plane:api:data-management"))
@@ -53,9 +52,17 @@ dependencies {
     implementation(project(":core:data-plane:data-plane-framework"))
     implementation(project(":extensions:data-plane:data-plane-http"))
 
+    implementation(project(":spi:common:core-spi"))
+
+    implementation("io.opentelemetry:opentelemetry-extension-annotations:${openTelemetryVersion}")
+
+    implementation(project(":spi:data-plane"))
+
+    implementation(project(":extensions:mindsphere:mindsphere-http"))
+
     implementation(project(":samples:other:file-transfer-http-to-http:api"))
 
-    implementation(project(":spi:common:core-spi"))
+    implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
 }
 
 application {

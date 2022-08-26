@@ -80,8 +80,9 @@ public class HashicorpVaultExtension implements ServiceExtension {
         context.registerService(Vault.class, vault);
 
         privateKeyResolver = new VaultPrivateKeyResolver(vault);
+        certificateResolver = new VaultCertificateResolver(vault);
 
-        context.registerService(CertificateResolver.class, new VaultCertificateResolver(vault));
+        context.registerService(CertificateResolver.class, certificateResolver);
     }
 
     private HashicorpVaultConfig loadHashicorpVaultClientConfig(

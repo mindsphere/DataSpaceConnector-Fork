@@ -11,9 +11,8 @@
  *
  */
 
-package com.siemens.mindsphere;
+package com.siemens.mindsphere.tenant;
 
-import com.siemens.mindsphere.tenant.TenantService;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;

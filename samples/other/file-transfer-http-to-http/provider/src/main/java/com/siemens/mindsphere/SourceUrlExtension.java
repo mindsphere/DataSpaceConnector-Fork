@@ -15,10 +15,12 @@ package com.siemens.mindsphere;
 
 
 import com.siemens.mindsphere.datalake.edc.http.provision.MindsphereDatalakeSchema;
-import com.siemens.mindsphere.tenant.PropertiesBasedTenantServiceImpl;
 import com.siemens.mindsphere.tenant.SiemensCatalogServiceImpl;
 import com.siemens.mindsphere.tenant.SiemensConnectorServiceImpl;
+import com.siemens.mindsphere.tenant.TenantFilter;
 import com.siemens.mindsphere.tenant.TenantService;
+import com.siemens.mindsphere.tenant.VaultBasedTenantServiceImpl;
+import org.eclipse.dataspaceconnector.api.datamanagement.configuration.DataManagementApiConfiguration;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2JwtDecoratorRegistry;
 import org.eclipse.dataspaceconnector.ids.core.service.ConnectorServiceSettings;
 import org.eclipse.dataspaceconnector.ids.spi.service.CatalogService;
@@ -60,13 +62,15 @@ public class SourceUrlExtension implements ServiceExtension {
 
     private static final Action USE_ACTION = Action.Builder.newInstance().type("USE").build();
 
-    public static final String IDS_API_CONTEXT_ALIAS = "ids";
 
     @Inject
     private PolicyDefinitionStore policyStore;
 
     @Inject
     private ContractDefinitionStore contractStore;
+
+    @Inject
+    private TenantService tenantService;
 
     @Inject
     private AssetLoader loader;
@@ -85,9 +89,6 @@ public class SourceUrlExtension implements ServiceExtension {
     @Inject
     private Oauth2JwtDecoratorRegistry jwtDecoratorRegistry;
 
-    @Inject
-    private WebService webService;
-
 
     private Monitor monitor;
     private ConnectorServiceSettings connectorServiceSettings;
@@ -97,15 +98,10 @@ public class SourceUrlExtension implements ServiceExtension {
         monitor = context.getMonitor();
         connectorServiceSettings = new ConnectorServiceSettings(context, monitor);
 
-        var tenantService = new PropertiesBasedTenantServiceImpl(context);
         var catalogService = catalogService(tenantService);
 
-        context.registerService(TenantService.class, tenantService);
         context.registerService(CatalogService.class, catalogService);
         context.registerService(ConnectorService.class, connectorService(catalogService));
-
-        var contextAlias = IDS_API_CONTEXT_ALIAS;
-        webService.registerResource(contextAlias, new TenantFilter(monitor));
 
         addTestData(context);
 
