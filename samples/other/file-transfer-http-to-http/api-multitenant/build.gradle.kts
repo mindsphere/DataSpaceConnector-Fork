@@ -1,7 +1,6 @@
 plugins {
     `java-library`
     id("application")
-    id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
 val jupiterVersion: String by project
@@ -20,22 +19,20 @@ dependencies {
     implementation("org.glassfish.jersey.media:jersey-media-json-jackson:${jerseyVersion}")
     implementation("org.glassfish.jersey.media:jersey-media-multipart:${jerseyVersion}")
 
+    implementation(project(":core"))
+    implementation(project(":core:common:boot"))
+    implementation(project(":spi:common:core-spi"))
+    implementation(project(":common:util"))
+
     implementation(project(":data-protocols:ids:ids-jsonld-serdes-lib"))
 
     implementation(project(":extensions:common:api:observability"))
 
     implementation(project(":extensions:common:configuration:filesystem-configuration"))
 
-    //use like gradle dependencies -P localdevelopment
-    if( project.hasProperty("localdevelopment")) {
-        implementation(project(":extensions:common:iam:iam-mock"))
-        implementation(project(":samples:other:file-transfer-http-to-http:api-mock"))
-    } else {
-        implementation(project(":extensions:common:iam:oauth2:daps"))
-        implementation(project(":extensions:common:iam:oauth2:oauth2-core"))
-        implementation(project(":extensions:common:vault:hashicorp-vault"))
-        implementation(project(":samples:other:file-transfer-http-to-http:api-multitenant"))
-    }
+    implementation(project(":extensions:common:iam:oauth2:daps"))
+    implementation(project(":extensions:common:iam:oauth2:oauth2-core"))
+    implementation(project(":extensions:common:vault:hashicorp-vault"))
 
     implementation("com.nimbusds:nimbus-jose-jwt:${nimbusVersion}")
 
@@ -60,17 +57,7 @@ dependencies {
 
     implementation(project(":spi:data-plane"))
 
-    implementation(project(":extensions:mindsphere:mindsphere-http"))
+    implementation(project(":samples:other:file-transfer-http-to-http:api"))
 
-    implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
-}
-
-application {
-    mainClass.set("com.siemens.mindsphere.ConsumerBaseRuntime")
-}
-
-tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
-    exclude("**/pom.properties", "**/pom.xm")
-    mergeServiceFiles()
-    archiveFileName.set("consumer.jar")
+    api("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
 }

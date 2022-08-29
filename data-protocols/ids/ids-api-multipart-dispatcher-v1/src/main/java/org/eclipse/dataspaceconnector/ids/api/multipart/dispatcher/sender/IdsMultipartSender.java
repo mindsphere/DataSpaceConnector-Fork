@@ -138,7 +138,6 @@ abstract class IdsMultipartSender<M extends RemoteMessage, R> implements IdsMess
         // Build multipart header part
         var headerPartHeaders = new Headers.Builder()
                 .add("Content-Disposition", "form-data; name=\"header\"")
-                .add("ten", "presdev")//TODO remove me - use ingress
                 .build();
 
         RequestBody headerRequestBody;
@@ -188,6 +187,7 @@ abstract class IdsMultipartSender<M extends RemoteMessage, R> implements IdsMess
         var httpRequest = new Request.Builder()
                 .url(requestUrl)
                 .addHeader("Content-Type", MediaType.MULTIPART_FORM_DATA)
+                .addHeader("ten",  "presdev")//TODO remove me - use ingress
                 .post(multipartRequestBody)
                 .build();
 

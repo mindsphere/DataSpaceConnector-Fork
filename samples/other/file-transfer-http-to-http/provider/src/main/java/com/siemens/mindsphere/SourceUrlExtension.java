@@ -17,11 +17,7 @@ package com.siemens.mindsphere;
 import com.siemens.mindsphere.datalake.edc.http.provision.MindsphereDatalakeSchema;
 import com.siemens.mindsphere.tenant.SiemensCatalogServiceImpl;
 import com.siemens.mindsphere.tenant.SiemensConnectorServiceImpl;
-import com.siemens.mindsphere.tenant.TenantFilter;
 import com.siemens.mindsphere.tenant.TenantService;
-import com.siemens.mindsphere.tenant.VaultBasedTenantServiceImpl;
-import org.eclipse.dataspaceconnector.api.datamanagement.configuration.DataManagementApiConfiguration;
-import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2JwtDecoratorRegistry;
 import org.eclipse.dataspaceconnector.ids.core.service.ConnectorServiceSettings;
 import org.eclipse.dataspaceconnector.ids.spi.service.CatalogService;
 import org.eclipse.dataspaceconnector.ids.spi.service.ConnectorService;
@@ -29,7 +25,6 @@ import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
-import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.asset.AssetLoader;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
 import org.eclipse.dataspaceconnector.spi.contract.offer.ContractOfferService;
@@ -85,9 +80,6 @@ public class SourceUrlExtension implements ServiceExtension {
 
     @Inject
     private ContractOfferService contractOfferService;
-
-    @Inject
-    private Oauth2JwtDecoratorRegistry jwtDecoratorRegistry;
 
 
     private Monitor monitor;

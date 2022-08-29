@@ -148,6 +148,8 @@ include(":extensions:mindsphere:mindsphere-http")
 include(":samples:other:file-transfer-http-to-http:consumer")
 include(":samples:other:file-transfer-http-to-http:provider")
 include(":samples:other:file-transfer-http-to-http:api")
+include(":samples:other:file-transfer-http-to-http:api-mock")
+include(":samples:other:file-transfer-http-to-http:api-multitenant")
 //end siemens
 
 // extension points for a connector

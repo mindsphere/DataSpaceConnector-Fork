@@ -133,9 +133,9 @@ public class SiemensOauthExtension implements ServiceExtension {
 
         context.registerService(IdentityService.class, oauth2Service);
 
-        var contextAlias = IDS_API_CONTEXT_ALIAS;
-        webService.registerResource(contextAlias, new TenantFilter(monitor));
-        webService.registerResource(config.getContextAlias(), new TenantFilter(monitor));
+        var tenantFilter = new TenantFilter(monitor);
+        webService.registerResource(IDS_API_CONTEXT_ALIAS, tenantFilter);
+        webService.registerResource(config.getContextAlias(), tenantFilter);
     }
 
     @Override

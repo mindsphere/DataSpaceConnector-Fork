@@ -28,7 +28,7 @@ public class SiemensServiceExtensionContext extends DefaultServiceExtensionConte
 
     @Override
     public <T> void registerService(Class<T> type, T service) {
-        //TODO Tag siemens implementation
+        //TODO Use marker interface to tag Siemens implementation
         if (!super.hasService(type) || type.getName().startsWith("Siemens")) {
             super.registerService(type, service);
         }

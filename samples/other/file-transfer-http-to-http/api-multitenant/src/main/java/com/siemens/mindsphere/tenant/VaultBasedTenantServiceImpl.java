@@ -48,7 +48,7 @@ public class VaultBasedTenantServiceImpl implements TenantService {
         @JsonProperty("client_id")
         private String clientId;
 
-        public TenantInfo() {
+        TenantInfo() {
         }
 
         public String getBpn() {

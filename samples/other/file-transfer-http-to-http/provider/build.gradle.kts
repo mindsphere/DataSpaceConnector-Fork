@@ -29,10 +29,12 @@ dependencies {
     //use like gradle dependencies -P localdevelopment
     if( project.hasProperty("localdevelopment")) {
         implementation(project(":extensions:common:iam:iam-mock"))
+        implementation(project(":samples:other:file-transfer-http-to-http:api-mock"))
     } else {
         implementation(project(":extensions:common:iam:oauth2:daps"))
         implementation(project(":extensions:common:iam:oauth2:oauth2-core"))
         implementation(project(":extensions:common:vault:hashicorp-vault"))
+        implementation(project(":samples:other:file-transfer-http-to-http:api-multitenant"))
     }
 
     implementation("com.nimbusds:nimbus-jose-jwt:${nimbusVersion}")

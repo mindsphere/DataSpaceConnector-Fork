@@ -14,4 +14,6 @@ dependencies {
     implementation(project(":core:common:boot"))
     implementation(project(":spi:common:core-spi"))
     implementation(project(":common:util"))
+
+    implementation(project(":samples:other:file-transfer-http-to-http:api"))
 }
