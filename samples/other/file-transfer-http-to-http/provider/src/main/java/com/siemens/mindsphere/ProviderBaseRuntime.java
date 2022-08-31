@@ -13,7 +13,12 @@
 
 package com.siemens.mindsphere;
 
+import com.siemens.mindsphere.context.SiemensServiceExtensionContext;
 import org.eclipse.dataspaceconnector.boot.system.runtime.BaseRuntime;
+import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
+import org.eclipse.dataspaceconnector.spi.telemetry.Telemetry;
+import org.eclipse.dataspaceconnector.spi.types.TypeManager;
 
 public class ProviderBaseRuntime extends BaseRuntime {
 
@@ -23,5 +28,10 @@ public class ProviderBaseRuntime extends BaseRuntime {
      */
     public static void main(String[] args) {
         new ProviderBaseRuntime().boot();
+    }
+
+    @Override
+    protected ServiceExtensionContext createContext(TypeManager typeManager, Monitor monitor, Telemetry telemetry) {
+        return new SiemensServiceExtensionContext(typeManager, monitor, telemetry, loadConfigurationExtensions());
     }
 }

@@ -1,0 +1,6 @@
+[submodule "secrets"]
+	path = resources/charts/dataspace-connector/configs
+	url = git@code.siemens.com:scxi/edc_secrets.git
+	# url = ../../../scxi/edc_secrets.git
+	# branch = main
+	branch = alc-vault-config

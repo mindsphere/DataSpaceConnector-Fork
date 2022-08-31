@@ -24,16 +24,17 @@ dependencies {
 
     implementation(project(":extensions:common:api:observability"))
 
-    implementation(project(":extensions:common:vault:filesystem-vault"))
-    // implementation(project(":extensions:common:vault:hashicorp-vault"))
     implementation(project(":extensions:common:configuration:filesystem-configuration"))
 
     //use like gradle dependencies -P localdevelopment
     if( project.hasProperty("localdevelopment")) {
         implementation(project(":extensions:common:iam:iam-mock"))
+        implementation(project(":samples:other:file-transfer-http-to-http:api-mock"))
     } else {
         implementation(project(":extensions:common:iam:oauth2:daps"))
         implementation(project(":extensions:common:iam:oauth2:oauth2-core"))
+        implementation(project(":extensions:common:vault:hashicorp-vault"))
+        implementation(project(":samples:other:file-transfer-http-to-http:api-multitenant"))
     }
 
     implementation("com.nimbusds:nimbus-jose-jwt:${nimbusVersion}")
@@ -61,7 +62,7 @@ dependencies {
 
     implementation(project(":extensions:mindsphere:mindsphere-http"))
 
-    // implementation(project(":samples:other:file-transfer-http-to-http:api"))
+    implementation(project(":samples:other:file-transfer-http-to-http:api"))
 
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
 }
