@@ -4,6 +4,7 @@ org.eclipse.dataspaceconnector:token-generation-lib:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:token-validation-lib:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:common-util:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:ids:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:mindsphere:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-server:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:module-domain:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:module-processor:0.0.1-SNAPSHOT
@@ -38,6 +39,7 @@ org.eclipse.dataspaceconnector:data-plane-http:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-s3:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-selector-api:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:data-plane-selector-client:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:mindsphere-http:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:auth-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:catalog-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:core-spi:0.0.1-SNAPSHOT
