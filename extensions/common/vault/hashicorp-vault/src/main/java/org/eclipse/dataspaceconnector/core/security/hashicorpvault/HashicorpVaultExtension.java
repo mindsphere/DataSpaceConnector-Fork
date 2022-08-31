@@ -18,10 +18,8 @@ import dev.failsafe.RetryPolicy;
 import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
-import org.eclipse.dataspaceconnector.spi.security.CertificateResolver;
 import org.eclipse.dataspaceconnector.spi.security.PrivateKeyResolver;
 import org.eclipse.dataspaceconnector.spi.security.Vault;
-import org.eclipse.dataspaceconnector.spi.security.VaultCertificateResolver;
 import org.eclipse.dataspaceconnector.spi.security.VaultPrivateKeyResolver;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.Provider;
@@ -29,7 +27,7 @@ import org.eclipse.dataspaceconnector.spi.system.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 
-@Provides({ Vault.class, PrivateKeyResolver.class, CertificateResolver.class })
+@Provides({ Vault.class, PrivateKeyResolver.class })
 public class HashicorpVaultExtension implements ServiceExtension {
 
     @EdcSetting(value = "The URL of the Hashicorp Vault", required = true)
@@ -48,8 +46,6 @@ public class HashicorpVaultExtension implements ServiceExtension {
 
     private PrivateKeyResolver privateKeyResolver;
 
-    private CertificateResolver certificateResolver;
-
     @Override
     public String name() {
         return "Hashicorp Vault";
@@ -65,11 +61,6 @@ public class HashicorpVaultExtension implements ServiceExtension {
         return privateKeyResolver;
     }
 
-    @Provider
-    public CertificateResolver certificateResolver() {
-        return certificateResolver;
-    }
-
     @Override
     public void initialize(ServiceExtensionContext context) {
         var config = loadHashicorpVaultClientConfig(context);
@@ -77,12 +68,7 @@ public class HashicorpVaultExtension implements ServiceExtension {
         var client = new HashicorpVaultClient(config, okHttpClient, context.getTypeManager(), retryPolicy);
 
         vault = new HashicorpVault(client, context.getMonitor());
-        context.registerService(Vault.class, vault);
-
         privateKeyResolver = new VaultPrivateKeyResolver(vault);
-        certificateResolver = new VaultCertificateResolver(vault);
-
-        context.registerService(CertificateResolver.class, certificateResolver);
     }
 
     private HashicorpVaultConfig loadHashicorpVaultClientConfig(

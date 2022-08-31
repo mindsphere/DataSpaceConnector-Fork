@@ -33,7 +33,9 @@ import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.security.CertificateResolver;
 import org.eclipse.dataspaceconnector.spi.security.PrivateKeyResolver;
 import org.eclipse.dataspaceconnector.spi.security.Vault;
+import org.eclipse.dataspaceconnector.spi.security.VaultCertificateResolver;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
+import org.eclipse.dataspaceconnector.spi.system.Provider;
 import org.eclipse.dataspaceconnector.spi.system.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
@@ -77,7 +79,6 @@ public class SiemensOauthExtension implements ServiceExtension {
     @Inject
     private PrivateKeyResolver privateKeyResolver;
 
-    @Inject
     private CertificateResolver certificateResolver;
 
     @Inject
@@ -102,9 +103,18 @@ public class SiemensOauthExtension implements ServiceExtension {
         return "SiemensOAuth2";
     }
 
+    @Provider(isDefault = true)
+    public CertificateResolver certificateResolver() {
+        return certificateResolver;
+    }
+
     @Override
     public void initialize(ServiceExtensionContext context) {
         monitor = context.getMonitor();
+
+        certificateResolver = new VaultCertificateResolver(vault);
+
+        context.registerService(CertificateResolver.class, certificateResolver);
 
         var jwksUrl = context.getSetting(PROVIDER_JWKS_URL, "http://localhost/empty_jwks_url");
         var keyRefreshInterval = context.getSetting(PROVIDER_JWKS_REFRESH, 5);
