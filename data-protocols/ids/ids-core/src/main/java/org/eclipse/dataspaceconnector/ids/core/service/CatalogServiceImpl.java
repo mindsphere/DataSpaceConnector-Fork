@@ -50,7 +50,6 @@ public class CatalogServiceImpl implements CatalogService {
     @Override
     @NotNull
     public Catalog getDataCatalog(ClaimToken claimToken, Range range) {
-        monitor.debug("Calling getDataCatalog");
         var query = ContractOfferQuery.Builder.newInstance().claimToken(claimToken).build();
 
         var offers = contractOfferService.queryContractOffers(query, range).collect(toList());
