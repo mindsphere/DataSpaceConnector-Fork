@@ -21,13 +21,14 @@ val failsafeVersion: String by project
 
 dependencies {
     api(project(":spi:common:core-spi"))
-    api(project(":common:util"))
+    api(project(":core:common:util"))
     api(project(":extensions:common:azure:cosmos-common"))
 
     implementation("com.azure:azure-cosmos:${cosmosSdkVersion}")
     implementation("dev.failsafe:failsafe:${failsafeVersion}")
 
     testImplementation(testFixtures(project(":extensions:common:azure:azure-test")))
+    testImplementation(testFixtures(project(":spi:common:core-spi")))
 
 }
 

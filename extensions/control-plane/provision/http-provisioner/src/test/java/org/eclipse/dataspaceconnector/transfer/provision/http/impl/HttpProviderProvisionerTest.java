@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Interceptor;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.policy.PolicyEngine;
+import org.eclipse.dataspaceconnector.spi.policy.engine.PolicyEngine;
 import org.eclipse.dataspaceconnector.spi.response.ResponseStatus;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.ProvisionedResource;
@@ -200,7 +200,10 @@ class HttpProviderProvisionerTest {
 
 
     private static class TestResourceDefinition extends ResourceDefinition {
-
+        @Override
+        public <RD extends ResourceDefinition, B extends Builder<RD, B>> B toBuilder() {
+            return null;
+        }
     }
 
     private static class TestProvisionedResource extends ProvisionedResource {

@@ -1,8 +1,8 @@
 # Implement a simple transfer listener
 
-In this sample, we build upon the [file transfer sample](../04.0-file-transfer) to add functionality to react to transfer completion on the consumer connector side.
+In this sample, we build upon the [file transfer sample](../04.0-file-transfer/) to add functionality to react to transfer completion on the consumer connector side.
 
-We will use the provider from the [file transfer sample](../04.0-file-transfer), and the consumer built on the consumer from that sample, with a transfer process listener added.
+We will use the provider from the [file transfer sample](../04.0-file-transfer/), and the consumer built on the consumer from that sample, with a transfer process listener added.
 
 Also, in order to keep things organized, the code in this example has been separated into several Java modules:
 
@@ -79,3 +79,7 @@ INFO 2022-04-14T16:23:18.9048494 Transfer Listener successfully wrote file C:\Us
 ```
 
 Then check `/path/on/yourmachine`, which should now contain a file named `marker.txt` in addition to the file defined in `dataDestination.properties.path` in `samples/04.0-file-transfer/filetransfer.json`.
+
+---
+
+[Previous Chapter](../04.0-file-transfer/README.md) | [Next Chapter](../04.2-modify-transferprocess/README.md)

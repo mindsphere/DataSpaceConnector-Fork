@@ -21,7 +21,7 @@ val failsafeVersion: String by project
 
 dependencies {
     api(project(":spi:control-plane:policy-spi"))
-    implementation(project(":common:util"))
+    implementation(project(":core:common:util"))
     implementation(project(":extensions:common:azure:cosmos-common"))
 
     implementation("com.azure:azure-cosmos:${cosmosSdkVersion}")
@@ -30,6 +30,8 @@ dependencies {
 
     testImplementation(project(":extensions:common:junit"))
     testImplementation(testFixtures(project(":extensions:common:azure:azure-test")))
+    testImplementation(testFixtures(project(":spi:control-plane:policy-spi")))
+
 }
 
 

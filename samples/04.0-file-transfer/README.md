@@ -75,8 +75,8 @@ private void registerContractDefinition(String uid) {
 }
 ```
 
-This adds an `Asset` to the `AssetIndex` and the relative `DataAddress` to the `DataAddressResolver` through the
-`AssetLoader`. Or, in other words, your provider now "hosts" one file named `test-document.txt` located in the path
+This adds an `Asset` to the `AssetIndex` and the relative `DataAddress` to the `DataAddressResolver`.
+Or, in other words, your provider now "hosts" one file named `test-document.txt` located in the path
 configured by the setting `edc.samples.04.asset.path` on your development machine. It makes it available for transfer
 under its `id` `"test-document"`. While it makes sense to have some sort of similarity between file name and id, it
 is by no means mandatory.
@@ -284,3 +284,7 @@ DEBUG 2022-05-03T10:38:06.246755642 Process f925131b-d61e-48b9-aa15-0f5e2e749064
 
 After the file transfer is completed, we can check the destination path specified in the request for the file. Here,
 we'll now find a file with the same content as the original file offered by the provider.
+
+---
+
+[Previous Chapter](../03-configuration/README.md) | [Next Chapter](../04.1-file-transfer-listener/README.md)

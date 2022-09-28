@@ -17,46 +17,39 @@ package org.eclipse.dataspaceconnector.core;
 import org.eclipse.dataspaceconnector.core.base.CommandHandlerRegistryImpl;
 import org.eclipse.dataspaceconnector.core.base.RemoteMessageDispatcherRegistryImpl;
 import org.eclipse.dataspaceconnector.core.base.agent.ParticipantAgentServiceImpl;
-import org.eclipse.dataspaceconnector.core.base.policy.PolicyEngineImpl;
-import org.eclipse.dataspaceconnector.core.base.policy.RuleBindingRegistryImpl;
-import org.eclipse.dataspaceconnector.core.base.policy.ScopeFilter;
 import org.eclipse.dataspaceconnector.core.event.EventExecutorServiceContainer;
 import org.eclipse.dataspaceconnector.core.event.EventRouterImpl;
 import org.eclipse.dataspaceconnector.core.health.HealthCheckServiceConfiguration;
 import org.eclipse.dataspaceconnector.core.health.HealthCheckServiceImpl;
+import org.eclipse.dataspaceconnector.core.policy.engine.PolicyEngineImpl;
+import org.eclipse.dataspaceconnector.core.policy.engine.RuleBindingRegistryImpl;
+import org.eclipse.dataspaceconnector.core.policy.engine.ScopeFilter;
 import org.eclipse.dataspaceconnector.core.security.DefaultPrivateKeyParseFunction;
 import org.eclipse.dataspaceconnector.policy.model.PolicyRegistrationTypes;
-import org.eclipse.dataspaceconnector.spi.EdcSetting;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.BaseExtension;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.EdcSetting;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provider;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provides;
 import org.eclipse.dataspaceconnector.spi.agent.ParticipantAgentService;
 import org.eclipse.dataspaceconnector.spi.command.CommandHandlerRegistry;
 import org.eclipse.dataspaceconnector.spi.event.EventRouter;
 import org.eclipse.dataspaceconnector.spi.message.RemoteMessageDispatcherRegistry;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.policy.PolicyEngine;
-import org.eclipse.dataspaceconnector.spi.policy.RuleBindingRegistry;
-import org.eclipse.dataspaceconnector.spi.security.CertificateResolver;
+import org.eclipse.dataspaceconnector.spi.policy.engine.PolicyEngine;
+import org.eclipse.dataspaceconnector.spi.policy.engine.RuleBindingRegistry;
 import org.eclipse.dataspaceconnector.spi.security.PrivateKeyResolver;
-import org.eclipse.dataspaceconnector.spi.security.Vault;
-import org.eclipse.dataspaceconnector.spi.system.BaseExtension;
 import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
 import org.eclipse.dataspaceconnector.spi.system.Hostname;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
-import org.eclipse.dataspaceconnector.spi.system.Provider;
-import org.eclipse.dataspaceconnector.spi.system.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.system.health.HealthCheckService;
-import org.eclipse.dataspaceconnector.spi.system.vault.NoopCertificateResolver;
-import org.eclipse.dataspaceconnector.spi.system.vault.NoopPrivateKeyResolver;
-import org.eclipse.dataspaceconnector.spi.system.vault.NoopVault;
 import org.eclipse.dataspaceconnector.spi.telemetry.Telemetry;
 import org.eclipse.dataspaceconnector.spi.types.TypeManager;
 
 import java.security.PrivateKey;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @BaseExtension
 @Provides({
@@ -83,22 +76,17 @@ public class CoreServicesExtension implements ServiceExtension {
     private static final int DEFAULT_TP_SIZE = 3;
     private static final String DEFAULT_HOSTNAME = "localhost";
 
-
-    /**
-     * An optional instrumentor for {@link ExecutorService}. Used by the optional {@code micrometer} module.
-     */
-    @Inject(required = false)
+    @Inject
     private ExecutorInstrumentation executorInstrumentation;
 
     @Inject
     private PrivateKeyResolver privateKeyResolver;
 
-    @Inject(required = false)
+    @Inject
     private EventExecutorServiceContainer eventExecutorServiceContainer;
 
     private HealthCheckServiceImpl healthCheckService;
-    private RuleBindingRegistryImpl ruleBindingRegistry;
-    private ScopeFilter scopeFilter;
+    private RuleBindingRegistry ruleBindingRegistry;
 
     @Override
     public String name() {
@@ -111,13 +99,8 @@ public class CoreServicesExtension implements ServiceExtension {
 
         var config = getHealthCheckConfig(context);
 
-        // health check service
         healthCheckService = new HealthCheckServiceImpl(config, executorInstrumentation);
-        context.registerService(HealthCheckService.class, healthCheckService);
-
         ruleBindingRegistry = new RuleBindingRegistryImpl();
-
-        scopeFilter = new ScopeFilter(ruleBindingRegistry);
 
         var typeManager = context.getTypeManager();
         PolicyRegistrationTypes.TYPES.forEach(typeManager::registerTypes);
@@ -132,11 +115,6 @@ public class CoreServicesExtension implements ServiceExtension {
     public void shutdown() {
         healthCheckService.stop();
         ServiceExtension.super.shutdown();
-    }
-
-    @Provider(isDefault = true)
-    public ExecutorInstrumentation defaultInstrumentation() {
-        return ExecutorInstrumentation.noop();
     }
 
     @Provider
@@ -170,39 +148,21 @@ public class CoreServicesExtension implements ServiceExtension {
 
     @Provider
     public PolicyEngine policyEngine() {
+        var scopeFilter = new ScopeFilter(ruleBindingRegistry);
         return new PolicyEngineImpl(scopeFilter);
     }
 
     @Provider
     public EventRouter eventRouter(ServiceExtensionContext context) {
-        if (eventExecutorServiceContainer == null) {
-            eventExecutorServiceContainer = eventExecutorServiceContainer();
-        }
         return new EventRouterImpl(context.getMonitor(), eventExecutorServiceContainer.getExecutorService());
     }
 
-    @Provider(isDefault = true)
-    public EventExecutorServiceContainer eventExecutorServiceContainer() {
-        return new EventExecutorServiceContainer(Executors.newFixedThreadPool(1)); // TODO: make configurable
-    }
-
-    @Provider(isDefault = true)
-    public Vault vault() {
-        return new NoopVault();
-    }
-
-    @Provider(isDefault = true)
-    public PrivateKeyResolver privateKeyResolver() {
-        return new NoopPrivateKeyResolver();
-    }
-
-    @Provider(isDefault = true)
-    public CertificateResolver certificateResolver() {
-        return new NoopCertificateResolver();
+    @Provider
+    public HealthCheckService healthCheckService() {
+        return healthCheckService;
     }
 
     private HealthCheckServiceConfiguration getHealthCheckConfig(ServiceExtensionContext context) {
-
         return HealthCheckServiceConfiguration.Builder.newInstance()
                 .livenessPeriod(Duration.ofSeconds(context.getSetting(LIVENESS_PERIOD_SECONDS_SETTING, DEFAULT_DURATION)))
                 .startupStatusPeriod(Duration.ofSeconds(context.getSetting(STARTUP_PERIOD_SECONDS_SETTING, DEFAULT_DURATION)))

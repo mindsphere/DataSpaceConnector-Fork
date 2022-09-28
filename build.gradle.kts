@@ -22,7 +22,7 @@ plugins {
     signing
     id("com.rameshkp.openapi-merger-gradle-plugin") version "1.0.4"
     id("org.eclipse.dataspaceconnector.module-names")
-    id("com.autonomousapps.dependency-analysis") version "1.13.0" apply (false)
+    id("com.autonomousapps.dependency-analysis") version "1.13.1" apply (false)
     id("org.gradle.crypto.checksum") version "1.4.0"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("org.hidetake.swagger.generator") version "2.19.2"
@@ -33,7 +33,7 @@ repositories {
 }
 
 dependencies {
-    "swaggerCodegen"("org.openapitools:openapi-generator-cli:6.0.1")
+    "swaggerCodegen"("org.openapitools:openapi-generator-cli:6.2.0")
     "swaggerUI"("org.webjars:swagger-ui:4.14.0")
 }
 
@@ -54,6 +54,7 @@ val edcWebsiteUrl: String by project
 val edcScmUrl: String by project
 val groupId: String by project
 val defaultVersion: String by project
+val metaModelVersion: String by project
 
 // required by the nexus publishing plugin
 val projectVersion: String = (project.findProperty("edcVersion") ?: defaultVersion) as String
@@ -67,6 +68,9 @@ if (projectVersion.contains("SNAPSHOT")) {
 subprojects {
 
     repositories {
+        maven {
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+        }
         mavenCentral()
         maven {
             url = uri("https://maven.iais.fraunhofer.de/artifactory/eis-ids-public/")
@@ -114,11 +118,15 @@ subprojects {
 
 buildscript {
     dependencies {
-        classpath("io.swagger.core.v3:swagger-gradle-plugin:2.1.13")
+        val swagger: String by project
+        classpath("io.swagger.core.v3:swagger-gradle-plugin:${swagger}")
     }
 }
 
 allprojects {
+    repositories {
+        mavenLocal()
+    }
     apply(plugin = "maven-publish")
     apply(plugin = "checkstyle")
     apply(plugin = "java")
@@ -168,6 +176,8 @@ allprojects {
             api("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
             api("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
             api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}")
+            api("${groupId}:runtime-metamodel:${metaModelVersion}")
+
 
             testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
             testImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")

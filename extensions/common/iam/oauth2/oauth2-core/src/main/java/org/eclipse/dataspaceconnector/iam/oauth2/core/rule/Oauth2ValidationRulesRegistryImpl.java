@@ -14,7 +14,7 @@
 
 package org.eclipse.dataspaceconnector.iam.oauth2.core.rule;
 
-import org.eclipse.dataspaceconnector.common.token.TokenValidationRulesRegistryImpl;
+import org.eclipse.dataspaceconnector.core.jwt.TokenValidationRulesRegistryImpl;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.Oauth2Configuration;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2ValidationRulesRegistry;
 
@@ -26,6 +26,8 @@ import java.time.Clock;
 public class Oauth2ValidationRulesRegistryImpl extends TokenValidationRulesRegistryImpl implements Oauth2ValidationRulesRegistry {
 
     public Oauth2ValidationRulesRegistryImpl(Oauth2Configuration configuration, Clock clock) {
-        this.addRule(new Oauth2ValidationRule(configuration, clock));
+        this.addRule(new Oauth2AudienceValidationRule(configuration.getEndpointAudience()));
+        this.addRule(new Oauth2NotBeforeValidationRule(clock, configuration.getNotBeforeValidationLeeway()));
+        this.addRule(new Oauth2ExpirationIssuedAtValidationRule(clock));
     }
 }

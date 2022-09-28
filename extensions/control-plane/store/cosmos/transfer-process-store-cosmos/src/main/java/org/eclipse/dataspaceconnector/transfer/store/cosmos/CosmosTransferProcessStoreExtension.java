@@ -17,14 +17,16 @@ package org.eclipse.dataspaceconnector.transfer.store.cosmos;
 import dev.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosClientProvider;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosDbApiImpl;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provides;
 import org.eclipse.dataspaceconnector.spi.security.Vault;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
-import org.eclipse.dataspaceconnector.spi.system.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.system.health.HealthCheckService;
 import org.eclipse.dataspaceconnector.spi.transfer.store.TransferProcessStore;
 import org.eclipse.dataspaceconnector.transfer.store.cosmos.model.TransferProcessDocument;
+
+import java.time.Clock;
 
 
 /**
@@ -44,6 +46,9 @@ public class CosmosTransferProcessStoreExtension implements ServiceExtension {
     @Inject
     private CosmosClientProvider clientProvider;
 
+    @Inject
+    private Clock clock;
+
     @Override
     public String name() {
         return "Cosmos Transfer Process Store";
@@ -59,7 +64,7 @@ public class CosmosTransferProcessStoreExtension implements ServiceExtension {
         TransferProcessStoreCosmosConfig configuration = new TransferProcessStoreCosmosConfig(context);
         var client = clientProvider.createClient(vault, configuration);
         var cosmosDbApi = new CosmosDbApiImpl(configuration, client);
-        context.registerService(TransferProcessStore.class, new CosmosTransferProcessStore(cosmosDbApi, context.getTypeManager(), configuration.getPartitionKey(), connectorId, retryPolicy));
+        context.registerService(TransferProcessStore.class, new CosmosTransferProcessStore(cosmosDbApi, context.getTypeManager(), configuration.getPartitionKey(), connectorId, retryPolicy, clock));
 
         context.getTypeManager().registerTypes(TransferProcessDocument.class);
 

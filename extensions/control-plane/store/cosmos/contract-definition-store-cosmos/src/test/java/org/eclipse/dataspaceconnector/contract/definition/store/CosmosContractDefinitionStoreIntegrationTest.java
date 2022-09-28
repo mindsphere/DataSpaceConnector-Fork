@@ -17,25 +17,31 @@ package org.eclipse.dataspaceconnector.contract.definition.store;
 
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
-import com.azure.cosmos.implementation.NotFoundException;
 import com.azure.cosmos.models.CosmosContainerResponse;
 import com.azure.cosmos.models.CosmosDatabaseResponse;
 import com.azure.cosmos.models.PartitionKey;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosDbApiImpl;
 import org.eclipse.dataspaceconnector.azure.testfixtures.CosmosTestClient;
 import org.eclipse.dataspaceconnector.azure.testfixtures.annotations.AzureCosmosDbIntegrationTest;
+import org.eclipse.dataspaceconnector.contract.offer.store.ContractDefinitionStoreTestBase;
 import org.eclipse.dataspaceconnector.cosmos.policy.store.model.ContractDefinitionDocument;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
+import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
+import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.query.Criterion;
 import org.eclipse.dataspaceconnector.spi.query.QuerySpec;
 import org.eclipse.dataspaceconnector.spi.query.SortOrder;
 import org.eclipse.dataspaceconnector.spi.types.TypeManager;
+import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractDefinition;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.temporal.ChronoUnit;
@@ -46,13 +52,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.dataspaceconnector.contract.definition.store.TestFunctions.generateDefinition;
 import static org.eclipse.dataspaceconnector.contract.definition.store.TestFunctions.generateDocument;
+import static org.eclipse.dataspaceconnector.contract.offer.store.TestFunctions.createContractDefinitions;
 import static org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression.SELECT_ALL;
+import static org.mockito.Mockito.mock;
 
 @AzureCosmosDbIntegrationTest
-public class CosmosContractDefinitionStoreIntegrationTest {
+public class CosmosContractDefinitionStoreIntegrationTest extends ContractDefinitionStoreTestBase {
     private static final String TEST_ID = UUID.randomUUID().toString();
     private static final String DATABASE_NAME = "connector-itest-" + TEST_ID;
     private static final String CONTAINER_PREFIX = "ContractDefinitionStore-";
@@ -89,7 +96,7 @@ public class CosmosContractDefinitionStoreIntegrationTest {
 
         var cosmosDbApi = new CosmosDbApiImpl(container, true);
         var retryPolicy = RetryPolicy.builder().withMaxRetries(3).withBackoff(1, 5, ChronoUnit.SECONDS).build();
-        store = new CosmosContractDefinitionStore(cosmosDbApi, typeManager, retryPolicy, TEST_PARTITION_KEY);
+        store = new CosmosContractDefinitionStore(cosmosDbApi, typeManager, retryPolicy, TEST_PARTITION_KEY, mock(Monitor.class));
     }
 
     @AfterEach
@@ -240,13 +247,6 @@ public class CosmosContractDefinitionStoreIntegrationTest {
     }
 
     @Test
-    void delete_notExist() {
-        assertThatThrownBy(() -> store.deleteById("not-exists"))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("An object with the ID not-exists could not be found!");
-    }
-
-    @Test
     void findAll_noQuerySpec() {
         var doc1 = generateDocument(TEST_PARTITION_KEY);
         var doc2 = generateDocument(TEST_PARTITION_KEY);
@@ -287,16 +287,6 @@ public class CosmosContractDefinitionStoreIntegrationTest {
     }
 
     @Test
-    void findAll_verifyFiltering_invalidFilterExpression() {
-        IntStream.range(0, 10).mapToObj(i -> generateDocument(TEST_PARTITION_KEY)).forEach(d -> container.createItem(d));
-
-        var query = QuerySpec.Builder.newInstance().filter("something contains other").build();
-
-        // message is coming from the predicate converter rather than the SQL statement translation layer
-        assertThatThrownBy(() -> store.findAll(query)).isInstanceOfAny(IllegalArgumentException.class).hasMessage("Operator [contains] is not supported by this converter!");
-    }
-
-    @Test
     void findAll_verifyFiltering_unsuccessfulFilterExpression() {
         IntStream.range(0, 10).mapToObj(i -> generateDocument(TEST_PARTITION_KEY)).forEach(d -> container.createItem(d));
 
@@ -316,8 +306,9 @@ public class CosmosContractDefinitionStoreIntegrationTest {
         assertThat(store.findAll(descendingQuery)).hasSize(10).isSortedAccordingTo((c1, c2) -> c2.getId().compareTo(c1.getId()));
     }
 
+    // Override the base test since Cosmos returns documents where the property subject of ORDER BY does not exist
     @Test
-    void findAll_sorting_nonExistentProperty() {
+    void findAll_verifySorting_invalidProperty() {
 
         var ids = IntStream.range(0, 10).mapToObj(i -> generateDocument(TEST_PARTITION_KEY)).peek(d -> container.createItem(d)).map(ContractDefinitionDocument::getId).collect(Collectors.toList());
 
@@ -325,7 +316,7 @@ public class CosmosContractDefinitionStoreIntegrationTest {
         var query = QuerySpec.Builder.newInstance().sortField("notexist").sortOrder(SortOrder.DESC).build();
 
         var all = store.findAll(query).collect(Collectors.toList());
-        assertThat(all).isEmpty();
+        assertThat(all).hasSize(10);
     }
 
     @Test
@@ -349,6 +340,46 @@ public class CosmosContractDefinitionStoreIntegrationTest {
 
         assertThat(all).hasSize(1).containsExactly(modifiedDef);
 
+    }
+
+    @Test
+    @Disabled("Cosmos does not support yet matching a JSON")
+    void find_queryBySelectorExpression_entireCriterion() throws JsonProcessingException {
+        var definitionsExpected = createContractDefinitions(20);
+        definitionsExpected.get(0).getSelectorExpression().getCriteria().add(new Criterion(Asset.PROPERTY_ID, "=", "test-asset"));
+        var def5 = definitionsExpected.get(5);
+        def5.getSelectorExpression().getCriteria().add(new Criterion(Asset.PROPERTY_ID, "=", "foobar-asset"));
+        getContractDefinitionStore().save(definitionsExpected);
+
+        var json = new ObjectMapper().writeValueAsString(new Criterion(Asset.PROPERTY_ID, "=", "foobar-asset"));
+
+        var spec = QuerySpec.Builder.newInstance()
+                .filter("selectorExpression.criteria = " + json)
+                .build();
+
+        assertThat(getContractDefinitionStore().findAll(spec)).hasSize(1)
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsOnly(def5);
+    }
+
+    @Override
+    protected ContractDefinitionStore getContractDefinitionStore() {
+        return store;
+    }
+
+    @Override
+    protected boolean supportsCollectionQuery() {
+        return true;
+    }
+
+    @Override
+    protected boolean supportsCollectionIndexQuery() {
+        return true;
+    }
+
+    @Override
+    protected boolean supportsSortOrder() {
+        return true;
     }
 
     private ContractDefinition getContractDefinition(String definitionId, String accessPolicyId, String contractPolicyId) {

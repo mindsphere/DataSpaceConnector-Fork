@@ -15,6 +15,7 @@
 
 package org.eclipse.dataspaceconnector.spi.contract.offer.store;
 
+import org.eclipse.dataspaceconnector.spi.persistence.EdcPersistenceException;
 import org.eclipse.dataspaceconnector.spi.query.QuerySpec;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractDefinition;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ import java.util.stream.Stream;
 /**
  * Persists {@link ContractDefinition}s.
  */
-public interface ContractDefinitionStore extends ContractDefinitionLoader {
+public interface ContractDefinitionStore {
 
     /**
      * Returns all the definitions in the store that are covered by a given {@link QuerySpec}.
@@ -62,6 +63,10 @@ public interface ContractDefinitionStore extends ContractDefinitionLoader {
 
     /**
      * Deletes the definition with the given id.
+     *
+     * @param id A String that represents the {@link ContractDefinition} ID, in most cases this will be a UUID.
+     * @return The {@link ContractDefinition} if one was found, or null otherwise.
+     * @throws EdcPersistenceException if something goes wrong.
      */
     ContractDefinition deleteById(String id);
 
@@ -72,7 +77,6 @@ public interface ContractDefinitionStore extends ContractDefinitionLoader {
     default void reload() {
     }
 
-    @Override
     default void accept(ContractDefinition item) {
         this.save(item);
     }

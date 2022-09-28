@@ -16,18 +16,21 @@ plugins {
     `java-library`
 }
 
+val httpMockServer: String by project
 val nimbusVersion: String by project
 val okHttpVersion: String by project
 
 dependencies {
     api(project(":spi:common:oauth2-spi"))
-    implementation(project(":common:token-generation-lib"))
-    implementation(project(":common:token-validation-lib"))
+    implementation(project(":core:common:jwt-core"))
+
     implementation("com.nimbusds:nimbus-jose-jwt:${nimbusVersion}")
     implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
 
     testImplementation(project(":extensions:common:junit"))
 
+    testImplementation("org.mock-server:mockserver-netty:${httpMockServer}:shaded")
+    testImplementation("org.mock-server:mockserver-client-java:${httpMockServer}:shaded")
 }
 
 publishing {

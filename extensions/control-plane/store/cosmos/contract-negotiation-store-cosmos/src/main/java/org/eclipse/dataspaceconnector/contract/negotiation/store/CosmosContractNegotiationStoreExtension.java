@@ -18,13 +18,15 @@ import dev.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosClientProvider;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosDbApiImpl;
 import org.eclipse.dataspaceconnector.contract.negotiation.store.model.ContractNegotiationDocument;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provides;
 import org.eclipse.dataspaceconnector.spi.contract.negotiation.store.ContractNegotiationStore;
 import org.eclipse.dataspaceconnector.spi.security.Vault;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
-import org.eclipse.dataspaceconnector.spi.system.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.system.health.HealthCheckService;
+
+import java.time.Clock;
 
 
 @Provides({ ContractNegotiationStore.class })
@@ -36,6 +38,9 @@ public class CosmosContractNegotiationStoreExtension implements ServiceExtension
     @Inject
     private CosmosClientProvider clientProvider;
 
+    @Inject
+    private Clock clock;
+
     @Override
     public String name() {
         return "CosmosDB ContractNegotiation Store";
@@ -46,7 +51,7 @@ public class CosmosContractNegotiationStoreExtension implements ServiceExtension
         var configuration = new CosmosContractNegotiationStoreConfig(context);
 
         var cosmosDbApi = new CosmosDbApiImpl(configuration, clientProvider.createClient(vault, configuration));
-        var store = new CosmosContractNegotiationStore(cosmosDbApi, context.getTypeManager(), (RetryPolicy<Object>) context.getService(RetryPolicy.class), configuration.getPartitionKey());
+        var store = new CosmosContractNegotiationStore(cosmosDbApi, context.getTypeManager(), (RetryPolicy<Object>) context.getService(RetryPolicy.class), configuration.getPartitionKey(), clock);
         context.registerService(ContractNegotiationStore.class, store);
 
         context.getTypeManager().registerTypes(ContractNegotiationDocument.class);

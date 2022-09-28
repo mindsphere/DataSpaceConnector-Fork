@@ -2267,7 +2267,7 @@ window.swaggerSpec={
           "criteria" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/Criterion"
+              "$ref" : "#/components/schemas/CriterionDto"
             }
           },
           "id" : {
@@ -2291,7 +2291,7 @@ window.swaggerSpec={
           "criteria" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/Criterion"
+              "$ref" : "#/components/schemas/CriterionDto"
             }
           },
           "id" : {
@@ -2391,6 +2391,21 @@ window.swaggerSpec={
         }
       },
       "Criterion" : {
+        "type" : "object",
+        "properties" : {
+          "operandLeft" : {
+            "type" : "object"
+          },
+          "operandRight" : {
+            "type" : "object"
+          },
+          "operator" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CriterionDto" : {
+        "required" : [ "operandLeft", "operator" ],
         "type" : "object",
         "properties" : {
           "operandLeft" : {

@@ -34,8 +34,9 @@ dependencies {
     testImplementation(testFixtures(project(":extensions:common:sql:lease-sql")))
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("org.awaitility:awaitility:${awaitility}")
-    testImplementation(testFixtures(project(":common:util")))
+    testImplementation(testFixtures(project(":core:common:util")))
     testImplementation("org.postgresql:postgresql:${postgresVersion}")
+    testImplementation(testFixtures(project(":spi:control-plane:transfer-spi")))
 
 }
 

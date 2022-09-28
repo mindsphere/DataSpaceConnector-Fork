@@ -18,16 +18,17 @@ import dev.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosClientProvider;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosDbApiImpl;
 import org.eclipse.dataspaceconnector.cosmos.policy.store.model.ContractDefinitionDocument;
-import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionLoader;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provides;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
+import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.security.Vault;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
-import org.eclipse.dataspaceconnector.spi.system.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.system.health.HealthCheckService;
+import org.eclipse.dataspaceconnector.spi.types.TypeManager;
 
-@Provides({ ContractDefinitionStore.class, ContractDefinitionLoader.class })
+@Provides({ ContractDefinitionStore.class })
 public class CosmosContractDefinitionStoreExtension implements ServiceExtension {
 
     @Inject
@@ -35,6 +36,15 @@ public class CosmosContractDefinitionStoreExtension implements ServiceExtension 
 
     @Inject
     private CosmosClientProvider clientProvider;
+
+    @Inject
+    private Monitor monitor;
+
+    @Inject
+    private RetryPolicy<Object> retryPolicy;
+
+    @Inject
+    private TypeManager typeManager;
 
     @Override
     public String name() {
@@ -48,11 +58,8 @@ public class CosmosContractDefinitionStoreExtension implements ServiceExtension 
         var client = clientProvider.createClient(vault, configuration);
         var cosmosDbApi = new CosmosDbApiImpl(configuration, client);
 
-        var store = new CosmosContractDefinitionStore(cosmosDbApi, context.getTypeManager(), (RetryPolicy<Object>) context.getService(RetryPolicy.class), configuration.getPartitionKey());
+        var store = new CosmosContractDefinitionStore(cosmosDbApi, typeManager, retryPolicy, configuration.getPartitionKey(), monitor);
         context.registerService(ContractDefinitionStore.class, store);
-
-        ContractDefinitionLoader loader = store::save;
-        context.registerService(ContractDefinitionLoader.class, loader);
 
         context.getTypeManager().registerTypes(ContractDefinitionDocument.class);
 

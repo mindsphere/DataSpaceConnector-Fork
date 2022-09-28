@@ -17,6 +17,8 @@ val jerseyVersion: String by project
 val okHttpVersion: String by project
 val restAssured: String by project
 val rsApi: String by project
+val awaitility: String by project
+
 
 plugins {
     `java-library`
@@ -27,7 +29,6 @@ dependencies {
     api(project(":spi:control-plane:control-plane-spi"))
     api(project(":spi:common:transaction-spi"))
     implementation(project(":extensions:common:api:api-core"))
-    implementation(project(":spi:common:auth-spi"))
     implementation(project(":extensions:control-plane:api:data-management:api-configuration"))
 
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:${rsApi}")
@@ -36,6 +37,8 @@ dependencies {
     testImplementation(project(":extensions:common:http"))
     testImplementation(project(":extensions:common:junit"))
     testImplementation("io.rest-assured:rest-assured:${restAssured}")
+    testImplementation("org.awaitility:awaitility:${awaitility}")
+
 }
 
 publishing {

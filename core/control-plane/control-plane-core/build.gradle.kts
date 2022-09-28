@@ -23,7 +23,11 @@ dependencies {
     api(project(":core:common:policy-engine"))
     api(project(":core:control-plane:contract"))
     api(project(":core:control-plane:transfer"))
-    implementation(project(":common:util"))
+    implementation(project(":core:common:util"))
+    testImplementation(testFixtures(project(":spi:common:core-spi")))
+    testImplementation(testFixtures(project(":spi:control-plane:contract-spi")))
+    testImplementation(testFixtures(project(":spi:control-plane:policy-spi")))
+    testImplementation(testFixtures(project(":spi:control-plane:transfer-spi")))
 }
 
 publishing {

@@ -22,14 +22,15 @@ plugins {
 }
 
 dependencies {
+    api(project(":spi:common:policy-engine-spi"))
     api(project(":spi:control-plane:contract-spi"))
 
-    implementation(project(":common:state-machine-lib"))
+    implementation(project(":core:common:state-machine"))
     implementation("io.opentelemetry:opentelemetry-extension-annotations:${openTelemetryVersion}")
 
     testImplementation(project(":core:control-plane:control-plane-core"))
     testImplementation(project(":extensions:common:junit"))
-    testImplementation(testFixtures(project(":common:util")))
+    testImplementation(testFixtures(project(":core:common:util")))
     testImplementation("org.awaitility:awaitility:${awaitility}")
 }
 

@@ -21,20 +21,22 @@ import org.eclipse.dataspaceconnector.ids.core.serialization.IdsTypeManagerUtil;
 import org.eclipse.dataspaceconnector.ids.core.service.CatalogServiceImpl;
 import org.eclipse.dataspaceconnector.ids.core.service.ConnectorServiceImpl;
 import org.eclipse.dataspaceconnector.ids.core.service.ConnectorServiceSettings;
+import org.eclipse.dataspaceconnector.ids.core.service.DynamicAttributeTokenServiceImpl;
 import org.eclipse.dataspaceconnector.ids.core.transform.IdsTransformerRegistryImpl;
 import org.eclipse.dataspaceconnector.ids.spi.descriptor.IdsDescriptorService;
 import org.eclipse.dataspaceconnector.ids.spi.service.CatalogService;
 import org.eclipse.dataspaceconnector.ids.spi.service.ConnectorService;
+import org.eclipse.dataspaceconnector.ids.spi.service.DynamicAttributeTokenService;
 import org.eclipse.dataspaceconnector.ids.spi.transform.IdsTransformerRegistry;
 import org.eclipse.dataspaceconnector.ids.spi.types.IdsId;
 import org.eclipse.dataspaceconnector.ids.spi.types.IdsType;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.EdcSetting;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provides;
 import org.eclipse.dataspaceconnector.spi.EdcException;
-import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.contract.offer.ContractOfferService;
 import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
-import org.eclipse.dataspaceconnector.spi.system.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 
@@ -44,8 +46,8 @@ import java.util.List;
 /**
  * Implements the IDS Controller REST API.
  */
-@Provides({ CatalogService.class, ConnectorService.class, IdsDescriptorService.class,
-        CatalogService.class, ConnectorService.class, IdsTransformerRegistry.class })
+@Provides({ IdsDescriptorService.class, CatalogService.class, ConnectorService.class,
+        IdsTransformerRegistry.class, DynamicAttributeTokenService.class})
 public class IdsCoreServiceExtension implements ServiceExtension {
 
     @EdcSetting
@@ -107,6 +109,8 @@ public class IdsCoreServiceExtension implements ServiceExtension {
         context.registerService(ConnectorService.class, connectorService);
 
         context.registerService(IdsDescriptorService.class, new IdsDescriptorServiceImpl());
+    
+        context.registerService(DynamicAttributeTokenService.class, new DynamicAttributeTokenServiceImpl(identityService));
     }
 
     private String resolveCatalogId(ServiceExtensionContext context) {

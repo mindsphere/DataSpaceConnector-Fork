@@ -1,6 +1,6 @@
 # Telemetry with OpenTelemetry and Micrometer
 
-This sample builds on top of [sample 04.0-file-transfer](../04.0-file-transfer) to show how you can:
+This sample builds on top of [sample 04.0-file-transfer](../04.0-file-transfer/) to show how you can:
 
 - generate traces with [OpenTelemetry](https://opentelemetry.io) and collect and visualize them with [Jaeger](https://www.jaegertracing.io/).
 - automatically collect metrics from infrastructure, server endpoints and client libraries with [Micrometer](https://micrometer.io) and visualize them with [Prometheus](https://prometheus.io).
@@ -99,3 +99,7 @@ In order to provide your own OpenTelemetry implementation, you have to "deploy a
 
 EDC uses a [ServiceLoader](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/ServiceLoader.html) to load an implementation of OpenTelemetry. If it finds an OpenTelemetry service provider on the class path it will use it, otherwise it will use the registered global OpenTelemetry.
 You can look at the section `Deploying service providers on the class path` of the [ServiceLoader documentation](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/ServiceLoader.html) to have more information about service providers.
+
+---
+
+[Previous Chapter](../04.2-modify-transferprocess/README.md) | [Next Chapter](../05-file-transfer-cloud/README.md)

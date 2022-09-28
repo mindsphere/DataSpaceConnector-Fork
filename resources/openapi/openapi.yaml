@@ -1653,7 +1653,7 @@ components:
         criteria:
           type: array
           items:
-            $ref: '#/components/schemas/Criterion'
+            $ref: '#/components/schemas/CriterionDto'
         id:
           type: string
     ContractDefinitionResponseDto:
@@ -1669,7 +1669,7 @@ components:
         criteria:
           type: array
           items:
-            $ref: '#/components/schemas/Criterion'
+            $ref: '#/components/schemas/CriterionDto'
         id:
           type: string
     ContractNegotiationDto:
@@ -1741,6 +1741,18 @@ components:
         policy:
           $ref: '#/components/schemas/Policy'
     Criterion:
+      type: object
+      properties:
+        operandLeft:
+          type: object
+        operandRight:
+          type: object
+        operator:
+          type: string
+    CriterionDto:
+      required:
+      - operandLeft
+      - operator
       type: object
       properties:
         operandLeft:

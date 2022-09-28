@@ -21,14 +21,15 @@ import org.eclipse.dataspaceconnector.api.datamanagement.contractdefinition.serv
 import org.eclipse.dataspaceconnector.api.datamanagement.contractdefinition.service.ContractDefinitionServiceImpl;
 import org.eclipse.dataspaceconnector.api.datamanagement.contractdefinition.transform.ContractDefinitionRequestDtoToContractDefinitionTransformer;
 import org.eclipse.dataspaceconnector.api.datamanagement.contractdefinition.transform.ContractDefinitionToContractDefinitionResponseDtoTransformer;
+import org.eclipse.dataspaceconnector.api.datamanagement.contractdefinition.transform.CriterionDtoToCriterionTransformer;
+import org.eclipse.dataspaceconnector.api.datamanagement.contractdefinition.transform.CriterionToCriterionDtoTransformer;
 import org.eclipse.dataspaceconnector.api.transformer.DtoTransformerRegistry;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provides;
 import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.contract.definition.observe.ContractDefinitionObservableImpl;
-import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionLoader;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
 import org.eclipse.dataspaceconnector.spi.event.EventRouter;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
-import org.eclipse.dataspaceconnector.spi.system.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.transaction.TransactionContext;
@@ -50,9 +51,6 @@ public class ContractDefinitionApiExtension implements ServiceExtension {
     ContractDefinitionStore contractDefinitionStore;
 
     @Inject
-    ContractDefinitionLoader contractDefinitionLoader;
-
-    @Inject
     TransactionContext transactionContext;
 
     @Inject
@@ -68,6 +66,8 @@ public class ContractDefinitionApiExtension implements ServiceExtension {
 
     @Override
     public void initialize(ServiceExtensionContext context) {
+        transformerRegistry.register(new CriterionToCriterionDtoTransformer());
+        transformerRegistry.register(new CriterionDtoToCriterionTransformer());
         transformerRegistry.register(new ContractDefinitionToContractDefinitionResponseDtoTransformer());
         transformerRegistry.register(new ContractDefinitionRequestDtoToContractDefinitionTransformer());
 
@@ -76,7 +76,7 @@ public class ContractDefinitionApiExtension implements ServiceExtension {
         var contractDefinitionObservable = new ContractDefinitionObservableImpl();
         contractDefinitionObservable.registerListener(new ContractDefinitionEventListener(clock, eventRouter));
 
-        var service = new ContractDefinitionServiceImpl(contractDefinitionStore, contractDefinitionLoader, transactionContext, contractDefinitionObservable);
+        var service = new ContractDefinitionServiceImpl(contractDefinitionStore, transactionContext, contractDefinitionObservable);
         context.registerService(ContractDefinitionService.class, service);
 
         webService.registerResource(config.getContextAlias(), new ContractDefinitionApiController(monitor, service, transformerRegistry));

@@ -14,10 +14,14 @@
 
 val jacksonVersion: String by project
 val openTelemetryVersion: String by project
+val jupiterVersion: String by project
+val mockitoVersion: String by project
+val assertj: String by project
 
 plugins {
     `java-library`
     `maven-publish`
+    `java-test-fixtures`
 }
 
 dependencies {
@@ -26,12 +30,19 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
     api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}")
 
-    api(project(":core:common:policy-evaluator"))
+    api(project(":spi:common:policy-model"))
 
     implementation("io.opentelemetry:opentelemetry-api:${openTelemetryVersion}")
 
-    implementation(project(":common:util"))
+    implementation(project(":core:common:util"))
     testImplementation(project(":extensions:common:junit"))
+
+    // needed by the abstract test spec located in testFixtures
+    testFixturesImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
+    testFixturesImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
+    testFixturesRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
+    testFixturesImplementation("org.mockito:mockito-core:${mockitoVersion}")
+    testFixturesImplementation("org.assertj:assertj-core:${assertj}")
 }
 
 publishing {

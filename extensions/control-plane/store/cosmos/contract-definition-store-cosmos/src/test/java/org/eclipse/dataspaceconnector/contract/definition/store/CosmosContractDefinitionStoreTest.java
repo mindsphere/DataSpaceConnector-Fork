@@ -20,6 +20,7 @@ import dev.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosDbApi;
 import org.eclipse.dataspaceconnector.azure.cosmos.CosmosDocument;
 import org.eclipse.dataspaceconnector.cosmos.policy.store.model.ContractDefinitionDocument;
+import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.persistence.EdcPersistenceException;
 import org.eclipse.dataspaceconnector.spi.query.QuerySpec;
 import org.eclipse.dataspaceconnector.spi.query.SortOrder;
@@ -29,9 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -40,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.dataspaceconnector.contract.definition.store.TestFunctions.generateDefinition;
 import static org.eclipse.dataspaceconnector.contract.definition.store.TestFunctions.generateDocument;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doNothing;
@@ -58,63 +58,62 @@ class CosmosContractDefinitionStoreTest {
         cosmosDbApiMock = mock(CosmosDbApi.class);
         var typeManager = new TypeManager();
         var retryPolicy = RetryPolicy.ofDefaults();
-        store = new CosmosContractDefinitionStore(cosmosDbApiMock, typeManager, retryPolicy, TEST_PART_KEY);
+        store = new CosmosContractDefinitionStore(cosmosDbApiMock, typeManager, retryPolicy, TEST_PART_KEY, mock(Monitor.class));
     }
 
     @Test
     void findAll() {
         var doc1 = generateDocument(TEST_PART_KEY);
         var doc2 = generateDocument(TEST_PART_KEY);
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(List.of(doc1, doc2));
+        when(cosmosDbApiMock.queryItems(any(SqlQuerySpec.class))).thenReturn(Stream.of(doc1, doc2));
 
         store.reload();
         var all = store.findAll(QuerySpec.max());
 
         assertThat(all).hasSize(2).containsExactlyInAnyOrder(doc1.getWrappedInstance(), doc2.getWrappedInstance());
-        verify(cosmosDbApiMock).queryAllItems();
+        verify(cosmosDbApiMock).queryItems(any(SqlQuerySpec.class));
     }
 
     @Test
     void findAll_noReload() {
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(Collections.emptyList());
+        when(cosmosDbApiMock.queryItems(any(SqlQuerySpec.class))).thenReturn(Stream.empty());
 
         var all = store.findAll(QuerySpec.max());
         assertThat(all).isEmpty();
-        verify(cosmosDbApiMock).queryAllItems();
+        verify(cosmosDbApiMock).queryItems(any(SqlQuerySpec.class));
     }
 
     @Test
     void findById() {
         var doc = generateDocument(TEST_PART_KEY);
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(List.of(doc));
+        when(cosmosDbApiMock.queryItemById(doc.getId())).thenReturn(doc);
 
         var result = store.findById(doc.getId());
 
         assertThat(result).isNotNull().isEqualTo(doc.getWrappedInstance());
-        verify(cosmosDbApiMock).queryAllItems();
+        verify(cosmosDbApiMock).queryItemById(doc.getId());
     }
 
     @Test
     void findById_invalidId() {
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(Collections.emptyList());
+        String invalidId = "invalid-id";
+        when(cosmosDbApiMock.queryItemById(invalidId)).thenReturn(null);
 
-        var result = store.findById("invalid-id");
+        var result = store.findById(invalidId);
 
         assertThat(result).isNull();
-        verify(cosmosDbApiMock).queryAllItems();
+        verify(cosmosDbApiMock).queryItemById(invalidId);
     }
 
     @Test
     void save() {
         var captor = ArgumentCaptor.forClass(CosmosDocument.class);
         doNothing().when(cosmosDbApiMock).saveItem(captor.capture());
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(Collections.emptyList());
         var definition = generateDefinition();
 
         store.save(definition);
 
         assertThat(captor.getValue().getWrappedInstance()).isEqualTo(definition);
-        verify(cosmosDbApiMock).queryAllItems();
         verify(cosmosDbApiMock).saveItem(captor.capture());
     }
 
@@ -122,7 +121,7 @@ class CosmosContractDefinitionStoreTest {
     void save_verifyWriteThrough() {
         var captor = ArgumentCaptor.forClass(CosmosDocument.class);
         doNothing().when(cosmosDbApiMock).saveItem(captor.capture());
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(Collections.emptyList());
+        when(cosmosDbApiMock.queryItems(any(SqlQuerySpec.class))).thenReturn(IntStream.range(0, 1).mapToObj((i) -> captor.getValue()));
         // cosmosDbApiQueryMock.queryAllItems() should never be called
         var definition = generateDefinition();
 
@@ -131,7 +130,7 @@ class CosmosContractDefinitionStoreTest {
         var all = store.findAll(QuerySpec.max());
 
         assertThat(all).isNotEmpty().containsExactlyInAnyOrder((ContractDefinition) captor.getValue().getWrappedInstance());
-        verify(cosmosDbApiMock).queryAllItems();
+        verify(cosmosDbApiMock).queryItems(any(SqlQuerySpec.class));
         verify(cosmosDbApiMock).saveItem(captor.capture());
     }
 
@@ -139,13 +138,11 @@ class CosmosContractDefinitionStoreTest {
     void update() {
         var captor = ArgumentCaptor.forClass(CosmosDocument.class);
         doNothing().when(cosmosDbApiMock).saveItem(captor.capture());
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(Collections.emptyList());
         var definition = generateDefinition();
 
         store.update(definition);
 
         assertThat(captor.getValue().getWrappedInstance()).isEqualTo(definition);
-        verify(cosmosDbApiMock).queryAllItems();
         verify(cosmosDbApiMock).saveItem(captor.capture());
     }
 
@@ -176,43 +173,22 @@ class CosmosContractDefinitionStoreTest {
     @Test
     void findAll_noQuerySpec() {
 
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(IntStream.range(0, 10).mapToObj(i -> generateDocument(TEST_PART_KEY)).collect(Collectors.toList()));
+        when(cosmosDbApiMock.queryItems(any(SqlQuerySpec.class))).thenReturn(IntStream.range(0, 10).mapToObj(i -> generateDocument(TEST_PART_KEY)));
 
         var all = store.findAll(QuerySpec.Builder.newInstance().build());
         assertThat(all).hasSize(10);
-        verify(cosmosDbApiMock).queryAllItems();
-        verifyNoMoreInteractions(cosmosDbApiMock);
-    }
-
-    @Test
-    void findAll_verifyPaging() {
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(IntStream.range(0, 4).mapToObj(i -> generateDocument(TEST_PART_KEY)).collect(Collectors.toList()));
-
-        // page size fits
-        assertThat(store.findAll(QuerySpec.Builder.newInstance().offset(3).limit(4).build())).hasSize(1);
-        verify(cosmosDbApiMock).queryAllItems();
-        verifyNoMoreInteractions(cosmosDbApiMock);
-    }
-
-    @Test
-    void findAll_verifyPaging_tooLarge() {
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(IntStream.range(0, 15).mapToObj(i -> generateDocument(TEST_PART_KEY)).collect(Collectors.toList()));
-
-        // page size too large
-        assertThat(store.findAll(QuerySpec.Builder.newInstance().offset(5).limit(100).build())).hasSize(10);
-
-        verify(cosmosDbApiMock).queryAllItems();
+        verify(cosmosDbApiMock).queryItems(any(SqlQuerySpec.class));
         verifyNoMoreInteractions(cosmosDbApiMock);
     }
 
     @Test
     void findAll_verifyFiltering() {
         var doc = generateDocument(TEST_PART_KEY);
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(List.of(doc));
+        when(cosmosDbApiMock.queryItems(any(SqlQuerySpec.class))).thenReturn(Stream.of(doc));
 
         var all = store.findAll(QuerySpec.Builder.newInstance().filter("id=" + doc.getId()).build());
         assertThat(all).hasSize(1).extracting(ContractDefinition::getId).containsOnly(doc.getId());
-        verify(cosmosDbApiMock).queryAllItems();
+        verify(cosmosDbApiMock).queryItems(any(SqlQuerySpec.class));
         verifyNoMoreInteractions(cosmosDbApiMock);
     }
 
@@ -223,24 +199,26 @@ class CosmosContractDefinitionStoreTest {
 
     @Test
     void findAll_verifySorting_asc() {
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(IntStream.range(0, 10).mapToObj(i -> generateDocument(TEST_PART_KEY)).sorted(Comparator.comparing(ContractDefinitionDocument::getId).reversed()).collect(Collectors.toList()));
+        var stream = IntStream.range(0, 10).mapToObj(i -> generateDocument(TEST_PART_KEY)).sorted(Comparator.comparing(ContractDefinitionDocument::getId).reversed()).map(Object.class::cast);
+        when(cosmosDbApiMock.queryItems(any(SqlQuerySpec.class))).thenReturn(stream);
 
         var all = store.findAll(QuerySpec.Builder.newInstance().sortField("id").sortOrder(SortOrder.DESC).build()).collect(Collectors.toList());
         assertThat(all).hasSize(10).isSortedAccordingTo((c1, c2) -> c2.getId().compareTo(c1.getId()));
 
-        verify(cosmosDbApiMock).queryAllItems();
+        verify(cosmosDbApiMock).queryItems(any(SqlQuerySpec.class));
         verifyNoMoreInteractions(cosmosDbApiMock);
     }
 
     @Test
     void findAll_verifySorting_desc() {
-        when(cosmosDbApiMock.queryAllItems()).thenReturn(IntStream.range(0, 10).mapToObj(i -> generateDocument(TEST_PART_KEY)).sorted(Comparator.comparing(ContractDefinitionDocument::getId)).collect(Collectors.toList()));
+        var stream = IntStream.range(0, 10).mapToObj(i -> generateDocument(TEST_PART_KEY)).sorted(Comparator.comparing(ContractDefinitionDocument::getId)).map(Object.class::cast);
+        when(cosmosDbApiMock.queryItems(isA(SqlQuerySpec.class))).thenReturn(stream);
 
 
         var all = store.findAll(QuerySpec.Builder.newInstance().sortField("id").sortOrder(SortOrder.ASC).build()).collect(Collectors.toList());
         assertThat(all).hasSize(10).isSortedAccordingTo(Comparator.comparing(ContractDefinition::getId));
 
-        verify(cosmosDbApiMock).queryAllItems();
+        verify(cosmosDbApiMock).queryItems(any(SqlQuerySpec.class));
         verifyNoMoreInteractions(cosmosDbApiMock);
     }
 

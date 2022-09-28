@@ -20,8 +20,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-import org.eclipse.dataspaceconnector.common.token.TokenValidationService;
 import org.eclipse.dataspaceconnector.spi.exception.NotAuthorizedException;
+import org.eclipse.dataspaceconnector.spi.jwt.TokenValidationService;
 import org.eclipse.dataspaceconnector.spi.types.TypeManager;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
 import org.eclipse.dataspaceconnector.transfer.dataplane.spi.security.DataEncrypter;
@@ -58,7 +58,7 @@ public class DataPlaneTokenValidationApiController implements DataPlaneTokenVali
             throw new NotAuthorizedException("Token validation failed: " + join(", ", result.getFailureMessages()));
         }
 
-        var obj = result.getContent().getClaims().get(DATA_ADDRESS);
+        var obj = result.getContent().getClaim(DATA_ADDRESS);
         if (!(obj instanceof String)) {
             throw new IllegalArgumentException(format("Missing claim `%s` in token", DATA_ADDRESS));
         }

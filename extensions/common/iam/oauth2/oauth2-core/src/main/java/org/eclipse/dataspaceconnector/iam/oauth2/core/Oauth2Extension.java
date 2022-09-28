@@ -16,23 +16,24 @@
 package org.eclipse.dataspaceconnector.iam.oauth2.core;
 
 import okhttp3.OkHttpClient;
-import org.eclipse.dataspaceconnector.common.token.TokenGenerationServiceImpl;
-import org.eclipse.dataspaceconnector.common.token.TokenValidationServiceImpl;
+import org.eclipse.dataspaceconnector.core.jwt.TokenGenerationServiceImpl;
+import org.eclipse.dataspaceconnector.core.jwt.TokenValidationServiceImpl;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.identity.IdentityProviderKeyResolver;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.identity.IdentityProviderKeyResolverConfiguration;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.identity.Oauth2ServiceImpl;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.jwt.DefaultJwtDecorator;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.jwt.Oauth2JwtDecoratorRegistryRegistryImpl;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.rule.Oauth2ValidationRulesRegistryImpl;
+import org.eclipse.dataspaceconnector.iam.oauth2.spi.CredentialsRequestAdditionalParametersProvider;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2JwtDecoratorRegistry;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2ValidationRulesRegistry;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.EdcSetting;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provides;
 import org.eclipse.dataspaceconnector.spi.EdcException;
-import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
 import org.eclipse.dataspaceconnector.spi.security.CertificateResolver;
 import org.eclipse.dataspaceconnector.spi.security.PrivateKeyResolver;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
-import org.eclipse.dataspaceconnector.spi.system.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 
@@ -52,8 +53,11 @@ public class Oauth2Extension implements ServiceExtension {
     @EdcSetting
     private static final String PROVIDER_JWKS_URL = "edc.oauth.provider.jwks.url";
 
-    @EdcSetting
+    @EdcSetting(value = "outgoing tokens 'aud' claim value, by default it's the connector id")
     private static final String PROVIDER_AUDIENCE = "edc.oauth.provider.audience";
+
+    @EdcSetting(value = "incoming tokens 'aud' claim required value, by default it's the provider audience value")
+    private static final String ENDPOINT_AUDIENCE = "edc.oauth.endpoint.audience";
 
     @EdcSetting
     private static final String PUBLIC_KEY_ALIAS = "edc.oauth.public.key.alias";
@@ -87,6 +91,9 @@ public class Oauth2Extension implements ServiceExtension {
     @Inject
     private Clock clock;
 
+    @Inject
+    private CredentialsRequestAdditionalParametersProvider credentialsRequestAdditionalParametersProvider;
+
     @Override
     public String name() {
         return "OAuth2";
@@ -109,13 +116,18 @@ public class Oauth2Extension implements ServiceExtension {
         var validationRulesRegistry = new Oauth2ValidationRulesRegistryImpl(configuration, clock);
         context.registerService(Oauth2ValidationRulesRegistry.class, validationRulesRegistry);
 
-        var tokenValidationService = new TokenValidationServiceImpl(configuration.getIdentityProviderKeyResolver(), validationRulesRegistry);
-
         var privateKeyAlias = configuration.getPrivateKeyAlias();
         var privateKey = configuration.getPrivateKeyResolver().resolvePrivateKey(privateKeyAlias, PrivateKey.class);
-        var tokenGenerationService = new TokenGenerationServiceImpl(privateKey);
 
-        var oauth2Service = new Oauth2ServiceImpl(configuration, tokenGenerationService, okHttpClient, jwtDecoratorRegistry, context.getTypeManager(), tokenValidationService);
+        var oauth2Service = new Oauth2ServiceImpl(
+                configuration,
+                new TokenGenerationServiceImpl(privateKey),
+                okHttpClient,
+                jwtDecoratorRegistry,
+                context.getTypeManager(),
+                new TokenValidationServiceImpl(configuration.getIdentityProviderKeyResolver(), validationRulesRegistry),
+                credentialsRequestAdditionalParametersProvider
+        );
 
         context.registerService(IdentityService.class, oauth2Service);
     }
@@ -130,7 +142,7 @@ public class Oauth2Extension implements ServiceExtension {
         providerKeyResolver.stop();
     }
 
-    private static byte[] getEncodedClientCertificate(Oauth2Configuration configuration) {
+    private byte[] getEncodedClientCertificate(Oauth2Configuration configuration) {
         var certificate = configuration.getCertificateResolver().resolveCertificate(configuration.getPublicCertificateAlias());
         if (certificate == null) {
             throw new EdcException("Public certificate not found: " + configuration.getPublicCertificateAlias());
@@ -145,6 +157,7 @@ public class Oauth2Extension implements ServiceExtension {
 
     private Oauth2Configuration createConfig(ServiceExtensionContext context) {
         var providerAudience = context.getSetting(PROVIDER_AUDIENCE, context.getConnectorId());
+        var endpointAudience = context.getSetting(ENDPOINT_AUDIENCE, providerAudience);
         var tokenUrl = context.getConfig().getString(TOKEN_URL);
         var publicKeyAlias = context.getConfig().getString(PUBLIC_KEY_ALIAS);
         var privateKeyAlias = context.getConfig().getString(PRIVATE_KEY_ALIAS);
@@ -153,6 +166,7 @@ public class Oauth2Extension implements ServiceExtension {
                 .identityProviderKeyResolver(providerKeyResolver)
                 .tokenUrl(tokenUrl)
                 .providerAudience(providerAudience)
+                .endpointAudience(endpointAudience)
                 .publicCertificateAlias(publicKeyAlias)
                 .privateKeyAlias(privateKeyAlias)
                 .clientId(clientId)

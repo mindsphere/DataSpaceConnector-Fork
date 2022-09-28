@@ -19,12 +19,12 @@ import org.eclipse.dataspaceconnector.dataplane.spi.pipeline.PipelineService;
 import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
-import org.eclipse.dataspaceconnector.spi.asset.AssetLoader;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+import org.eclipse.dataspaceconnector.spi.asset.AssetIndex;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
 import org.eclipse.dataspaceconnector.spi.policy.PolicyDefinition;
 import org.eclipse.dataspaceconnector.spi.policy.store.PolicyDefinitionStore;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
@@ -40,7 +40,7 @@ public class FileTransferExtension implements ServiceExtension {
     @Inject
     private ContractDefinitionStore contractStore;
     @Inject
-    private AssetLoader loader;
+    private AssetIndex assetIndex;
     @Inject
     private PipelineService pipelineService;
     @Inject
@@ -93,7 +93,7 @@ public class FileTransferExtension implements ServiceExtension {
         var assetId = "test-document";
         var asset = Asset.Builder.newInstance().id(assetId).build();
 
-        loader.accept(asset, dataAddress);
+        assetIndex.accept(asset, dataAddress);
     }
 
     private void registerContractDefinition(String uid) {
