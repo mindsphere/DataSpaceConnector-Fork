@@ -20,7 +20,7 @@ plugins {
     checkstyle
     jacoco
     signing
-    id("com.rameshkp.openapi-merger-gradle-plugin") version "1.0.4"
+    id("com.rameshkp.openapi-merger-gradle-plugin") version "1.0.5"
     id("org.eclipse.dataspaceconnector.module-names")
     id("com.autonomousapps.dependency-analysis") version "1.13.0" apply (false)
     id("org.gradle.crypto.checksum") version "1.4.0"
