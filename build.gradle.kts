@@ -24,7 +24,7 @@ plugins {
     id("org.eclipse.dataspaceconnector.module-names")
     id("com.autonomousapps.dependency-analysis") version "1.13.0" apply (false)
     id("org.gradle.crypto.checksum") version "1.4.0"
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
     id("org.hidetake.swagger.generator") version "2.19.2"
 }
 
