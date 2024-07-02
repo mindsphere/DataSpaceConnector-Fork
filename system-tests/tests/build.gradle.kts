@@ -44,7 +44,7 @@ dependencies {
 
     testFixturesApi("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
     testImplementation("io.opentelemetry:opentelemetry-api:${openTelemetryVersion}")
-    testImplementation("io.opentelemetry.proto:opentelemetry-proto:0.14.0-alpha")
+    testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.3.2-alpha")
     testImplementation("org.awaitility:awaitility:${awaitility}")
     testImplementation("org.mock-server:mockserver-netty:${httpMockServer}:shaded")
 
